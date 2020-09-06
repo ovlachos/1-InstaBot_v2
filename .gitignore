@@ -122,3 +122,13 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+Inputs/
+
+Outputs/
+
+py/.DS_Store
+
+py/auth.py
+
+.DS_Store
