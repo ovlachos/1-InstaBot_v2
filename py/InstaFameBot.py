@@ -6,28 +6,21 @@
 # ~ Uses .py files/modules above to figure out which profiles failed to follow me back within the past week.
 # ~ Executes "executeFollowUnfollowOneProfile.py" on the above with a "pleaseUnfollow" argument.
 
-
-# Another more simple strategy would be to start liking anything on a certain hashtag while logged in from your account
-#
 import auth
 import glob
 import logging
 import os
-import sys
-from collections import Counter
+import time
 import random
-
 import datetime
 import pandas as pd
 import NoLogIn_getHashTagOrProfileInfo as noLogin
 
-from bs4 import BeautifulSoup
 from selenium import webdriver
 from datetime import datetime, timedelta
 from random import randint
 from time import sleep
-import time
-from NoLogIn_getHashTagOrProfileInfo import getProfileStatsDict_multiProc
+from collections import Counter
 
 datetimeStringFormat_day = '%Y_%m_%d'
 datetimeStringFormat_minute = '%Y_%m_%d %H-%M'
@@ -39,6 +32,9 @@ projectFolderPath0 = os.path.join(dirname_of_py_files0, '../')
 hdlr = logging.FileHandler(projectFolderPath0 + 'InstaFame.log')
 formatter = logging.Formatter('%(asctime)s %(message)s')
 hdlr.setFormatter(formatter)
+# to avoid logging duplication the below clearance must be made
+if (log.hasHandlers()):
+    log.handlers.clear()
 log.addHandler(hdlr)
 
 
@@ -529,7 +525,7 @@ class InstaBot:
         # Mandatory waiting time to make sure we do not hit any limits
         # 200 profile views pre hour = at least 18secs wait
         # previous bounds: 40~45 (14/07/2020)
-        self.helper.sleepForXseconds(self.helper, 40, 45)
+        self.helper.sleepForXseconds(self.helper, 30, 45)
         nameOnPage = ''
 
         try:
@@ -622,11 +618,11 @@ class InstaBot:
         names = []
         # make sure you scroll to the end of the list
         scrollCount = 0
-        while (len(users) <= 0.9 * targetCount) or scrollCount <= 6:
+        while (len(users) <= 0.95 * targetCount) or scrollCount < 2:
             last_ht, ht = 0, 1
             while last_ht != ht:
                 last_ht = ht
-                sleep(3)
+                sleep(2)
                 dialog = driver.find_element_by_xpath("//div[contains(@role, 'dialog')]")
                 currentAtags = dialog.find_elements_by_tag_name('a')
                 names = currentAtags
@@ -655,6 +651,7 @@ class InstaBot:
         return list(users)
 
     def t1_unfollowUser(self, userHandle):
+        # TODO add some sort of verification check on the final outcome before returning "OK"
         if not self.t0_Open_user_profile(userHandle):
             return self.tooManyActionsBreakCode
         else:
@@ -664,7 +661,8 @@ class InstaBot:
                     "//span[@aria-label='Following']").click()
                 sleep(1)
                 buttons = self.driver.find_element_by_xpath("//*[contains(@class,'-Cab')]")
-
+                # for some reason if I switch the focus to another window
+                # while the unfollow menu is open the unfollow button cannot be pressed
                 if 'follow' in buttons.text:
                     buttons.click()
                     log.error('Bye bye ' + userHandle)
@@ -784,6 +782,8 @@ class InstaBot:
 
                 # building list of unique photos
                 [pic_hrefs.append(href) for href in hrefs_in_view if href not in pic_hrefs]
+                if len(pic_hrefs) < 1:
+                    break
             except Exception:
                 continue
         pic_hrefs = pic_hrefs[:numberOfLikes]
@@ -985,6 +985,10 @@ class InstaBot:
         return 'OK'
 
     def t2_getList_1(self, processStep=4):
+        # TODO cannot really work as there are too many users who have changed their handles
+        # in actuall life we need to mark them as drop if we open their page and it gives the
+        # broken link error. Let us do a quick fix to make a release and then fix it in the 'user' object
+
         # Get TheList_1: A list of all people following certain profiles that:
         # a) Do not follow me
         # b) Have less than twice my followers
@@ -1015,6 +1019,7 @@ class InstaBot:
         except Exception as e:
             log.error('list 1 | Unable to get my followers because: {0}'.format(e))
             # return self.tooManyActionsBreakCode
+        # theList_1_list = theList_0_users_list
 
         try:
             print('Will try getting stats for the following users {}'.format(theList_1_list))
@@ -1024,6 +1029,8 @@ class InstaBot:
             user_counter = 0
             for user in theList_1_list:
                 user_counter += 1
+                rowIndexOfUser = theList_1_frame[theList_1_frame.a1_User == user].index.values[0]
+
                 if self.t0_Open_user_profile(user):
                     dictio = self.currentProfileStats_dict
 
@@ -1037,8 +1044,6 @@ class InstaBot:
                             return self.tooManyActionsBreakCode
 
                         continue
-
-                    rowIndexOfUser = theList_1_frame[theList_1_frame.a1_User == user].index.values[0]
 
                     # Filter out users with more than 500 followers
                     mark = 'keep'
@@ -1063,6 +1068,11 @@ class InstaBot:
                 else:
                     # In case the page did not open due to
                     # tooManyActionsLimit being hit
+
+                    theList_1_frame.iloc[rowIndexOfUser, 2] = 0
+                    theList_1_frame.iloc[rowIndexOfUser, 3] = "drop"
+                    theList_1_frame.to_csv(ppath, index=False, encoding='utf-8')
+
                     numberOfFails += 1
                     HelperBot.sleepForXseconds(self.helper, 30, 40)
                     if numberOfFails > 0.3 * processStep:
