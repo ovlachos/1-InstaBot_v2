@@ -5,12 +5,13 @@ import time
 from os import path
 
 
-def main(likesPerUser=3, hoursOfWait=0):
+def main(likesPerUser=1, hoursOfWait=0):
     start_time = time.time()
     if len(sys.argv) > 1:
         likesPerUser = int(sys.argv[1])
         if len(sys.argv) > 2:
             hoursOfWait = int(sys.argv[2])
+
     InstaFameBot.log.error('\n\n')
     InstaFameBot.log.error('{0}: -- -- gearing up for the Love Daily'.format(str(path.basename(__file__))[:-3]))
 

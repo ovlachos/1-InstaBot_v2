@@ -132,3 +132,5 @@ py/.DS_Store
 py/auth.py
 
 .DS_Store
+
+py/.idea/

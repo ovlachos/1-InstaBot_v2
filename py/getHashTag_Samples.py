@@ -13,14 +13,13 @@ def main():
 
     # Input Parameters
     intervalInSeconds = 60 * 45
-    numberOfSamples = 0
+    numberOfSamples = 1
 
     samples = True
-    # samples = False
+    samples = False
 
     # Input files
-    photoName = 'syracuse_weddingPhoto'
-    # photoName = 'vlachou'
+    photoName = 'Tilos_1'
     hs.log.error("\n\n")
     hs.log.error("Starting #tag sampling round for {0}".format(photoName))
 

@@ -6,7 +6,6 @@ from datetime import datetime
 from os import path
 import have_I_been_played
 
-
 InstaFameBot.log.error('\n\n')
 InstaFameBot.log.error('MyStats - Scum Report')
 now = datetime.now()

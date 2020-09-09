@@ -1,5 +1,5 @@
+import os
 from time import sleep
-
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup
@@ -12,8 +12,9 @@ from multiprocessing import get_context
 import multiprocessing as mp
 
 logProfiles = logging.getLogger("InstaFame")
+a = os.path.dirname(__file__)
 hdlr = logging.FileHandler(
-    '/Users/cortomaltese/Google Drive/10 Projects/1 Insta-Fame WebScraper/instaBot/ProfileAndPostStats.log')
+    '/Users/cortomaltese/Google Drive/10 Projects/1 InstaBot_v2/InstaFame.log')
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 hdlr.setFormatter(formatter)
 logProfiles.addHandler(hdlr)
