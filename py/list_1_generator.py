@@ -1,13 +1,19 @@
 import InstaFameBot
 import auth
-from time import sleep
+import sys
 import datetime
+from time import sleep
 from os import path
+
+if len(sys.argv) > 1:
+    hdLess = sys.argv[1]
+else:
+    hdLess = False
 
 InstaFameBot.log.error('\n\n')
 numberOfUsersToProcess = 80
 passes = 2
-bot = InstaFameBot.InstaBot(auth.username, auth.password)
+bot = InstaFameBot.InstaBot(auth.username, auth.password, headless=hdLess)
 
 for innn in reversed(range(0, passes)):
     InstaFameBot.log.error(

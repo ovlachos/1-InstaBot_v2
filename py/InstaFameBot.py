@@ -16,6 +16,7 @@ import datetime
 import pandas as pd
 import NoLogIn_getHashTagOrProfileInfo as noLogin
 
+from selenium.webdriver.firefox.options import Options
 from selenium import webdriver
 from datetime import datetime, timedelta
 from random import randint
@@ -242,8 +243,10 @@ class HelperBot:
 
 class InstaBot:
 
-    def __init__(self, username, pw):
+    def __init__(self, username, pw, headless=False):
+        self.headless = headless
         self.driver = self.tH_getDriver()
+        self.driver.implicitly_wait(4)  # TODO check all scripts to see if this breasks stuff
         self.username = username
         self.pw = pw
         self.myUser = User(self.username)
@@ -295,6 +298,9 @@ class InstaBot:
         option.experimental_options["prefs"] = chrome_prefs
 
         # setting up a Firefox driver
+        options = Options()
+        if self.headless:
+            options.headless = True
         profile = webdriver.FirefoxProfile()
         profile.set_preference("intl.accept_languages", 'en-us')
         profile.update_preferences()
@@ -303,7 +309,7 @@ class InstaBot:
         # 3 - Block 3rd party images
         profile.set_preference("permissions.default.image", 1)
 
-        return webdriver.Firefox(firefox_profile=profile)
+        return webdriver.Firefox(options=options, firefox_profile=profile)
         # return webdriver.Chrome(options=option)
         # return webdriver.Chrome()
 
