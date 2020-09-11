@@ -1,9 +1,11 @@
-import hashTagEvaluation as hs
+import glob
 import time
+import os
+import hashTagEvaluation as hs
 from InstaFameBot import HelperBot as help
 
 
-def main():
+def main(photoName, numberOfSamples=1, samples=True):
     # ~~~~~~~ The actual script ~~~~~~~
     # ~~~~~~~ ~~~~~~~   ~~~~~~~ ~~~~~~~
     # ~~~~~~~ ~~~~~~~   ~~~~~~~ ~~~~~~~
@@ -13,13 +15,8 @@ def main():
 
     # Input Parameters
     intervalInSeconds = 60 * 45
-    numberOfSamples = 1
-
-    samples = True
-    samples = False
 
     # Input files
-    photoName = 'Tilos_1'
     hs.log.error("\n\n")
     hs.log.error("Starting #tag sampling round for {0}".format(photoName))
 
@@ -49,4 +46,27 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    pyPath = os.path.dirname(__file__)
+    projectFolderPath = os.path.join(pyPath, '../')
+    inputs = os.path.join(projectFolderPath, 'Inputs/')
+    os.chdir(inputs)
+
+    # create a list with all the .txt file paths
+    paths = []
+    for file in glob.glob("*hashtags.txt"):
+        paths.append(inputs + file)
+    paths.sort()
+    if len(paths) > 0:
+        f = open(paths[0], "r")
+        argum = []
+        for line in f:
+            argum.append(line.strip('?\n'))
+
+        if len(argum) > 2:
+            if argum[2] == 'True':
+                argum[2] = True
+            elif argum[2] == 'False':
+                argum[2] = False
+            main(argum[0], int(argum[1]), samples=argum[2])
+        else:
+            main("photoName", numberOfSamples=1, samples=True)

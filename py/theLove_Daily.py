@@ -6,6 +6,11 @@ from os import path
 
 
 def main(likesPerUser=1, hoursOfWait=0):
+    if len(sys.argv) > 1:
+        hdLess = sys.argv[2]
+    else:
+        hdLess = False
+
     start_time = time.time()
     if len(sys.argv) > 1:
         likesPerUser = int(sys.argv[1])
@@ -18,7 +23,7 @@ def main(likesPerUser=1, hoursOfWait=0):
     InstaFameBot.log.error(
         '{0}: --I will be giving out {1} likes per user today mylord'.format(str(path.basename(__file__))[:-3],
                                                                              likesPerUser))
-    bot = InstaFameBot.InstaBot(auth.username, auth.password)
+    bot = InstaFameBot.InstaBot(auth.username, auth.password, headless=hdLess)
 
     # args: likesPerUser, True/False, File path
     bot.tH_logIn()

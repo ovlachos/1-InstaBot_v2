@@ -1,10 +1,15 @@
 import InstaFameBot
 import auth
 import pandas as pd
-import time
+import sys
 from datetime import datetime
 from os import path
 import have_I_been_played
+
+if len(sys.argv) > 1:
+    hdLess = sys.argv[1]
+else:
+    hdLess = False
 
 InstaFameBot.log.error('\n\n')
 InstaFameBot.log.error('MyStats - Scum Report')
@@ -25,7 +30,7 @@ oldPaths = [InstaFameBot.file_paths.theScumMainCSV,
 alternativeScumCSV = InstaFameBot.file_paths.theScumMainCSV[:-4] + '_alternative.csv'
 
 # Get new list/row of scum
-bot = InstaFameBot.InstaBot(auth.username, auth.password)
+bot = InstaFameBot.InstaBot(auth.username, auth.password, headless=hdLess)
 bot.tH_logIn()
 theList = bot.t1_getListOfUsers_thatDontFollowBack(auth.username)
 
