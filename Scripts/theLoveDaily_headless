@@ -1,0 +1,4 @@
+#!/bin/sh
+scriptdir="$(dirname "$0")"
+cd "$scriptdir"
+python ../py/theLove_Daily.py 1 0 True
