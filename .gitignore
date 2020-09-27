@@ -134,3 +134,7 @@ py/auth.py
 .DS_Store
 
 py/.idea/
+
+Scripts/theLoveDaily.app/
+
+py/getUserIDs.py
