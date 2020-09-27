@@ -12,6 +12,7 @@ class InstaLogIn:
     def __init__(self, webPage):
         self.page = webPage
         self.driver = self.page.driver
+        # self.driver.implicitly_wait(6)
         self.user = auth.username
         self.pw = auth.password
 

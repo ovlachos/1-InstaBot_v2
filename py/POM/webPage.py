@@ -29,7 +29,7 @@ class Browser:
         profile.set_preference("permissions.default.image", 1)
         profile.update_preferences()
         self.driver = webdriver.Firefox(options=options, firefox_profile=profile)
-        self.driver.implicitly_wait(6)
+        # self.driver.implicitly_wait(6)
         # ~~~ setting up a Firefox driver
 
 
@@ -46,5 +46,5 @@ class WebPage:
 
     def whichPageAmI(self):
         name = self.driver.current_url
-        print("Session: {0}\n@ {1}".format(self.driver.session_id, name))
+        # print("Session: {0}\n@ {1}".format(self.driver.session_id, name))
         return name

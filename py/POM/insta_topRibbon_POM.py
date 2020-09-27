@@ -33,10 +33,20 @@ class SearchField:
     def __init__(self, webPage):
         self.page = webPage
         self.driver = self.page.driver
+        # self.driver.implicitly_wait(6)
+
+    def clearSearchField(self):
+        try:
+            self.driver.find_element_by_xpath("//div[contains(@class,'SearchClear')]").click()
+        except Exception as e:
+            pass
 
     def navigateToUserPageThroughSearch(self, userName):
+        self.clearSearchField()
         self.typeIntoSearchBox(userName)
-        self.driver.find_element_by_xpath("//a[@href='/{}/']".format(userName)).click()
+        sleep(2)
+        result = self.driver.find_element_by_xpath("//a[@href='/{}/']".format(userName))
+        result.click()
         sleep(2)
 
     def navigateToHashTagPageThroughSearch(self, hashtag):

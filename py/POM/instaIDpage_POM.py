@@ -1,5 +1,7 @@
 # All POMs require a webPage object to be instantiated/initialized.
 # The webPage object provides the webdriver and a "what page am I currently browsing" method
+from time import sleep
+
 
 class InstaID:
 
@@ -26,6 +28,7 @@ class InstaID:
         ID_userNameInputField.send_keys(username)
 
         ID_get_button.click()
+        sleep(2)
         ID_result_box = self.driver.find_element_by_xpath("//div[@class='result-box__highlight']")
         return ID_result_box.text
 

@@ -136,3 +136,5 @@ py/auth.py
 py/.idea/
 
 Scripts/theLoveDaily.app/
+
+py/getUserIDs.py
