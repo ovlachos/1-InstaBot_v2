@@ -11,8 +11,8 @@ else:
     hdLess = False
 
 InstaFameBot.log.error('\n\n')
-numberOfUsersToProcess = 80
-passes = 2
+numberOfUsersToProcess = 100
+passes = 1
 bot = InstaFameBot.InstaBot(auth.username, auth.password, headless=hdLess)
 
 for innn in reversed(range(0, passes)):
