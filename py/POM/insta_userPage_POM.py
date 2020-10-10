@@ -1,4 +1,3 @@
-from time import sleep
 import auth
 
 
@@ -43,6 +42,7 @@ class userPage_base:
         # 40 -   Type 2B: It is someone I do not follow
         # 50 -       Type 2Bi: Their profile is open
         # 60 -       Type 2Bi: Their profile is not open
+        # 70 -  Type 3: It's no one (name changed, or profile deleted)
 
         self.type = 0
         if self.userName == auth.username:
@@ -67,6 +67,26 @@ class userPage_base:
             # print(e)
             self.type += 10
 
+        try:
+            self.driver.find_element_by_xpath("//h2[contains(text(),'Sorry')]")
+            self.type += 20
+            return
+        except Exception as e:
+            print(e)
+
+    def profileTypeDescription(self):
+        # phrased so that it fits in 'This user BLAH ...'
+        description = {
+            '10': 'is myself, good job :P',
+            '20': 'is not me Sherlock',
+            '30': 'is someone I already follow',
+            '40': 'is someone I do not follow',
+            '50': 'is someone I do not follow and their profile is OPEN',
+            '60': 'is someone I do not follow, but their profile is CLOSED',
+            '70': 'has either changed handle or deleted their account',
+        }
+        return description[str(self.type)]
+
     def getStats_dict(self):
         stats = {
             'posts': '',
@@ -89,6 +109,7 @@ class userPage_base:
 
 class userPage(userPage_base):
     def getFollowersList(self):
+        from time import sleep
         if self.type < 55:
             try:
                 sleep(3)
@@ -104,6 +125,7 @@ class userPage(userPage_base):
             print('nahh - no followers access for this user')
 
     def getFollowingList(self):
+        from time import sleep
         if self.type < 55:
             try:
                 sleep(3)
@@ -119,6 +141,7 @@ class userPage(userPage_base):
             print('nahh - no following access for this user')
 
     def getHashtagsFollowingList(self):
+        from time import sleep
         if self.type < 55:
             sleep(3)
             try:
@@ -136,6 +159,7 @@ class userPage(userPage_base):
             print('nahh - no hashtag access for this user')
 
     def navigateTo_X_latestPost(self, numberX):
+        from POM import insta_post as post
         # numberX runs from 0 to whatever
         if self.type < 55:
             try:
@@ -147,6 +171,7 @@ class userPage(userPage_base):
             except Exception as e:
                 print(e)
                 print('Opening post number {} failed'.format(numberX))
+            return post.Post(self.page)
         else:
             print('nahh')
 
@@ -167,12 +192,11 @@ class userPage(userPage_base):
             return 'no access'
 
     def unfollow(self):
+        from time import sleep
         if 10 < self.type < 35:
             self.driver.find_element_by_xpath("//span[@aria-label='Following']").click()
             sleep(1)
             buttons = self.driver.find_element_by_xpath("//*[contains(@class,'-Cab')]")
-            # for some reason if I switch the focus to another window
-            # while the unfollow menu is open the unfollow button cannot be pressed
             if 'follow' in buttons.text:
                 buttons.click()
                 sleep(2)
@@ -188,6 +212,7 @@ class userPage(userPage_base):
             return 'no access'
 
     def __scroll_and_get(self, type='users', xpath="//div[@class='isgrP']", targetCount=0):
+        from time import sleep
         xpath.strip("'\'")
         sleep(2)
         outputList = []

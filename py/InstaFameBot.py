@@ -85,28 +85,14 @@ class post:
         self.helper.sleepForXseconds(self.helper, 20, 28)
         try:
             self.driver.get(self.post_href)
-            self.updatePostDateTime()
-            self.updatePostLocation()
             try:
-                self.updateUsers_commented_underPost()
+                pass  # self.updateUsers_commented_underPost()
             except Exception as e:
                 print(e)
             # self.updateUsers_liked_post_andCount()
 
         except Exception as e:
             print(e)
-
-    def updateUsers_commented_underPost(self):
-        try:
-            elements = self.driver.find_elements_by_xpath(
-                "//a[@class='sqdOP yWX7d     _8A5w5   ZIAjV ']")
-            for element in elements:
-                self.usersCommented.append(element.text)
-
-            self.usersCommented = list(dict.fromkeys(self.usersCommented))
-        except Exception as e:
-            print(e)
-            self.usersCommented = []
 
     def updateUsers_liked_post_andCount(self):
         try:
@@ -134,24 +120,6 @@ class post:
         except Exception as e:
             print(e)
             self.usersThatLiked = []
-
-    def updatePostDateTime(self):
-        try:
-            dateElement = self.driver.find_element_by_xpath("//time[@class='_1o9PC Nzb55']")
-            self.datePosted = dateElement.get_attribute('datetime')
-        except Exception as e:
-            print(e)
-            self.datePosted = ""
-
-    def updatePostLocation(self):
-        try:
-            loc_element_text = self.driver.find_element_by_xpath("//a[contains(@href,'/explore/locations')]").text
-            if 'LOCATIONS' in loc_element_text:
-                self.location = ""
-            self.location = loc_element_text
-        except Exception as e:
-            print(e)
-            self.location = ""
 
 
 class file_paths:
@@ -321,12 +289,13 @@ class InstaBot:
         self.driver.get("https://www.instagram.com")
         sleep(randint(2, 6))
         try:
+            self.driver.find_element_by_xpath("//button[contains(text(),'Accept')]").click()
             loginButton = self.driver.find_element_by_xpath("//a[contains(text(), 'Log in')]")
             loginButton.click()
         except Exception as e:
-
             self.driver.get("https://www.instagram.com/accounts/login/")
             print(e)
+
         sleep(randint(2, 6))
         self.driver.find_element_by_xpath("//input[@name=\"username\"]") \
             .send_keys(self.username)
