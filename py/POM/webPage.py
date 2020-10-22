@@ -40,3 +40,13 @@ class WebPage:
             print("Session: {0}\n@ {1}".format(self.driver.session_id, currentPageURL))
 
         return currentPageURL
+
+    def tH_checkIfIhit_ActionLimit(self):
+        try:
+            errorMessagePresent = self.driver.find_element_by_xpath(
+                "//p[contains(text(),'Please wait a few minutes')]").text
+        except:
+            return False
+
+        if 'wait' in errorMessagePresent:
+            return True

@@ -1,0 +1,14 @@
+{
+	"input" 											: "Input/",
+	"love"												:	"Input/Love/",
+	"inputGames"									: "Input/Games_Input/",
+	"output" 											: "Output/",
+	"outputGames" 								: "Output/Games_Output/",
+	"myStats" 										: "Output/MyStats/",
+	"myStats_Folowers" 						: "Output/MyStats/myFollowers/",
+	"myStats_Following" 					: "Output/MyStats/myFollow_ing/",
+	"myStats_Mutineers" 					: "Output/MyStats/Mutineers/",
+	"hashtags"										:	"HashTags/",
+	"inputHashtags"								:	"HashTags/HashTags_Input/",
+	"outputHashtags"							:	"HashTags/HashTags_Output/"
+}

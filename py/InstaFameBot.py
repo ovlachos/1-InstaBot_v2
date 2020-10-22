@@ -807,6 +807,30 @@ class InstaBot:
 
         outPutFrame.to_csv(file_paths.hashtagFollowershipStatsCSV, index=False, encoding='utf-8')
 
+    def t1_unfollowListOfUsers(self, dateList, theList_1_frame, usersToUnfollow_list):
+        if len(usersToUnfollow_list) > 0:
+            log.error(
+                '{0} users to stop following. They are: {1}'.format(len(usersToUnfollow_list),
+                                                                    usersToUnfollow_list[:len(usersToUnfollow_list)]))
+        for user in usersToUnfollow_list:
+            rowIndexOfUser = theList_1_frame[theList_1_frame.a1_User == user].index.values[0]
+            try:
+                unfollowed = self.t1_unfollowUser(user)
+
+                # Check if we have hit Instagrams Action limit and are getting error pages only
+                if self.tooManyActionsBreakCode in unfollowed:
+                    sleep(60 * 4)
+                    # return self.tooManyActionsBreakCode
+
+                # log.error('t2_theGame: Bye bye {0}! sorry about that'.format(user))
+            except Exception as e:
+                continue
+
+            if 'OK' in unfollowed:
+                theList_1_frame.iloc[rowIndexOfUser, 7] = dateList[0]  # Mark the date you unfollowed
+                theList_1_frame.to_csv(file_paths.theList_1_file, index=False, encoding='utf-8')
+            self.helper.sleepForXseconds(self.helper, (60 * 0.5), (60 * 1), 0.5, True)
+
     def t2_getHashtagFollowership(self, numberOfProfilesToProcess=3):
         # read input/outputFiles from disk
         targetUsersDB = pd.read_csv(file_paths.theList_0_file)
@@ -1145,29 +1169,7 @@ class InstaBot:
         usersToUnfollow_frame = usersToUnfollow_frame[usersToUnfollow_frame.iloc[:, 7].isnull()]
         usersToUnfollow_list = usersToUnfollow_frame.iloc[:, 1].tolist()
 
-        if len(usersToUnfollow_list) > 0:
-            log.error(
-                '{0} users to stop following. They are: {1}'.format(len(usersToUnfollow_list),
-                                                                    usersToUnfollow_list[:len(usersToUnfollow_list)]))
-
-        for user in usersToUnfollow_list:
-            rowIndexOfUser = theList_1_frame[theList_1_frame.a1_User == user].index.values[0]
-            try:
-                unfollowed = self.t1_unfollowUser(user)
-
-                # Check if we have hit Instagrams Action limit and are getting error pages only
-                if self.tooManyActionsBreakCode in unfollowed:
-                    sleep(60 * 4)
-                    # return self.tooManyActionsBreakCode
-
-                # log.error('t2_theGame: Bye bye {0}! sorry about that'.format(user))
-            except Exception as e:
-                continue
-
-            if 'OK' in unfollowed:
-                theList_1_frame.iloc[rowIndexOfUser, 7] = dateList[0]  # Mark the date you unfollowed
-                theList_1_frame.to_csv(file_paths.theList_1_file, index=False, encoding='utf-8')
-            self.helper.sleepForXseconds(self.helper, (60 * 0.5), (60 * 1), 0.5, True)
+        self.t1_unfollowListOfUsers(dateList, theList_1_frame, usersToUnfollow_list)
 
         # Check if it is time to remove someone from the love daily (a week after I have unfollowed)
         usersToStopLoving_frame = theList_1_frame[theList_1_frame.iloc[:, 7] < dateList[howManyDaysBeforeI_unlove]]
