@@ -214,7 +214,7 @@ class InstaBot:
     def __init__(self, username, pw, headless=False):
         self.headless = headless
         self.driver = self.tH_getDriver()
-        self.driver.implicitly_wait(4)  # TODO check all scripts to see if this breasks stuff
+        self.driver.implicitly_wait(4)
         self.username = username
         self.pw = pw
         self.myUser = User(self.username)

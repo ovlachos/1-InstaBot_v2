@@ -1,5 +1,7 @@
 import os
-import BotMemoryFiles as BF
+import pandas as pd
+
+import BotMemoryFilesFactory as BF
 
 
 def initializeFolder(targetPath):
@@ -35,10 +37,12 @@ class FileHandlerBot:
         self.files = self.getConfig_JSON_paths('files')
         self.fileFactoryCreator = BF.fileCreator()
 
+        # Make sure the files and folders mentioned
+        # in the JSON configs are in existence
         for val in self.paths.values():
             initializeFolder(Path(self.projectFolder + val))
 
-        for file in self.files:  # TODO: turn this into a factory object for you have many file cases
+        for file in self.files:
             if not Path(file['filepath']).is_file():
                 mFile = MemoryFile(file['filename'], file['filepath'], file['extension'], file['columns'])
                 self.fileFactoryCreator.create(mFile, file['extension'])
@@ -57,18 +61,60 @@ class FileHandlerBot:
 
         return CONF
 
-    # def addUserto_theDailyLove(self, user):
-    #     import pandas as pd
-    #     from datetime import datetime
-    #     from pathlib import Path
-    #
-    #     initializeFile(Path(self.files['dailyLoveCSV']))
-    #     dailyLove_frame_old = pd.read_csv(self.files['dailyLoveCSV'])
-    #
-    #     new_row = pd.Series([user, 1, datetime.now(), 0])
-    #     row_df = pd.DataFrame([new_row])
-    #     row_df.columns = ['theLoveDaily', 'Post Count', 't_sinceLast', 'PostsPerDay']
-    #
-    #     lovedOnes_frame_new = pd.concat([row_df, dailyLove_frame_old], ignore_index=True)
-    #     lovedOnes_frame_new.to_csv(self.paths.theDailyLoveCSV, index=False, encoding='utf-8')
-    #     # log.error('User: {} added to the LoveDaily'.format(user))
+    def getFileFromFilename(self, filename):
+        fileFound = 0
+        for file in self.files:
+            if filename in file['filename']:
+                return file
+
+    def CSV_getFrameFromCSVfile(self, filename):
+        frame = pd.DataFrame([])
+        file = self.getFileFromFilename(filename)
+        if file:
+            frame = pd.read_csv(file['filepath'])
+
+        return frame
+
+    def CSV_saveFrametoCSVfile(self, filename, frame):
+        file = self.getFileFromFilename(filename)
+        frame.to_csv(file['filepath'], index=False, encoding='utf-8')
+
+    def CSV_removeRowFromCSV(self, filename, row_index):
+        file = self.getFileFromFilename(filename)
+        if file:
+            oldframe = self.CSV_getFrameFromCSVfile(filename)
+            oldframe = oldframe.drop(oldframe.index[row_index])
+            oldframe.to_csv(file['filepath'], index=False, encoding='utf-8')
+
+    def CSV_addNewRowToCSV(self, filename, row):
+        file = self.getFileFromFilename(filename)
+        if file:
+            oldFrame = pd.read_csv(file['filepath'])
+
+            if len(file['columns']) == len(row):
+                new_row = pd.Series(row)
+                row_df = pd.DataFrame([new_row])
+                row_df.columns = file['columns']
+
+                frame_new = pd.concat([row_df, oldFrame], ignore_index=True)
+                frame_new.to_csv(file['filepath'], index=False, encoding='utf-8')
+
+    def addUserto_the_Love(self, user, kindOfLove):
+        from datetime import datetime
+
+        file = self.getFileFromFilename(kindOfLove)  # e.g. 'dailyLoveCSV'
+        if file:
+            oldFrame = pd.read_csv(file['filepath'])
+
+            if not user in oldFrame[file['columns'][0]].tolist():
+                self.CSV_addNewRowToCSV(kindOfLove, [user, 1, datetime.now(), 0])
+
+    def removeUserfrom_the_Love(self, user, kindOfLove):
+        file = self.getFileFromFilename(kindOfLove)
+        if file:
+            oldFrame = pd.read_csv(file['filepath'])
+            try:
+                rowIndexOfUser = oldFrame[oldFrame[file['columns'][0]] == user].index.values[0]
+                self.CSV_removeRowFromCSV(kindOfLove, rowIndexOfUser)
+            except Exception as e:
+                print("{0}, {1}".format(e, user))

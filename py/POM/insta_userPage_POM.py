@@ -72,7 +72,7 @@ class userPage_base:
             self.type += 20
             return
         except Exception as e:
-            print(e)
+            pass
 
     def profileTypeDescription(self):
         # phrased so that it fits in 'This user BLAH ...'
@@ -98,9 +98,9 @@ class userPage_base:
             allItems = self.driver.find_elements_by_xpath("//header//ul//span[@class='g47SY ']")
 
             if len(allItems) >= 3:
-                stats['posts'] = int(allItems[0].text)
-                stats['followers'] = int(allItems[1].text)
-                stats['following'] = int(allItems[2].text)
+                stats['posts'] = int(allItems[0].text.replace(',', ''))
+                stats['followers'] = int(allItems[1].text.replace(',', ''))
+                stats['following'] = int(allItems[2].text.replace(',', ''))
         except Exception as ex:
             print(ex)
 
@@ -123,6 +123,7 @@ class userPage(userPage_base):
                 return []
         else:
             print('nahh - no followers access for this user')
+            print('User {0} {1}'.format(self.userName, self.profileTypeDescription()))
 
     def getFollowingList(self):
         from time import sleep
@@ -139,6 +140,7 @@ class userPage(userPage_base):
                 return []
         else:
             print('nahh - no following access for this user')
+            print('User {0} {1}'.format(self.userName, self.profileTypeDescription()))
 
     def getHashtagsFollowingList(self):
         from time import sleep
@@ -157,6 +159,7 @@ class userPage(userPage_base):
                 return []
         else:
             print('nahh - no hashtag access for this user')
+            print('User {0} {1}'.format(self.userName, self.profileTypeDescription()))
 
     def navigateTo_X_latestPost(self, numberX):
         from POM import insta_post as post
@@ -174,6 +177,7 @@ class userPage(userPage_base):
             return post.Post(self.page)
         else:
             print('nahh')
+            print('User {0} {1}'.format(self.userName, self.profileTypeDescription()))
 
     def follow(self):
         if self.type > 35:
@@ -189,7 +193,8 @@ class userPage(userPage_base):
                 return 'fail'
         else:
             print('nahh - no follow access for this user')
-            return 'no access'
+            print('User {0} {1}'.format(self.userName, self.profileTypeDescription()))
+            return 'OK'
 
     def unfollow(self):
         from time import sleep
@@ -209,7 +214,8 @@ class userPage(userPage_base):
                 return 'fail'
         else:
             print('nahh - no unfollow access for this user')
-            return 'no access'
+            print('User {0} {1}'.format(self.userName, self.profileTypeDescription()))
+            return 'OK'
 
     def __scroll_and_get(self, type='users', xpath="//div[@class='isgrP']", targetCount=0):
         from time import sleep

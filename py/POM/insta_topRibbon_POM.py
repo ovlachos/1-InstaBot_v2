@@ -21,7 +21,13 @@ class AccountTab:
         return up.userPage(self.page, auth.username)
 
     def logOut(self):
-        self.driver.find_element_by_xpath(self.ac_xpaths['myAvatar']).click()
+        result = None
+        while result is None:
+            try:
+                self.driver.find_element_by_xpath(self.ac_xpaths['myAvatar']).click()
+                result = self.driver.find_element_by_xpath(self.ac_xpaths['logOutButton'])
+            except:
+                pass
         self.driver.find_element_by_xpath(self.ac_xpaths['logOutButton']).click()
 
 
@@ -49,16 +55,22 @@ class SearchField:
         self.clearSearchField()
         self.typeIntoSearchBox(userName)
         sleep(2)
-        try:
-            result = self.driver.find_element_by_xpath(
-                "//a[@href='/{}/']".format(userName))  # This is the first/top result
-            result.click()
-            sleep(2)
-        except Exception as e:
-            print(e)
-            self.clearSearchField()
 
-        return up.userPage(self.page, userName)
+        attempts = 5
+        result = None
+        while result is None:
+            try:
+                result = self.driver.find_element_by_xpath(
+                    "//a[@href='/{}/']".format(userName))  # This is the first/top result
+                sleep(2)
+                result.click()
+                return up.userPage(self.page, userName)
+            except:
+                if attempts == 0:
+                    self.clearSearchField()
+                    break
+                attempts -= 1
+                pass
 
     def navigateToHashTagPageThroughSearch(self, hashtag):
         from time import sleep

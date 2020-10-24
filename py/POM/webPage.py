@@ -33,6 +33,9 @@ class WebPage:
         # append all instances of the WebPage class to check if the same one gets passed around
         WebPage.allpages.append(self)
 
+    def killBrowser(self):
+        self.driver.quit()
+
     def whichPageAmI(self, verbose=False):
         currentPageURL = self.driver.current_url
 
