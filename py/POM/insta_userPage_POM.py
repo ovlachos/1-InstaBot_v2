@@ -10,12 +10,24 @@ class userPage_base:
         self.type = 0
         if self.iAmInAUserPage():
             self.determineProfileType()
+            print('User {0} {1}'.format(self.userName, self.get_profileTypeDescription()))
             self.stats = self.getStats_dict()
         else:
             self.type = 0
 
     def updateUserName(self):
         self.userName = self.driver.find_element_by_xpath("//header//h2").text
+
+    def getPageElement_tryHard(self, xpath):
+        attempts = 5
+        result = None
+        while result is None:
+            try:
+                result = self.driver.find_element_by_xpath(xpath)
+            except:
+                if attempts == 0: break
+                attempts -= 1
+        return result
 
     def getAlternativeUserName(self):
         return self.driver.find_element_by_xpath("//header//div[@class='-vDIg']//h1").text
@@ -36,6 +48,7 @@ class userPage_base:
             return False
 
     def determineProfileType(self):
+        from time import sleep
         # 10 - Type 1: it's me
         # 20 -  Type 2: it's not me
         # 30 -   Type 2A: It is someone I already follow
@@ -45,6 +58,7 @@ class userPage_base:
         # 70 -  Type 3: It's no one (name changed, or profile deleted)
 
         self.type = 0
+        sleep(3)
         if self.userName == auth.username:
             self.type += 10
             return
@@ -74,10 +88,10 @@ class userPage_base:
         except Exception as e:
             pass
 
-    def profileTypeDescription(self):
+    def get_profileTypeDescription(self):
         # phrased so that it fits in 'This user BLAH ...'
         description = {
-            '10': 'is myself, good job :P',
+            '10': 'is myself! good job finding me :P',
             '20': 'is not me Sherlock',
             '30': 'is someone I already follow',
             '40': 'is someone I do not follow',
@@ -113,53 +127,53 @@ class userPage(userPage_base):
         if self.type < 55:
             try:
                 sleep(3)
-                self.driver.find_element_by_xpath("//a[contains(@href,'/{}')]".format('followers')).click()
+                self.getPageElement_tryHard("//a[contains(@href,'/{}')]".format('followers')).click()
                 sleep(2)
                 followersList = self.__scroll_and_get(targetCount=self.stats['followers'])
-                self.driver.find_element_by_xpath("//button[@class='wpO6b ']//*[@aria-label='Close']").click()
+                self.getPageElement_tryHard("//button[@class='wpO6b ']//*[@aria-label='Close']").click()
                 return followersList
             except Exception as e:
                 print(e)
                 return []
         else:
-            print('nahh - no followers access for this user')
-            print('User {0} {1}'.format(self.userName, self.profileTypeDescription()))
+            print('nahh - no followers access for this user because:')
+            print('User {0} {1}\n'.format(self.userName, self.get_profileTypeDescription()))
 
     def getFollowingList(self):
         from time import sleep
         if self.type < 55:
             try:
                 sleep(3)
-                self.driver.find_element_by_xpath("//a[contains(@href,'/{}')]".format('following')).click()
+                self.getPageElement_tryHard("//a[contains(@href,'/{}')]".format('following')).click()
                 sleep(2)
                 followingList = self.__scroll_and_get(targetCount=self.stats['following'])
-                self.driver.find_element_by_xpath("//button[@class='wpO6b ']//*[@aria-label='Close']").click()
+                self.getPageElement_tryHard("//button[@class='wpO6b ']//*[@aria-label='Close']").click()
                 return followingList
             except Exception as e:
                 print(e)
                 return []
         else:
-            print('nahh - no following access for this user')
-            print('User {0} {1}'.format(self.userName, self.profileTypeDescription()))
+            print('nahh - no following access for this user because:')
+            print('User {0} {1}\n'.format(self.userName, self.get_profileTypeDescription()))
 
     def getHashtagsFollowingList(self):
         from time import sleep
         if self.type < 55:
             sleep(3)
             try:
-                self.driver.find_element_by_xpath("//a[contains(@href,'/{}')]".format('following')).click()
+                self.getPageElement_tryHard("//a[contains(@href,'/{}')]".format('following')).click()
                 sleep(2)
-                self.driver.find_element_by_xpath("//a[contains(@href,'/{}')]".format('hashtag_following')).click()
+                self.getPageElement_tryHard("//a[contains(@href,'/{}')]".format('hashtag_following')).click()
                 sleep(2)
                 hashtagList = self.__scroll_and_get('hashTags', "//div[@class='_8zyFd']")
-                self.driver.find_element_by_xpath("//button[@class='wpO6b ']//*[@aria-label='Close']").click()
+                self.getPageElement_tryHard("//button[@class='wpO6b ']//*[@aria-label='Close']").click()
                 return hashtagList
             except Exception as e:
                 print(e)
                 return []
         else:
-            print('nahh - no hashtag access for this user')
-            print('User {0} {1}'.format(self.userName, self.profileTypeDescription()))
+            print('nahh - no hashtag access for this user because:')
+            print('User {0} {1}\n'.format(self.userName, self.get_profileTypeDescription()))
 
     def navigateTo_X_latestPost(self, numberX):
         from POM import insta_post as post
@@ -176,10 +190,11 @@ class userPage(userPage_base):
                 print('Opening post number {} failed'.format(numberX))
             return post.Post(self.page)
         else:
-            print('nahh')
-            print('User {0} {1}'.format(self.userName, self.profileTypeDescription()))
+            print('nahh cannot navigate to a post because:')
+            print('User {0} {1}\n'.format(self.userName, self.get_profileTypeDescription()))
 
     def follow(self):
+        self.determineProfileType()
         if self.type > 35:
             try:
                 self.driver.find_element_by_xpath("//button[contains(text(),'Follow')]").click()
@@ -192,12 +207,13 @@ class userPage(userPage_base):
             else:
                 return 'fail'
         else:
-            print('nahh - no follow access for this user')
-            print('User {0} {1}'.format(self.userName, self.profileTypeDescription()))
+            print('nahh - no follow access for this user because:')
+            print('User {0} {1}\n'.format(self.userName, self.get_profileTypeDescription()))
             return 'OK'
 
     def unfollow(self):
         from time import sleep
+        self.determineProfileType()
         if 10 < self.type < 35:
             self.driver.find_element_by_xpath("//span[@aria-label='Following']").click()
             sleep(1)
@@ -213,8 +229,8 @@ class userPage(userPage_base):
             else:
                 return 'fail'
         else:
-            print('nahh - no unfollow access for this user')
-            print('User {0} {1}'.format(self.userName, self.profileTypeDescription()))
+            print('nahh - no unfollow access for this user because:')
+            print('User {0} {1}\n'.format(self.userName, self.get_profileTypeDescription()))
             return 'OK'
 
     def __scroll_and_get(self, type='users', xpath="//div[@class='isgrP']", targetCount=0):

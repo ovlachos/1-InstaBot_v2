@@ -2,12 +2,13 @@ import InstaFameBot
 import auth
 import sys
 import time
+import InstaBotV2
 from os import path
 
 
 def main(likesPerUser=1, hoursOfWait=0):
     if len(sys.argv) > 1:
-        hdLess = sys.argv[2]
+        hdLess = sys.argv[0]
     else:
         hdLess = False
 
@@ -17,23 +18,29 @@ def main(likesPerUser=1, hoursOfWait=0):
         if len(sys.argv) > 2:
             hoursOfWait = int(sys.argv[2])
 
-    InstaFameBot.log.error('\n\n')
-    InstaFameBot.log.error('{0}: -- -- gearing up for the Love Daily'.format(str(path.basename(__file__))[:-3]))
+    # # InstaFameBot.log.error('\n\n')
+    # # InstaFameBot.log.error('{0}: -- -- gearing up for the Love Daily'.format(str(path.basename(__file__))[:-3]))
+    # #
+    # # InstaFameBot.log.error(
+    # #     '{0}: --I will be giving out {1} likes per user today mylord'.format(str(path.basename(__file__))[:-3],
+    #                                                                          likesPerUser))
 
-    InstaFameBot.log.error(
-        '{0}: --I will be giving out {1} likes per user today mylord'.format(str(path.basename(__file__))[:-3],
-                                                                             likesPerUser))
-    bot = InstaFameBot.InstaBot(auth.username, auth.password, headless=hdLess)
+    v2Bot = InstaBotV2.InstaBot()
+    v2Bot.logIn()
+    v2Bot.theLoveDaily('dailyLoveCSV', 2, 0.1)
+    v2Bot.shutDown()
 
-    # args: likesPerUser, True/False, File path
-    bot.tH_logIn()
-    success = bot.t2_theLoveDaily(likesPerUser, percentageOfUsers=0.52)
-
-    elapsed_time = time.time() - start_time
-    InstaFameBot.log.error('{0} -- I gave out {1} likes per user today mylord'.format(success, likesPerUser))
-    InstaFameBot.log.error('~~ TheLoveDay ~~ The time ellapsed was {} minutes'.format((elapsed_time / 60)))
-
-    bot.tH_escapeSequence()
+    # bot = InstaFameBot.InstaBot(auth.username, auth.password, headless=hdLess)
+    #
+    # # args: likesPerUser, True/False, File path
+    # bot.tH_logIn()
+    # success = bot.t2_theLoveDaily(likesPerUser, percentageOfUsers=0.52)
+    #
+    # elapsed_time = time.time() - start_time
+    # InstaFameBot.log.error('{0} -- I gave out {1} likes per user today mylord'.format(success, likesPerUser))
+    # InstaFameBot.log.error('~~ TheLoveDay ~~ The time ellapsed was {} minutes'.format((elapsed_time / 60)))
+    #
+    # bot.tH_escapeSequence()
 
 
 if __name__ == "__main__": main()

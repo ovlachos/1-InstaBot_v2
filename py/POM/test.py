@@ -17,7 +17,7 @@ print('plop')
 #
 # akis = mainPage.topRibbon_SearchField.navigateToUserPageThroughSearch('katsikis')
 #
-# # print('User {} {}'.format(akis.userName, akis.profileTypeDescription()))
+# # print('User {} {}'.format(akis.userName, akis.get_profileTypeDescription()))
 # nums = [x for x in range(10)]
 #
 # for n in nums:

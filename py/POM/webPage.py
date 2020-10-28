@@ -9,7 +9,9 @@ class Browser:
     def __init__(self, headless=False):
         # ~~~ setting up a Firefox driver
         options = Options()
+        options.headless = False
         if headless:
+            print("I've got a  a headless browser!!")  # TODO remove
             options.headless = True
         profile = webdriver.FirefoxProfile()
         profile.set_preference("intl.accept_languages", 'en-us')

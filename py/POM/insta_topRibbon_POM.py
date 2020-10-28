@@ -52,14 +52,14 @@ class SearchField:
     def navigateToUserPageThroughSearch(self, userName):
         from POM import insta_userPage_POM as up
         from time import sleep
-        self.clearSearchField()
-        self.typeIntoSearchBox(userName)
-        sleep(2)
 
         attempts = 5
         result = None
         while result is None:
             try:
+                self.clearSearchField()
+                self.typeIntoSearchBox(userName)
+                sleep(2)
                 result = self.driver.find_element_by_xpath(
                     "//a[@href='/{}/']".format(userName))  # This is the first/top result
                 sleep(2)

@@ -109,6 +109,8 @@ class FileHandlerBot:
             if not user in oldFrame[file['columns'][0]].tolist():
                 self.CSV_addNewRowToCSV(kindOfLove, [user, 1, datetime.now(), 0])
 
+    # TODO: Write integrity / duplicates check method for all the CSV files that get manual input
+
     def removeUserfrom_the_Love(self, user, kindOfLove):
         file = self.getFileFromFilename(kindOfLove)
         if file:

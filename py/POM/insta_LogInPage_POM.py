@@ -1,6 +1,3 @@
-import auth
-
-
 # All POMs require a webPage object to be instantiated/initialized.
 # The webPage object provides the webdriver and a "what page am I currently browsing" method
 
@@ -9,10 +6,8 @@ class InstaLogIn:
     def __init__(self, webPage):
         self.page = webPage
         self.driver = self.page.driver
-        self.user = auth.username
-        self.pw = auth.password
 
-    def logIn(self):
+    def logIn(self, user, pswd):
         from time import sleep
         from random import randint
         try:
@@ -27,8 +22,8 @@ class InstaLogIn:
         except Exception as e:
             print(e)
 
-        self.driver.find_element_by_xpath("//input[@name=\"username\"]").send_keys(self.user)
-        self.driver.find_element_by_xpath("//input[@name=\"password\"]").send_keys(self.pw)
+        self.driver.find_element_by_xpath("//input[@name=\"username\"]").send_keys(user)
+        self.driver.find_element_by_xpath("//input[@name=\"password\"]").send_keys(pswd)
         self.driver.find_element_by_xpath('//button[@type="submit"]').click()
 
         sleep(4)
