@@ -14,14 +14,14 @@ class Post:
     def like_post(self):
         try:
             sleep(randint(2, 6))
+            like_button = None
             try:
-                # If it's a picture
-                like_button = self.driver.find_element_by_xpath(
+                # If it's a picture or
+                like_button = self.page.getPageElement_tryHard(
                     "//button[@class='wpO6b ']//*[contains(@aria-label,'ike')]/..")
-            except:
-                # If it's a video
-                like_button = self.driver.find_element_by_xpath(
-                    "//button[@class='wpO6b ']//*[contains(@aria-label,'ike')]/..")
+            except Exception as e:
+                print(e)
+                print('Could not find like button!')
 
             buttonStatus = like_button.find_element_by_class_name('_8-yf5 ').get_attribute('aria-label')
             if buttonStatus == 'Like':
@@ -35,7 +35,7 @@ class Post:
     def close_post(self):
         try:
             sleep(1)
-            self.driver.find_element_by_xpath("//*[@aria-label='Close']").click()
+            self.page.getPageElement_tryHard("//*[@aria-label='Close']").click()
         except Exception as e:
             print(e)
 
@@ -54,7 +54,7 @@ class Post:
 
     def updatePostDateTime(self):
         try:
-            dateElement = self.driver.find_element_by_xpath("//time[@class='_1o9PC Nzb55']")
+            dateElement = self.page.getPageElement_tryHard("//time[@class='_1o9PC Nzb55']")
             self.datePosted = dateElement.get_attribute('datetime')
         except Exception as e:
             print(e)

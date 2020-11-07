@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 
-import BotMemoryFilesFactory as BF
+from BotMemory import BotMemoryFilesFactory as BF
 
 
 def initializeFolder(targetPath):
@@ -27,7 +27,8 @@ class MemoryFile():
 
 class FileHandlerBot:
     # Main Directories
-    py_files = os.path.dirname(__file__)
+    thisFile = os.path.dirname(__file__)
+    py_files = os.path.join(thisFile, '../')
     projectFolder = os.path.join(py_files, '../')
 
     def __init__(self):
@@ -108,8 +109,6 @@ class FileHandlerBot:
 
             if not user in oldFrame[file['columns'][0]].tolist():
                 self.CSV_addNewRowToCSV(kindOfLove, [user, 1, datetime.now(), 0])
-
-    # TODO: Write integrity / duplicates check method for all the CSV files that get manual input
 
     def removeUserfrom_the_Love(self, user, kindOfLove):
         file = self.getFileFromFilename(kindOfLove)

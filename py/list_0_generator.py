@@ -1,19 +1,28 @@
-import InstaFameBot
-import auth
-from os import path
-from time import sleep
+import sys
 import InstaBotV2
 
-bot = InstaBotV2.InstaBot()
-bot.logIn()
-bot.list_getList_0()
-bot.shutDown()
 
-# InstaFameBot.log.error('\n\n')
-# InstaFameBot.log.error('{0}: Building the List 0'.format(str(path.basename(__file__))[:-3]))
-#
-# bot = InstaFameBot.InstaBot(auth.username, auth.password)
-# bot.tH_logIn()
-# answer = bot.t2_getList_0(10)
-# bot.tH_logOut()
-# bot.tH_close_browser()
+def main():
+    hdLess = False
+    numberOfProfilesToProcess = 10
+
+    if len(sys.argv) > 1:
+        print(sys.argv)
+        if sys.argv[1] == 'True':
+            hdLess = True
+        try:
+            numberOfProfilesToProcess = int(sys.argv[2])
+        except Exception as e:
+            print(e)
+    else:
+        hdLess = False
+
+    print([hdLess, type(hdLess), numberOfProfilesToProcess, type(numberOfProfilesToProcess)])
+
+    bot = InstaBotV2.InstaBot(hdLess)
+    bot.logIn()
+    bot.list_getList_0(numberOfProfilesToProcess)
+    bot.shutDown()
+
+
+if __name__ == "__main__": main()

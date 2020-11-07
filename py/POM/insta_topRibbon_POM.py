@@ -1,9 +1,14 @@
+from time import sleep
+
+from selenium.webdriver.common.keys import Keys
+
 import auth
 
 
 class AccountTab:
     ac_xpaths = {
-        "myAvatar": "//img[contains(@alt,'{}')]".format(auth.username),
+        # "myAvatar": "//img[contains(@alt,'{}')]//..".format(auth.username)
+        "myAvatar": "//img[contains(@alt,'{}')]//..//..//span[@class='_2dbep qNELH']".format(auth.username),
         'ownProfile': "//div[contains(text(),'Profile')]",
         'logOutButton': "//div[contains(text(),'Log Out')]",
     }
@@ -15,20 +20,36 @@ class AccountTab:
     def navigateToOwnProfile(self):
         from POM import insta_userPage_POM as up
 
-        self.driver.find_element_by_xpath(self.ac_xpaths['myAvatar']).click()
-        self.driver.find_element_by_xpath(self.ac_xpaths['ownProfile']).click()
+        result = None
+        attempts = 4
+        while result is None:
+            try:
+                self.page.getPageElement_tryHard(self.ac_xpaths['myAvatar']).click()
+                result = self.page.getPageElement_tryHard(self.ac_xpaths['ownProfile'])
+                result.click()
+                sleep(1)
+                if auth.username in self.page.whichPageAmI():
+                    return up.userPage(self.page, auth.username)
+            except:
+                if attempts == 0:
+                    break
+                attempts -= 1
 
-        return up.userPage(self.page, auth.username)
+        return None
 
     def logOut(self):
         result = None
+        attempts = 4
         while result is None:
             try:
-                self.driver.find_element_by_xpath(self.ac_xpaths['myAvatar']).click()
-                result = self.driver.find_element_by_xpath(self.ac_xpaths['logOutButton'])
+                self.page.getPageElement_tryHard(self.ac_xpaths['myAvatar']).click()
+                sleep(1)
+                result = self.page.getPageElement_tryHard(self.ac_xpaths['logOutButton'])
+                result.click()
             except:
-                pass
-        self.driver.find_element_by_xpath(self.ac_xpaths['logOutButton']).click()
+                if attempts == 0:
+                    break
+                attempts -= 1
 
 
 class SearchField:
@@ -45,47 +66,49 @@ class SearchField:
 
     def clearSearchField(self):
         try:
-            self.driver.find_element_by_xpath("//div[contains(@class,'SearchClear')]").click()
+            self.driver.find_element_by_xpath(self.sf_xpaths['clearSearch']).click()
         except Exception as e:
-            pass
+            print('Cannot Clear search field in top ribbon')
 
     def navigateToUserPageThroughSearch(self, userName):
         from POM import insta_userPage_POM as up
-        from time import sleep
 
-        attempts = 5
+        # self.clearSearchField()
+        attempts = 3
         result = None
         while result is None:
             try:
-                self.clearSearchField()
                 self.typeIntoSearchBox(userName)
                 sleep(2)
-                result = self.driver.find_element_by_xpath(
-                    "//a[@href='/{}/']".format(userName))  # This is the first/top result
-                sleep(2)
+                result = self.driver.find_element_by_xpath("//a[@href='/{}/']".format(userName))
+                # This is the first/top result
                 result.click()
+                sleep(2)
                 return up.userPage(self.page, userName)
-            except:
+            except Exception as e:
+                print(e)
+                if 'obscures it' in e:
+                    pass
+                self.clearSearchField()
+                # self.driver.ActionChains(self.driver).send_keys(Keys.ESCAPE).perform()
                 if attempts == 0:
-                    self.clearSearchField()
                     break
                 attempts -= 1
-                pass
+                result = None
 
     def navigateToHashTagPageThroughSearch(self, hashtag):
-        from time import sleep
         self.typeIntoSearchBox('#{}'.format(hashtag))
-        self.driver.find_element_by_xpath("//a[@href='/explore/tags/{}/']".format(hashtag)).click()
+        self.page.getPageElement_tryHard("//a[@href='/explore/tags/{}/']".format(hashtag)).click()
         sleep(2)
 
         return self.page  # TODO create a POM of hashtag pages and have it return an instance of that
 
     def getHashTagPostCountThroughSearch(self, hashtag):
         self.typeIntoSearchBox('#{}'.format(hashtag))
-        tagResult = self.driver.find_element_by_xpath(
+        tagResult = self.page.getPageElement_tryHard(
             "//a[@href='/explore/tags/{}/']//../div[@class='Fy4o8']/span/span".format(hashtag)).text
 
-        self.driver.find_element_by_xpath(self.sf_xpaths["clearSearch"]).click()
+        self.clearSearchField()
 
         return int(tagResult.replace(',', ''))
 
@@ -94,4 +117,4 @@ class SearchField:
         return self.driver.find_elements_by_xpath(self.sf_xpaths["resultsList"])
 
     def typeIntoSearchBox(self, query):
-        self.driver.find_element_by_xpath(self.sf_xpaths["searchBoxInput"]).send_keys(query)
+        self.page.getPageElement_tryHard(self.sf_xpaths["searchBoxInput"]).send_keys(query)

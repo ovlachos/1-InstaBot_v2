@@ -18,35 +18,35 @@ class InstaID:
     def getUserID(self, username):
         self.navigateTo(self.url_USERNAMEtoID)
         try:
-            self.driver.find_element_by_xpath(self.xpaths['cookies']).click()
+            self.page.getPageElement_tryHard(self.xpaths['cookies']).click()
         except Exception as e:
             print(e)
-        ID_userNameInputField = self.driver.find_element_by_xpath("//input[@id='instagram-username']")
-        ID_get_button = self.driver.find_element_by_xpath("//button[@id='get-user-id-button']")
+        ID_userNameInputField = self.page.getPageElement_tryHard("//input[@id='instagram-username']")
+        ID_get_button = self.page.getPageElement_tryHard("//button[@id='get-user-id-button']")
         self.driver.execute_script("arguments[0].scrollIntoView();", ID_get_button)
 
         ID_userNameInputField.send_keys(username)
 
         ID_get_button.click()
         sleep(2)
-        ID_result_box = self.driver.find_element_by_xpath("//div[@class='result-box__highlight']")
+        ID_result_box = self.page.getPageElement_tryHard("//div[@class='result-box__highlight']")
         return ID_result_box.text
 
     def getUserName(self, userID):
         self.navigateTo(self.url_IDtoUSERNAME)
         try:
-            self.driver.find_element_by_xpath(self.xpaths['cookies']).click()
+            self.page.getPageElement_tryHard(self.xpaths['cookies']).click()
         except Exception as e:
             print(e)
 
-        Username_IDinputField = self.driver.find_element_by_xpath("//input[@id='instagram-userid']")
-        Username_get_button = self.driver.find_element_by_xpath("//button[@id='get-username-button']")
+        Username_IDinputField = self.page.getPageElement_tryHard("//input[@id='instagram-userid']")
+        Username_get_button = self.page.getPageElement_tryHard("//button[@id='get-username-button']")
         self.driver.execute_script("arguments[0].scrollIntoView();", Username_get_button)
 
         Username_IDinputField.send_keys(userID)
 
         Username_get_button.click()
-        Username_result_box = self.driver.find_element_by_xpath("//div[@class='result-box__highlight']//a")
+        Username_result_box = self.page.getPageElement_tryHard("//div[@class='result-box__highlight']//a")
         return Username_result_box.text
 
     def researchUsernameChange(self, username):

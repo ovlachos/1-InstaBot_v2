@@ -11,7 +11,7 @@ class Browser:
         options = Options()
         options.headless = False
         if headless:
-            print("I've got a  a headless browser!!")  # TODO remove
+            print("I've got a  a headless browser!!")
             options.headless = True
         profile = webdriver.FirefoxProfile()
         profile.set_preference("intl.accept_languages", 'en-us')
@@ -55,3 +55,14 @@ class WebPage:
 
         if 'wait' in errorMessagePresent:
             return True
+
+    def getPageElement_tryHard(self, xpath):
+        attempts = 3
+        result = None
+        while result is None:
+            try:
+                result = self.driver.find_element_by_xpath(xpath)
+            except:
+                if attempts == 0: break
+                attempts -= 1
+        return result

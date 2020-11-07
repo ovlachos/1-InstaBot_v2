@@ -7,7 +7,9 @@ class userPage_base:
         self.page = webPage
         self.driver = self.page.driver
         self.userName = user
+        self.altName = self.getAltname()
         self.type = 0
+        self.bio = self.getBio()
         if self.iAmInAUserPage():
             self.determineProfileType()
             print('User {0} {1}'.format(self.userName, self.get_profileTypeDescription()))
@@ -16,21 +18,16 @@ class userPage_base:
             self.type = 0
 
     def updateUserName(self):
-        self.userName = self.driver.find_element_by_xpath("//header//h2").text
+        self.userName = self.page.getPageElement_tryHard("//header//h2").text
 
-    def getPageElement_tryHard(self, xpath):
-        attempts = 5
-        result = None
-        while result is None:
-            try:
-                result = self.driver.find_element_by_xpath(xpath)
-            except:
-                if attempts == 0: break
-                attempts -= 1
-        return result
+    def getAltname(self):
+        return self.page.getPageElement_tryHard("//h1[@class='rhpdm']").text
+
+    def getPageElement_tryHard1(self, xpath):
+        pass
 
     def getAlternativeUserName(self):
-        return self.driver.find_element_by_xpath("//header//div[@class='-vDIg']//h1").text
+        return self.page.getPageElement_tryHard("//header//div[@class='-vDIg']//h1").text
 
     def getBio(self):
         bioText = ''
@@ -66,7 +63,7 @@ class userPage_base:
             self.type += 20
 
         try:
-            self.driver.find_element_by_xpath("//header//section//span[@aria-label='Following']")
+            self.page.getPageElement_tryHard("//header//section//span[@aria-label='Following']")
             self.type += 10
             return
         except Exception as e:
@@ -74,7 +71,7 @@ class userPage_base:
             self.type += 20
 
         try:
-            self.driver.find_element_by_xpath("//h2[contains(text(),'Private')]")
+            self.page.getPageElement_tryHard("//h2[contains(text(),'Private')]")
             self.type += 20
             return
         except Exception as e:
@@ -82,7 +79,7 @@ class userPage_base:
             self.type += 10
 
         try:
-            self.driver.find_element_by_xpath("//h2[contains(text(),'Sorry')]")
+            self.page.getPageElement_tryHard("//h2[contains(text(),'Sorry')]")
             self.type += 20
             return
         except Exception as e:
@@ -113,7 +110,7 @@ class userPage_base:
 
             if len(allItems) >= 3:
                 stats['posts'] = int(allItems[0].text.replace(',', ''))
-                stats['followers'] = int(allItems[1].text.replace(',', ''))
+                stats['followers'] = int(allItems[1].get_attribute("title").replace(',', ''))
                 stats['following'] = int(allItems[2].text.replace(',', ''))
         except Exception as ex:
             print(ex)
@@ -127,10 +124,10 @@ class userPage(userPage_base):
         if self.type < 55:
             try:
                 sleep(3)
-                self.getPageElement_tryHard("//a[contains(@href,'/{}')]".format('followers')).click()
+                self.page.getPageElement_tryHard("//a[contains(@href,'/{}')]".format('followers')).click()
                 sleep(2)
                 followersList = self.__scroll_and_get(targetCount=self.stats['followers'])
-                self.getPageElement_tryHard("//button[@class='wpO6b ']//*[@aria-label='Close']").click()
+                self.page.getPageElement_tryHard("//button[@class='wpO6b ']//*[@aria-label='Close']").click()
                 return followersList
             except Exception as e:
                 print(e)
@@ -144,10 +141,10 @@ class userPage(userPage_base):
         if self.type < 55:
             try:
                 sleep(3)
-                self.getPageElement_tryHard("//a[contains(@href,'/{}')]".format('following')).click()
+                self.page.getPageElement_tryHard("//a[contains(@href,'/{}')]".format('following')).click()
                 sleep(2)
                 followingList = self.__scroll_and_get(targetCount=self.stats['following'])
-                self.getPageElement_tryHard("//button[@class='wpO6b ']//*[@aria-label='Close']").click()
+                self.page.getPageElement_tryHard("//button[@class='wpO6b ']//*[@aria-label='Close']").click()
                 return followingList
             except Exception as e:
                 print(e)
@@ -161,12 +158,12 @@ class userPage(userPage_base):
         if self.type < 55:
             sleep(3)
             try:
-                self.getPageElement_tryHard("//a[contains(@href,'/{}')]".format('following')).click()
+                self.page.getPageElement_tryHard("//a[contains(@href,'/{}')]".format('following')).click()
                 sleep(2)
-                self.getPageElement_tryHard("//a[contains(@href,'/{}')]".format('hashtag_following')).click()
+                self.page.getPageElement_tryHard("//a[contains(@href,'/{}')]".format('hashtag_following')).click()
                 sleep(2)
                 hashtagList = self.__scroll_and_get('hashTags', "//div[@class='_8zyFd']")
-                self.getPageElement_tryHard("//button[@class='wpO6b ']//*[@aria-label='Close']").click()
+                self.page.getPageElement_tryHard("//button[@class='wpO6b ']//*[@aria-label='Close']").click()
                 return hashtagList
             except Exception as e:
                 print(e)
@@ -197,11 +194,13 @@ class userPage(userPage_base):
         self.determineProfileType()
         if self.type > 35:
             try:
-                self.driver.find_element_by_xpath("//button[contains(text(),'Follow')]").click()
+                self.page.getPageElement_tryHard(
+                    "//button[contains(text(),'Follow')]").click()
             except Exception as e:
                 print('Cannot find the follow button')
 
             self.determineProfileType()
+
             if self.type < 40:
                 return 'OK'
             else:
@@ -215,9 +214,9 @@ class userPage(userPage_base):
         from time import sleep
         self.determineProfileType()
         if 10 < self.type < 35:
-            self.driver.find_element_by_xpath("//span[@aria-label='Following']").click()
+            self.page.getPageElement_tryHard("//span[@aria-label='Following']").click()
             sleep(1)
-            buttons = self.driver.find_element_by_xpath("//*[contains(@class,'-Cab')]")
+            buttons = self.page.getPageElement_tryHard("//*[contains(@class,'-Cab')]")
             if 'follow' in buttons.text:
                 buttons.click()
                 sleep(2)
@@ -240,13 +239,13 @@ class userPage(userPage_base):
         outputList = []
 
         try:
-            scroll_box = self.driver.find_element_by_xpath(xpath)
+            scroll_box = self.page.getPageElement_tryHard(xpath)
         except Exception as e:
             print(e)
             return outputList
 
         try:
-            sugs = self.driver.find_element_by_xpath("//h4[text()='Suggestions')]")
+            sugs = self.page.getPageElement_tryHard("//h4[text()='Suggestions')]")
             self.driver.execute_script('arguments[0].scrollIntoView()', sugs)
         except Exception as e:
             sleep(1)
@@ -260,7 +259,7 @@ class userPage(userPage_base):
             while last_ht != ht:
                 last_ht = ht
                 sleep(1)
-                dialog = self.driver.find_element_by_xpath("//div[contains(@role, 'dialog')]")
+                dialog = self.page.getPageElement_tryHard("//div[contains(@role, 'dialog')]")
                 currentAtags = dialog.find_elements_by_tag_name('a')
                 names = currentAtags
 

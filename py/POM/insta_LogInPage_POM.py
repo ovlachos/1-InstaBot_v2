@@ -18,20 +18,20 @@ class InstaLogIn:
         sleep(randint(2, 6))
 
         try:
-            self.driver.find_element_by_xpath("//button[contains(text(),'Accept')]").click()
+            self.page.getPageElement_tryHard("//button[contains(text(),'Accept')]").click()
         except Exception as e:
             print(e)
 
-        self.driver.find_element_by_xpath("//input[@name=\"username\"]").send_keys(user)
-        self.driver.find_element_by_xpath("//input[@name=\"password\"]").send_keys(pswd)
-        self.driver.find_element_by_xpath('//button[@type="submit"]').click()
+        self.page.getPageElement_tryHard("//input[@name=\"username\"]").send_keys(user)
+        self.page.getPageElement_tryHard("//input[@name=\"password\"]").send_keys(pswd)
+        self.page.getPageElement_tryHard('//button[@type="submit"]').click()
 
         sleep(4)
 
         try:
-            self.driver.find_element_by_xpath("//button[contains(text(), 'Not Now')]").click()
-            sleep(3)
-            self.driver.find_element_by_xpath("//button[contains(text(), 'Not Now')]").click()
+            self.page.getPageElement_tryHard("//button[contains(text(), 'Not Now')]").click()
+            sleep(2)
+            self.page.getPageElement_tryHard("//button[contains(text(), 'Not Now')]").click()
         except Exception as e:
             print(e)
 

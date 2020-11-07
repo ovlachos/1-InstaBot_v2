@@ -626,7 +626,7 @@ class InstaBot:
         return list(users)
 
     def t1_unfollowUser(self, userHandle):
-        # TODO add some sort of verification check on the final outcome before returning "OK"
+
         if not self.t0_Open_user_profile(userHandle):
             return self.tooManyActionsBreakCode
         else:
@@ -984,7 +984,7 @@ class InstaBot:
         return 'OK'
 
     def t2_getList_1(self, processStep=4):
-        # TODO cannot really work as there are too many users who have changed their handles
+
         # in actuall life we need to mark them as drop if we open their page and it gives the
         # broken link error. Let us do a quick fix to make a release and then fix it in the 'user' object
 
