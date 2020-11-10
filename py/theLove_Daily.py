@@ -5,7 +5,7 @@ import InstaBotV2
 def main():
     hdLess = False
     noOfLikesToGive = 1
-    percentageOfUsersToCover = 0.40
+    percentageOfUsersToCover = 0.501
 
     if len(sys.argv) > 1:
         print(sys.argv)
@@ -23,7 +23,7 @@ def main():
     v2Bot = InstaBotV2.InstaBot(hdLess)
     v2Bot.logIn()
     v2Bot.theLoveDaily('dailyLoveCSV', noOfLikesToGive, percentageOfUsersToCover)
-    v2Bot.theLoveDaily('extraLoveCSV', noOfLikesToGive, 1.0)
+    v2Bot.theLoveDaily('extraLoveCSV', noOfLikesToGive, 0.501)
     v2Bot.shutDown()
 
 

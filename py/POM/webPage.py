@@ -1,5 +1,6 @@
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.common.action_chains import ActionChains
 
 
 # All POMs require a webPage object to be instantiated/initialized.
@@ -66,3 +67,12 @@ class WebPage:
                 if attempts == 0: break
                 attempts -= 1
         return result
+
+    def sendKey(self, key):
+        if isinstance(key, str):
+            try:
+                actions = ActionChains(self.driver)
+                actions.send_keys(key)
+                actions.perform()
+            except Exception as e:
+                print(e)

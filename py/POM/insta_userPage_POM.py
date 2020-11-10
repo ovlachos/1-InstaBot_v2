@@ -7,13 +7,13 @@ class userPage_base:
         self.page = webPage
         self.driver = self.page.driver
         self.userName = user
-        self.altName = self.getAltname()
         self.type = 0
-        self.bio = self.getBio()
         if self.iAmInAUserPage():
+            self.altName = self.getAltname()
+            self.bio = self.getBio()
             self.determineProfileType()
-            print('User {0} {1}'.format(self.userName, self.get_profileTypeDescription()))
             self.stats = self.getStats_dict()
+            self.printProfileTypeDescription()
         else:
             self.type = 0
 
@@ -21,7 +21,11 @@ class userPage_base:
         self.userName = self.page.getPageElement_tryHard("//header//h2").text
 
     def getAltname(self):
-        return self.page.getPageElement_tryHard("//h1[@class='rhpdm']").text
+        try:
+            return self.page.getPageElement_tryHard("//h1[@class='rhpdm']").text
+        except Exception as e:
+            print("No altname cause: {}".format(e))
+            return ''
 
     def getPageElement_tryHard1(self, xpath):
         pass
@@ -31,10 +35,12 @@ class userPage_base:
 
     def getBio(self):
         bioText = ''
-
-        bio = self.driver.find_elements_by_xpath("//header//div[@class='-vDIg']//span")
-        for line in bio:
-            bioText += line.text
+        try:
+            bio = self.driver.find_elements_by_xpath("//header//div[@class='-vDIg']//span")
+            for line in bio:
+                bioText += line.text
+        except Exception as e:
+            print("No bio cause: {}".format(e))
 
         return bioText
 
@@ -63,7 +69,8 @@ class userPage_base:
             self.type += 20
 
         try:
-            self.page.getPageElement_tryHard("//header//section//span[@aria-label='Following']")
+            # self.page.getPageElement_tryHard("//header//section//span[@aria-label='Following']")
+            self.driver.find_element_by_xpath("//header//section//span[@aria-label='Following']")
             self.type += 10
             return
         except Exception as e:
@@ -71,7 +78,7 @@ class userPage_base:
             self.type += 20
 
         try:
-            self.page.getPageElement_tryHard("//h2[contains(text(),'Private')]")
+            self.driver.find_element_by_xpath("//h2[contains(text(),'Private')]")
             self.type += 20
             return
         except Exception as e:
@@ -79,10 +86,11 @@ class userPage_base:
             self.type += 10
 
         try:
-            self.page.getPageElement_tryHard("//h2[contains(text(),'Sorry')]")
+            self.driver.find_element_by_xpath("//h2[contains(text(),'Sorry')]")
             self.type += 20
             return
         except Exception as e:
+            # print(e)
             pass
 
     def get_profileTypeDescription(self):
@@ -97,6 +105,9 @@ class userPage_base:
             '70': 'has either changed handle or deleted their account',
         }
         return description[str(self.type)]
+
+    def printProfileTypeDescription(self):
+        print('~~> User {0} {1}'.format(self.userName, self.get_profileTypeDescription()))
 
     def getStats_dict(self):
         stats = {
@@ -134,7 +145,7 @@ class userPage(userPage_base):
                 return []
         else:
             print('nahh - no followers access for this user because:')
-            print('User {0} {1}\n'.format(self.userName, self.get_profileTypeDescription()))
+            self.printProfileTypeDescription()
 
     def getFollowingList(self):
         from time import sleep
@@ -151,7 +162,7 @@ class userPage(userPage_base):
                 return []
         else:
             print('nahh - no following access for this user because:')
-            print('User {0} {1}\n'.format(self.userName, self.get_profileTypeDescription()))
+            self.printProfileTypeDescription()
 
     def getHashtagsFollowingList(self):
         from time import sleep
@@ -170,7 +181,7 @@ class userPage(userPage_base):
                 return []
         else:
             print('nahh - no hashtag access for this user because:')
-            print('User {0} {1}\n'.format(self.userName, self.get_profileTypeDescription()))
+            self.printProfileTypeDescription()
 
     def navigateTo_X_latestPost(self, numberX):
         from POM import insta_post as post
@@ -188,7 +199,7 @@ class userPage(userPage_base):
             return post.Post(self.page)
         else:
             print('nahh cannot navigate to a post because:')
-            print('User {0} {1}\n'.format(self.userName, self.get_profileTypeDescription()))
+            self.printProfileTypeDescription()
 
     def follow(self):
         self.determineProfileType()
@@ -207,13 +218,13 @@ class userPage(userPage_base):
                 return 'fail'
         else:
             print('nahh - no follow access for this user because:')
-            print('User {0} {1}\n'.format(self.userName, self.get_profileTypeDescription()))
+            self.printProfileTypeDescription()
             return 'OK'
 
     def unfollow(self):
         from time import sleep
         self.determineProfileType()
-        if 10 < self.type < 35:
+        if self.type < 35:
             self.page.getPageElement_tryHard("//span[@aria-label='Following']").click()
             sleep(1)
             buttons = self.page.getPageElement_tryHard("//*[contains(@class,'-Cab')]")
@@ -229,10 +240,10 @@ class userPage(userPage_base):
                 return 'fail'
         else:
             print('nahh - no unfollow access for this user because:')
-            print('User {0} {1}\n'.format(self.userName, self.get_profileTypeDescription()))
+            self.printProfileTypeDescription()
             return 'OK'
 
-    def __scroll_and_get(self, type='users', xpath="//div[@class='isgrP']", targetCount=0):
+    def __scroll_and_get(self, itemType='users', xpath="//div[@class='isgrP']", targetCount=0):
         from time import sleep
         xpath.strip("'\'")
         sleep(2)
@@ -248,6 +259,7 @@ class userPage(userPage_base):
             sugs = self.page.getPageElement_tryHard("//h4[text()='Suggestions')]")
             self.driver.execute_script('arguments[0].scrollIntoView()', sugs)
         except Exception as e:
+            print(e)
             sleep(1)
 
         sleep(2)
@@ -266,12 +278,13 @@ class userPage(userPage_base):
                 # names = dialog.find_elements_by_tag_name('a')
                 for name in names:
                     try:
-                        if type == 'users':
+                        if itemType == 'users':
                             if len(name.get_attribute('title')) > 0:
                                 outputList.append(name.get_attribute('title'))
                                 outputList = list(dict.fromkeys(outputList))
                         else:
-                            if '#' in name.text: outputList.append(name.text)
+                            if '#' in name.text:
+                                outputList.append(name.text)
                     except Exception as e:
                         print(e)
                         continue

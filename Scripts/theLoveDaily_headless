@@ -1,4 +1,4 @@
 #!/bin/sh
 scriptdir="$(dirname "$0")"
 cd "$scriptdir"
-python ../py/theLove_Daily.py True 2 0.501 
+python ../py/theLove_Daily.py True 2 0.501

@@ -25,12 +25,13 @@ class InstaBot:
 
     def shutDown(self):
         self.logOut()
+        sleep(1)
         self.webPage.killBrowser()
 
     def theGame(self, processStep=30):
         # Setup parameters
-        howManyDaysBeforeI_unfollow = 10
-        howManyDaysBeforeI_unlove = howManyDaysBeforeI_unfollow + 4
+        howManyDaysBeforeI_unfollow = 12
+        howManyDaysBeforeI_unlove = 4 + howManyDaysBeforeI_unfollow
         usersTofollowToday = processStep
 
         # create dateList of dates in datetimeStringFormat_day format
@@ -90,6 +91,9 @@ class InstaBot:
 
     def theLoveDaily(self, fileName, numberOflikes=2, percentageOfUsers=1):
         import pandas as pd
+
+        print("\n~~> Now processing the {0} list with {1} likes/user going for {2}".format(fileName, numberOflikes,
+                                                                                           percentageOfUsers))
         # 'Like' everyone's latest N posts
         # log.error('\n\n~~~ The Love Daily commences ! ~~~\n\n')
 
@@ -113,8 +117,6 @@ class InstaBot:
         printmark = 0.0
         for index, row in lovedOnes_frame.iterrows():
 
-            sleep(randint(14, 20))
-
             loveCount -= 1
             if (loveTotal - loveCount) > (loveTotal * percentageOfUsers):
                 break
@@ -125,8 +127,10 @@ class InstaBot:
                 printmark += 5
 
             deltaT = self.theLoveDaily_timeCheck(row)
-            if 72 < deltaT <= 13:
+            if deltaT <= 13 or 300 < deltaT:
                 continue
+
+            sleep(randint(14, 20))
 
             # Navigate to user's profile
             userPage = self.mainPage.topRibbon_SearchField.navigateToUserPageThroughSearch(row['theLoveDaily'])
@@ -155,6 +159,7 @@ class InstaBot:
                 post = userPage.navigateTo_X_latestPost(i)
                 sleep(1)
                 post.like_post()
+                print("~~> Like pressed on user {0}".format(row['theLoveDaily']))
                 sleep(2)
                 post.close_post()
                 sleep(1)
@@ -236,10 +241,12 @@ class InstaBot:
 
         # Get the list of profiles already examined in the list 1 file on disk
         old_frame = self.fileHandler.CSV_getFrameFromCSVfile('theList_1_fileCSV')
+        theList_1_frame = old_frame  # TODO: maybe do this from the start
 
         # Get a list of profiles sitting on list 0 waiting to be examined
         theList_0_frame = old_frame[
-            (old_frame[old_frame.columns[3]] != 'keep') & (old_frame[old_frame.columns[3]] != 'drop')]
+            (old_frame[old_frame.columns[3]] != 'keep') &
+            (old_frame[old_frame.columns[3]] != 'drop')]
 
         theList_0_users_list = theList_0_frame[theList_0_frame.columns[1]].tolist()
         theList_0_users_list = list(dict.fromkeys(theList_0_users_list))  # Remove duplicates
@@ -261,7 +268,6 @@ class InstaBot:
             # log.error('list 1 | Unable to get my followers because: {0}'.format(e))
 
         try:
-            theList_1_frame = old_frame  # TODO: maybe do this from the start
             theList_1_list = theList_1_list[:processStep]
             print('Will try getting stats for the following users {}'.format(theList_1_list))
 

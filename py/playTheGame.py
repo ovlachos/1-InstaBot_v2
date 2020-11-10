@@ -4,7 +4,7 @@ import InstaBotV2 as ibV2
 
 def main():
     hdLess = False
-    numberOfProfilesToProcess = 30
+    numberOfProfilesToProcess = 3
 
     if len(sys.argv) > 1:
 

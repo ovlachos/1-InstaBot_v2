@@ -26,6 +26,7 @@ class Post:
             buttonStatus = like_button.find_element_by_class_name('_8-yf5 ').get_attribute('aria-label')
             if buttonStatus == 'Like':
                 self.driver.execute_script("arguments[0].click();", like_button)
+
                 sleep(2)
 
         except Exception as e:

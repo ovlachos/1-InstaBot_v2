@@ -1,7 +1,5 @@
 from time import sleep
-
 from selenium.webdriver.common.keys import Keys
-
 import auth
 
 
@@ -45,6 +43,7 @@ class AccountTab:
                 self.page.getPageElement_tryHard(self.ac_xpaths['myAvatar']).click()
                 sleep(1)
                 result = self.page.getPageElement_tryHard(self.ac_xpaths['logOutButton'])
+                sleep(2)
                 result.click()
             except:
                 if attempts == 0:
@@ -74,25 +73,26 @@ class SearchField:
         from POM import insta_userPage_POM as up
 
         # self.clearSearchField()
-        attempts = 3
+        attempts = 2
         result = None
         while result is None:
             try:
                 self.typeIntoSearchBox(userName)
                 sleep(2)
+
                 result = self.driver.find_element_by_xpath("//a[@href='/{}/']".format(userName))
-                # This is the first/top result
                 result.click()
+
                 sleep(2)
+
                 return up.userPage(self.page, userName)
             except Exception as e:
                 print(e)
-                if 'obscures it' in e:
-                    pass
+                self.page.sendKey(Keys.ESCAPE)
                 self.clearSearchField()
-                # self.driver.ActionChains(self.driver).send_keys(Keys.ESCAPE).perform()
                 if attempts == 0:
                     break
+
                 attempts -= 1
                 result = None
 
