@@ -31,6 +31,9 @@ class FileHandlerBot:
     py_files = os.path.join(thisFile, '../')
     projectFolder = os.path.join(py_files, '../')
 
+    def __del__(self):
+        print("FileHandler deleted")
+
     def __init__(self):
         from pathlib import Path
 

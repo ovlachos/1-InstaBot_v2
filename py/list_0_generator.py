@@ -22,7 +22,8 @@ def main():
     bot = InstaBotV2.InstaBot(hdLess)
     bot.logIn()
     bot.list_getList_0(numberOfProfilesToProcess)
-    bot.shutDown()
+    # bot.shutDown()
+    del bot
 
 
 if __name__ == "__main__": main()

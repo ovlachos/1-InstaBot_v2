@@ -1,10 +1,12 @@
 import sys
 import InstaBotV2 as ibV2
+from time import sleep
+from random import randint
 
 
 def main():
     hdLess = False
-    numberOfProfilesToProcess = 3
+    numberOfProfilesToProcess = 5
 
     if len(sys.argv) > 1:
 
@@ -19,10 +21,15 @@ def main():
 
     print([hdLess, type(hdLess), numberOfProfilesToProcess, type(numberOfProfilesToProcess)])
 
+    sleepTime = randint((2 * 60), (20 * 60))
+    sleep(sleepTime)
+    print(f'Sleeping for {sleepTime / 60} minutes')
+
     theBot = ibV2.InstaBot(hdLess)
     theBot.logIn()
     theBot.theGame(numberOfProfilesToProcess)
-    theBot.shutDown()
+    # theBot.shutDown()
+    del theBot
 
 
 if __name__ == "__main__": main()

@@ -1,3 +1,5 @@
+from selenium.webdriver.common.keys import Keys
+from time import sleep
 import auth
 
 
@@ -7,15 +9,17 @@ class userPage_base:
         self.page = webPage
         self.driver = self.page.driver
         self.userName = user
-        self.type = 0
+
+        self.followAccess = 0
+        self.infoAccess = 0
+        self.determineLevelOfFollowAccess()
+        self.determineLevelOfInfoAccess()
+        self.printProfileTypeDescription()
+
         if self.iAmInAUserPage():
             self.altName = self.getAltname()
             self.bio = self.getBio()
-            self.determineProfileType()
             self.stats = self.getStats_dict()
-            self.printProfileTypeDescription()
-        else:
-            self.type = 0
 
     def updateUserName(self):
         self.userName = self.page.getPageElement_tryHard("//header//h2").text
@@ -50,70 +54,95 @@ class userPage_base:
         else:
             return False
 
-    def determineProfileType(self):
-        from time import sleep
-        # 10 - Type 1: it's me
-        # 20 -  Type 2: it's not me
-        # 30 -   Type 2A: It is someone I already follow
-        # 40 -   Type 2B: It is someone I do not follow
-        # 50 -       Type 2Bi: Their profile is open
-        # 60 -       Type 2Bi: Their profile is not open
-        # 70 -  Type 3: It's no one (name changed, or profile deleted)
+    def determineLevelOfFollowAccess(self):
 
-        self.type = 0
-        sleep(3)
+        # Follow Access:
+        # 0  -  A: It is me
+        # 20 -  B: It's someone I'm following currently
+        # 40 -  C: It's someone I've requested to follow (and they have not yet replied)
+        # 60 -  D: It's someone I do not follow
+
+        sleep(1)
+        self.followAccess = 0
         if self.userName == auth.username:
-            self.type += 10
             return
         else:
-            self.type += 20
+            self.followAccess += 20  # @20
 
+        # Ok so it is NOT me.
+        # One step further away from me are people I am following. Check for that
         try:
-            # self.page.getPageElement_tryHard("//header//section//span[@aria-label='Following']")
             self.driver.find_element_by_xpath("//header//section//span[@aria-label='Following']")
-            self.type += 10
             return
         except Exception as e:
-            # print(e)
-            self.type += 20
+            self.followAccess += 20  # @40
 
+        # Ok so it is NOT someone I am following.
+        # One step further away from me are people I have requested to follow. Check for that
         try:
-            self.driver.find_element_by_xpath("//h2[contains(text(),'Private')]")
-            self.type += 20
+            self.driver.find_element_by_xpath("//div[@class='nZSzR']//button[contains(text(),'Requested')]")
             return
         except Exception as e:
-            # print(e)
-            self.type += 10
+            self.followAccess += 20  # @60
 
+        # If we get to this point it turns out to be someone I am not following at all,
+        # or have requested to follow
+        # but it could also be an error page. Let's check
         try:
             self.driver.find_element_by_xpath("//h2[contains(text(),'Sorry')]")
-            self.type += 20
-            return
+            self.followAccess = 100
+            self.infoAccess = 100
         except Exception as e:
-            # print(e)
             pass
+
+    def determineLevelOfInfoAccess(self):
+
+        # Info/lists Access:
+        # 0  - 01: It is me
+        # 25 - 02: It is an open profile. I have access to info/lists/posts
+        # 50 - 03: It is a private profile. Limited access
+
+        self.infoAccess = 0
+        sleep(1)
+        if self.userName == auth.username:
+            return
+        else:
+            self.infoAccess += 25  # @25
+
+        # If it's not me it could either be an open or private profile. Let us check for that.
+        try:
+            self.driver.find_element_by_xpath("//h2[contains(text(),'Private')]")
+            self.infoAccess += 25  # @50
+        except Exception as e:
+            pass
+            # self.infoAccess = 100
 
     def get_profileTypeDescription(self):
         # phrased so that it fits in 'This user BLAH ...'
-        description = {
-            '10': 'is myself! good job finding me :P',
-            '20': 'is not me Sherlock',
-            '30': 'is someone I already follow',
-            '40': 'is someone I do not follow',
-            '50': 'is someone I do not follow and their profile is OPEN',
-            '60': 'is someone I do not follow, but their profile is CLOSED',
-            '70': 'has either changed handle or deleted their account',
+        descriptionInfoAccess = {
+            '0': 'full access since this is myself! good job finding me :P',
+            '25': 'full access',
+            '50': 'limited access to just the basics',
+            '100': 'no access. Is this an error page',
         }
-        return description[str(self.type)]
+
+        descriptionFollowAccess = {
+            '0': 'cannot follow myself i.e.',
+            '20': 'am already following',
+            '40': 'have requested to follow',
+            '60': 'am not following',
+            '100': 'am not following',
+        }
+        return f"I {descriptionFollowAccess[str(self.followAccess)]} user {self.userName} and I have {descriptionInfoAccess[str(self.infoAccess)]}"  # description[str(self.type)]
 
     def printProfileTypeDescription(self):
-        print('~~> User {0} {1}'.format(self.userName, self.get_profileTypeDescription()))
+        print('~~> {0}'.format(self.get_profileTypeDescription()))
 
     def getStats_dict(self):
         stats = {
-            'posts': '',
-            'followers': '',
-            'following': ''
+            'posts': 0,
+            'followers': 0,
+            'following': 0
         }
 
         try:
@@ -131,8 +160,8 @@ class userPage_base:
 
 class userPage(userPage_base):
     def getFollowersList(self):
-        from time import sleep
-        if self.type < 55:
+
+        if self.infoAccess < 45:
             try:
                 sleep(3)
                 self.page.getPageElement_tryHard("//a[contains(@href,'/{}')]".format('followers')).click()
@@ -148,8 +177,8 @@ class userPage(userPage_base):
             self.printProfileTypeDescription()
 
     def getFollowingList(self):
-        from time import sleep
-        if self.type < 55:
+
+        if self.infoAccess < 45:
             try:
                 sleep(3)
                 self.page.getPageElement_tryHard("//a[contains(@href,'/{}')]".format('following')).click()
@@ -165,8 +194,8 @@ class userPage(userPage_base):
             self.printProfileTypeDescription()
 
     def getHashtagsFollowingList(self):
-        from time import sleep
-        if self.type < 55:
+
+        if self.infoAccess < 45:
             sleep(3)
             try:
                 self.page.getPageElement_tryHard("//a[contains(@href,'/{}')]".format('following')).click()
@@ -174,10 +203,11 @@ class userPage(userPage_base):
                 self.page.getPageElement_tryHard("//a[contains(@href,'/{}')]".format('hashtag_following')).click()
                 sleep(2)
                 hashtagList = self.__scroll_and_get('hashTags', "//div[@class='_8zyFd']")
-                self.page.getPageElement_tryHard("//button[@class='wpO6b ']//*[@aria-label='Close']").click()
+                self.driver.find_element_by_tag_name('body').send_keys(Keys.ESCAPE)
+                # self.page.getPageElement_tryHard("//button[@class='wpO6b ']//*[@aria-label='Close']").click()
                 return hashtagList
             except Exception as e:
-                print(e)
+                print('{} . Returning an empty hashtag list'.format(e))
                 return []
         else:
             print('nahh - no hashtag access for this user because:')
@@ -186,7 +216,7 @@ class userPage(userPage_base):
     def navigateTo_X_latestPost(self, numberX):
         from POM import insta_post as post
         # numberX runs from 0 to whatever
-        if self.type < 55:
+        if self.infoAccess < 45:
             try:
                 # self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
                 posts = self.driver.find_elements_by_xpath("//a[contains(@href,'/p/')]")
@@ -202,17 +232,20 @@ class userPage(userPage_base):
             self.printProfileTypeDescription()
 
     def follow(self):
-        self.determineProfileType()
-        if self.type > 35:
+
+        self.determineLevelOfFollowAccess()
+        if self.followAccess > 45:
             try:
                 self.page.getPageElement_tryHard(
                     "//button[contains(text(),'Follow')]").click()
             except Exception as e:
                 print('Cannot find the follow button')
 
-            self.determineProfileType()
+            sleep(2)
+            self.determineLevelOfFollowAccess()
 
-            if self.type < 40:
+            if self.followAccess < 45:
+                print('OK followed {}'.format(self.userName))
                 return 'OK'
             else:
                 return 'fail'
@@ -222,19 +255,31 @@ class userPage(userPage_base):
             return 'OK'
 
     def unfollow(self):
-        from time import sleep
-        self.determineProfileType()
-        if self.type < 35:
-            self.page.getPageElement_tryHard("//span[@aria-label='Following']").click()
-            sleep(1)
-            buttons = self.page.getPageElement_tryHard("//*[contains(@class,'-Cab')]")
-            if 'follow' in buttons.text:
-                buttons.click()
-                sleep(2)
-                self.driver.refresh()
 
-            self.determineProfileType()
-            if self.type > 40:
+        self.determineLevelOfFollowAccess()
+        if 45 > self.followAccess > 5:
+            if self.followAccess < 25:
+                # if following
+                self.page.getPageElement_tryHard("//span[@aria-label='Following']").click()
+                sleep(1)
+                buttons = self.page.getPageElement_tryHard("//*[contains(@class,'-Cab')]")
+                if 'follow' in buttons.text:
+                    buttons.click()
+                    sleep(2)
+                    self.driver.refresh()
+            else:
+                # if requested
+                self.page.getPageElement_tryHard("//button[contains(text(),'Requested')]").click()
+                sleep(1)
+                buttons = self.page.getPageElement_tryHard("//*[contains(@class,'-Cab')]")
+                if 'follow' in buttons.text:
+                    buttons.click()
+                    sleep(2)
+                    self.driver.refresh()
+
+            self.determineLevelOfFollowAccess()
+            if self.followAccess > 45:
+                print('OK UNfollowed {}'.format(self.userName))
                 return 'OK'
             else:
                 return 'fail'
@@ -244,29 +289,29 @@ class userPage(userPage_base):
             return 'OK'
 
     def __scroll_and_get(self, itemType='users', xpath="//div[@class='isgrP']", targetCount=0):
-        from time import sleep
+
         xpath.strip("'\'")
         sleep(2)
         outputList = []
-
+        # TODO: need to do something about this target count. Return a value that makes sense if not reached. Now it's meaningless
         try:
             scroll_box = self.page.getPageElement_tryHard(xpath)
         except Exception as e:
             print(e)
             return outputList
 
-        try:
-            sugs = self.page.getPageElement_tryHard("//h4[text()='Suggestions')]")
-            self.driver.execute_script('arguments[0].scrollIntoView()', sugs)
-        except Exception as e:
-            print(e)
-            sleep(1)
+        # try:
+        #     sugs = self.page.getPageElement_tryHard("//h4[text()='Suggestions')]")
+        #     self.driver.execute_script('arguments[0].scrollIntoView()', sugs)
+        # except Exception as e:
+        #     print(e)
+        #     sleep(1)
 
         sleep(2)
 
         # make sure you scroll to the end of the list
         scrollCount = 0
-        while (len(outputList) <= int(0.95 * targetCount)) or scrollCount < 2:
+        while (len(outputList) < int(0.95 * targetCount)) or scrollCount < 2:
             last_ht, ht = 0, 1
             while last_ht != ht:
                 last_ht = ht
@@ -289,11 +334,16 @@ class userPage(userPage_base):
                         print(e)
                         continue
 
-                # print('~~scrolling ' + type)
-                ht = self.driver.execute_script(
-                    'arguments[0].scrollTo(0, arguments[0].scrollHeight);'
-                    'return arguments[0].scrollHeight;',
-                    scroll_box)
+                try:
+                    ht = self.driver.execute_script(
+                        'arguments[0].scrollTo(0, arguments[0].scrollHeight);'
+                        'return arguments[0].scrollHeight;',
+                        scroll_box)
+                except Exception as e:
+                    print(e)
+                    scrollCount = 666
+                    break
+
             scrollCount += 1
 
         outputList = list(dict.fromkeys(outputList))  # remove duplicates
