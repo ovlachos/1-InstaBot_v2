@@ -3,16 +3,14 @@ import InstaBotV2
 from time import sleep
 
 bot = InstaBotV2.InstaBot()
+bot.getBrowser()
 bot.logIn()
 
-user = bot.mainPage.topRibbon_SearchField.navigateToUserPageThroughSearch('maria.karamani91')
-sleep(2)
-user = bot.mainPage.topRibbon_SearchField.navigateToUserPageThroughSearch('erietta_sl')
-sleep(2)
+user = bot.mainPage.topRibbon_SearchField.navigateToUserPageThroughSearch('mar_ia.karamani_91')
+sleep(1)
+user = bot.mainPage.topRibbon_SearchField.navigateToUserPageThroughSearch('erie.tta_sl')
+sleep(1)
 user = bot.mainPage.topRibbon_SearchField.navigateToUserPageThroughSearch('katsikis')
-sleep(4)
-
-del bot
 
 # Bot Cleanup Lists ~ Keep for later as a self-cleanup check?
 # myPage = bot.mainPage.topRibbon_myAccount.navigateToOwnProfile()

@@ -1,5 +1,7 @@
+import random
 from time import sleep
 from selenium.webdriver.common.keys import Keys
+from fuzzywuzzy import process
 import auth
 
 xpaths = {
@@ -16,24 +18,23 @@ xpaths = {
 
 
 def clickOnObscuringElement(driver, e):
-    try:
+    try:  # Maybe we are stuck on unfollow
         driver.find_element_by_xpath(xpaths["cancelUnfollow"]).click()
         return
     except Exception as ex:
-        print(ex)
+        print(f" In click obscuring 0 elem")
 
-    try:
+    try:  # Click on it
         typeOfElement = '*'
-        classOfelement = e.msg.split("another element <")[1].split("> obscures it")[0].split("class=")[1].strip(
-            '\"')
+        classOfelement = e.msg.split("another element <")[1].split("> obscures it")[0].split("class=")[1].strip('\"')
         xpath_0 = f"//{typeOfElement}[@class='{classOfelement}']"
         driver.find_element_by_xpath(xpath_0).click()
         driver.find_element_by_xpath(xpath_0).click()
         driver.find_element_by_xpath(xpath_0).click()
     except Exception as ex:
-        print(f" In click obscuring 1 elem e: {ex}")
+        print(f" In click obscuring 1 elem")
 
-    try:
+    try:  # Click on body element
         el = driver.find_element_by_tag_name('body')
 
         action = driver.common.action_chains.ActionChains(driver)
@@ -41,7 +42,7 @@ def clickOnObscuringElement(driver, e):
         action.click()
         action.perform()
     except Exception as ex:
-        print(f" In click obscuring 2 elem e: {ex}")
+        print(f" In click obscuring 2 elem")
 
 
 class AccountTab:
@@ -89,8 +90,8 @@ class AccountTab:
 
     def goHomeWhereYouAreSafe_u(self, e):
 
-        if 'obscures it' in e.msg:
-            clickOnObscuringElement(self.driver, e)
+        # if 'obscures it' in e.msg:
+        #     clickOnObscuringElement(self.driver, e)
 
         # if not obscured
         try:
@@ -99,9 +100,11 @@ class AccountTab:
             try:
                 logo.click()
             except Exception as e:
-                print(e)
+                # print(e)
+                pass
         except Exception as e:
-            print('ET cannot go home cause: {0}'.format(e))
+            # print('ET cannot go home cause: {0}'.format(e))
+            pass
 
 
 class SearchField:
@@ -120,29 +123,16 @@ class SearchField:
             return False
 
     def goHomeWhereYouAreSafe_s(self, e):
-
-        if 'obscures it' in e.msg:
-            clickOnObscuringElement(self.driver, e)
-
-        if 'Unable to locate' in e.msg:
-            try:
-                self.driver.find_element_by_tag_name('body').send_keys(Keys.ESCAPE)
-                logo = self.page.getPageElement_tryHard(xpaths['logo'])
-                logo.click()
-
-            except Exception as e1:
-                print('ET cannot go home cause: {0}'.format(e1))
-                if e1.msg:
-                    if 'obscures it' in e1.msg:
-                        clickOnObscuringElement(self.driver, e1)
-
-        # self.page.getPageElement_tryHard(xpaths["searchBoxInput"]).clear()
-        # self.page.driver.refresh()
+        try:
+            if 'obscures it' in e.msg:
+                clickOnObscuringElement(self.driver, e)
+        except:
+            pass
 
     def navigateToUserPageThroughSearch(self, userName):
         from POM import insta_userPage_POM as up
 
-        attempts = 2
+        attempts = 3
         result = None
         while result is None:
             try:
@@ -152,13 +142,21 @@ class SearchField:
                 if self.noResultsCheck():
                     return None
 
-                result = self.driver.find_element_by_xpath("//a[@href='/{}/']".format(userName))
+                fuzzyMatch = self.getFuzzyResults(userName)
+                result = self.driver.find_element_by_xpath("//a[@href='/{}/']".format(fuzzyMatch))
+
+                # used to be result = self.getExactResult(userName)
+
+                if not result:
+                    fuzzyMatch = self.getFuzzyResults(userName)
+                    result = self.driver.find_element_by_xpath("//a[@href='/{}/']".format(fuzzyMatch))
+                    userName = fuzzyMatch
+
                 result.click()
 
                 return up.userPage(self.page, userName)
 
             except Exception as e:
-                # print(e)
                 attempts -= 1
                 result = None
                 self.goHomeWhereYouAreSafe_s(e)
@@ -182,12 +180,42 @@ class SearchField:
         return int(tagResult.replace(',', ''))
 
     def getAllSearchResults_List(self, query):
-        self.typeIntoSearchBox(query)
-        return self.driver.find_elements_by_xpath(xpaths["resultsList"])
+        sleep(1)
+        try:
+            return self.driver.find_elements_by_xpath(xpaths["resultsList"])
+        except:
+            return None
+
+    def getExactResult(self, userName):
+        try:
+            result = self.driver.find_element_by_xpath("//a[@href='/{}/']".format(userName))
+            return result
+        except:
+            return None
+
+    def getFuzzyResults(self, userName):
+        searchResults = self.getAllSearchResults_List(userName)
+        if not searchResults:
+            return None
+
+        userHandles = []
+
+        if len(searchResults) > 0:
+            for item in searchResults:
+                userHandles.append(item.text.split("\n")[0])
+
+            highest = process.extractOne(userName, userHandles)
+            fuzzyMatch = highest[0]
+            return fuzzyMatch
+
+        return None
 
     def typeIntoSearchBox(self, query):
         try:
             self.page.getPageElement_tryHard(xpaths["searchBoxInput"]).clear()
-            self.page.getPageElement_tryHard(xpaths["searchBoxInput"]).send_keys(query)
+            for ch in query:
+                sleep(random.uniform(0, 1))
+                self.page.getPageElement_tryHard(xpaths["searchBoxInput"]).send_keys(ch)
+            sleep(1)
         except Exception as e:
             print(e)

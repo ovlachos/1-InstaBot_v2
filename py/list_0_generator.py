@@ -19,11 +19,14 @@ def main():
 
     print([hdLess, type(hdLess), numberOfProfilesToProcess, type(numberOfProfilesToProcess)])
 
-    bot = InstaBotV2.InstaBot(hdLess)
-    bot.logIn()
-    bot.list_getList_0(numberOfProfilesToProcess)
-    # bot.shutDown()
-    del bot
+    v2Bot = InstaBotV2.InstaBot(hdLess)
+    # v2Bot.delayOps()
+    v2Bot.getBrowser()
+    v2Bot.logIn()
+
+    v2Bot.list_getList_0(numberOfProfilesToProcess)
+
+    # del v2Bot
 
 
 if __name__ == "__main__": main()

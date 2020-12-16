@@ -2,9 +2,10 @@ import auth
 import time
 from random import randint
 from selenium.webdriver.common.keys import Keys
-from BotMemory import FileHandlerBot as fh
-from datetime import datetime, timedelta, time
+from datetime import datetime, timedelta
 from time import sleep
+
+from BotMemory import FileHandlerBot as fh
 from POM import webPage as wp
 from POM import insta_LogInPage_POM as login
 
@@ -12,15 +13,11 @@ from POM import insta_LogInPage_POM as login
 class InstaBot:
     datetimeStringFormat_day = '%Y_%m_%d'
 
-    def __del__(self):
-        self.clearBrowserData()
-        print("Instabot deleted")
-
     def __init__(self, headless=False):
         self.fileHandler = fh.FileHandlerBot()
-        self.webPage = wp.WebPage(headless)
-        self.timeUpperBound = 26
-        self.timeLowerBound = 18
+        self.headless = headless
+        self.timeUpperBound = 42
+        self.timeLowerBound = 28
 
     def logIn(self):
         logInPage = login.InstaLogIn(self.webPage)
@@ -29,7 +26,7 @@ class InstaBot:
     def logOut(self):
         self.mainPage.topRibbon_myAccount.logOut()
 
-    def clearBrowserData(self):
+    def clearBrowserData(self):  # This does nothing
         self.webPage.instance.clearCache()
         print('Firefox data cleared')
 
@@ -39,11 +36,18 @@ class InstaBot:
         self.webPage.instance.writeSessionDataToJSON()
         self.webPage.killBrowser()
 
-    def theGame(self, processStep=30):
+    def getBrowser(self):
+        self.webPage = wp.WebPage(self.headless)
+
+    def delayOps(self, minimum=2, maximum=20):
+        sleepTime = randint((minimum * 60), (maximum * 60))
+        print(f'Sleeping for {int(sleepTime / 60)} minutes')
+        sleep(sleepTime)
+
+    def theGame(self, usersTofollowToday=30):
         # Setup parameters
-        howManyDaysBeforeI_unfollow = 12
+        howManyDaysBeforeI_unfollow = 14 - 1
         howManyDaysBeforeI_unlove = 4 + howManyDaysBeforeI_unfollow
-        usersTofollowToday = processStep
 
         # create dateList of dates in datetimeStringFormat_day format
         dateList = []
@@ -60,33 +64,14 @@ class InstaBot:
 
         # unLove
         if game_lists[3]:
-            dailyLove_list = self.fileHandler.CSV_getFrameFromCSVfile('dailyLoveCSV')['theLoveDaily'].tolist()
-            listFinal = [x for x in game_lists[3] if x in dailyLove_list]
-            for user in listFinal:
-                self.fileHandler.removeUserfrom_the_Love(user, 'dailyLoveCSV')
+            self.theGame_Unlove(game_lists)
 
         # unFollow
         if game_lists[2]:
-            for user in game_lists[2]:
-                rowIndexOfUser = game_frame[game_frame.a1_User == user].index.values[0]
+            self.theGame_Unfollow(dateList, game_frame, game_lists)
 
-                userpage = self.mainPage.topRibbon_SearchField.navigateToUserPageThroughSearch(user)
-
-                if userpage:
-                    print("UnFollow {}".format(user))
-                    if 'OK' in userpage.unfollow():
-                        game_frame.iloc[rowIndexOfUser, 7] = dateList[0]  # Mark the date you unfollowed
-                        self.fileHandler.CSV_saveFrametoCSVfile('theList_1_fileCSV', game_frame)
-                    sleep(randint(14, 20))
-                else:
-                    # what happens if a user page does not come up / does not exist
-                    # -> then I mark as unfollowed in 1/1/1989 so that I can
-                    # -> figure out who they are later and they also get auto-removed from love lists
-                    print('User {} not found'.format(user))
-                    game_frame.iloc[rowIndexOfUser, 7] = '1989_01_01'  # Mark the date you unfollowed
-                    self.fileHandler.CSV_saveFrametoCSVfile('theList_1_fileCSV', game_frame)
-
-        print(f'{len(game_lists[0]) + len(game_lists[1])} users left to follow')
+        print(f'\n\n{len(game_lists[0]) + len(game_lists[1])} users left to follow')
+        print(f'{len(game_lists[0])} optimal users left to follow')
         if usersTofollowToday > (len(game_lists[0]) + len(game_lists[1])):
             usersTofollowToday = len(game_lists[0]) + len(game_lists[1])
 
@@ -103,6 +88,44 @@ class InstaBot:
             print('OK_Game')
         else:
             print("Fail_Game: {0}".format(usersTofollowToday))
+
+    def theGame_Unlove(self, game_lists):
+        print(f"{len(game_lists[3])} to UnLove")
+        dailyLove_list = self.fileHandler.CSV_getFrameFromCSVfile('dailyLoveCSV')['theLoveDaily'].tolist()
+        listFinal = [x for x in game_lists[3] if x in dailyLove_list]
+        for user in listFinal:
+            self.fileHandler.removeUserfrom_the_Love(user, 'dailyLoveCSV')
+        dailyLove_list_1 = self.fileHandler.CSV_getFrameFromCSVfile('dailyLoveCSV')['theLoveDaily'].tolist()
+        listFinal_1 = [x for x in game_lists[3] if x in dailyLove_list_1]
+        if len(listFinal_1) > 0:
+            print(f'{len(listFinal_1)} users not removed from the love daily')
+
+    def theGame_Unfollow(self, dateList, game_frame, game_lists):
+        print(f"{len(game_lists[2])} to UnFollow")
+        numberToUnfollow = len(game_lists[2])
+        for user in game_lists[2]:
+            rowIndexOfUser = game_frame[game_frame.a1_User == user].index.values[0]
+
+            userpage = self.mainPage.topRibbon_SearchField.navigateToUserPageThroughSearch(user)
+
+            if userpage:
+                print("UnFollow {}".format(user))
+                if 'OK' in userpage.unfollow():
+                    game_frame.iloc[rowIndexOfUser, 7] = dateList[0]  # Mark the date you unfollowed
+                    self.fileHandler.CSV_saveFrametoCSVfile('theList_1_fileCSV', game_frame)
+                    numberToUnfollow -= 1
+
+                    # unlove if they did not follow back
+                    # if userpage.
+                sleep(randint(self.timeLowerBound, self.timeUpperBound))
+            else:
+                # what happens if a user page does not come up / does not exist
+                # -> then I mark as unfollowed in 1/1/1989 so that I can
+                # -> figure out who they are later and they also get auto-removed from love lists
+                print('User {} not found'.format(user))
+                game_frame.iloc[rowIndexOfUser, 7] = '1989_01_01'  # Mark the date you unfollowed
+                self.fileHandler.CSV_saveFrametoCSVfile('theList_1_fileCSV', game_frame)
+        print(f"{numberToUnfollow} left to UnFollow")
 
     def theLoveDaily(self, fileName, numberOflikes=2, percentageOfUsers=1):
         import pandas as pd
@@ -125,6 +148,10 @@ class InstaBot:
         loveCount = loveTotal
 
         # TODO: Check for duplicates and see if you can remove one based on date last loved
+        loveList = list(dict.fromkeys(lovedOnes_frame['theLoveDaily'].tolist()))
+        if len(loveList) < loveTotal:
+            print(f'#### POSSIBLE DUPLICATES IN LOVE LIST: {fileName} ####')
+        print(f'{loveTotal} users to love')
 
         # log.error('~~~ {0} users to love'.format(loveTotal))
 
@@ -148,13 +175,11 @@ class InstaBot:
             userPage = self.mainPage.topRibbon_SearchField.navigateToUserPageThroughSearch(row['theLoveDaily'])
 
             if not userPage:
-                lovedOnes_frame.iloc[index, 1] = -1
                 lovedOnes_frame.iloc[index, 2] = datetime.now()  # t_sinceLast
                 self.fileHandler.CSV_saveFrametoCSVfile(fileName, lovedOnes_frame)
-                continue  # TODO: Handle username changes? Check love lists from users -1 posts
+                continue  # TODO: Handle username changes?
 
             loveCount -= 1
-            sleep(randint(self.timeLowerBound, self.timeUpperBound))
 
             # Check if we have new post since last time
             # Move to next user if there are no new posts since last check
@@ -175,8 +200,8 @@ class InstaBot:
                     try:
                         post = userPage.navigateTo_X_latestPost(i)
                         sleep(1)
-                        post.like_post()
-                        print("~~> Like pressed on user {0}".format(row['theLoveDaily']))
+                        if post.like_post():
+                            print("~~> Like pressed on user {0}".format(row['theLoveDaily']))
                         sleep(2)
                         post.close_post()
                         sleep(1)
@@ -187,7 +212,9 @@ class InstaBot:
             lovedOnes_frame.iloc[index, 1] = userPage.stats['posts']
             lovedOnes_frame.iloc[index, 2] = datetime.now()  # t_sinceLast
             self.fileHandler.CSV_saveFrametoCSVfile(fileName, lovedOnes_frame)
-            del userPage
+
+            sleep(randint(self.timeLowerBound, self.timeUpperBound))
+            # del userPage
 
         # log.error('\n\n~~~ The Love Daily has ended ! ~~~\n\n')
         return 'OK'
@@ -300,6 +327,7 @@ class InstaBot:
 
                 if not userPage:
                     # write new user progress to frame
+                    print(f"Dropping user: {user}. No page found (code -666)")
                     theList_1_frame.iloc[rowIndexOfUser, 2] = -666
                     theList_1_frame.iloc[rowIndexOfUser, 3] = "drop"
                     self.fileHandler.CSV_saveFrametoCSVfile('theList_1_fileCSV', theList_1_frame)
@@ -428,12 +456,12 @@ class InstaBot:
         #   d) Users to unLove
 
         # (a)
-        optimalFutureFollowers_frame = game_frame[game_frame[game_frame.columns[5]] == 'keep']
+        optimalFutureFollowers_frame = game_frame[game_frame[game_frame.columns[4]] == 'keep']
         optimalFutureFollowers_frame = optimalFutureFollowers_frame[optimalFutureFollowers_frame.iloc[:, 6].isnull()]
         optimalFutureFollowers_list = optimalFutureFollowers_frame.iloc[:, 1].tolist()
 
         # (b)
-        futureFollowers_frame = game_frame[game_frame[game_frame.columns[4]] == 'keep']
+        futureFollowers_frame = game_frame[game_frame[game_frame.columns[3]] == 'keep']
         futureFollowers_frame = futureFollowers_frame[futureFollowers_frame.iloc[:, 6].isnull()]
         futureFollowers_list = futureFollowers_frame.iloc[:, 1].tolist()
         futureFollowers_list = [x for x in futureFollowers_list if x not in optimalFutureFollowers_list]

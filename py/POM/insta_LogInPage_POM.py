@@ -1,6 +1,7 @@
 # All POMs require a webPage object to be instantiated/initialized.
 # The webPage object provides the webdriver and a "what page am I currently browsing" method
 
+
 class InstaLogIn:
 
     def __init__(self, webPage):
@@ -12,7 +13,9 @@ class InstaLogIn:
             from time import sleep
             from random import randint
             try:
-                self.driver.get("https://www.instagram.com/accounts/login/")
+                self.driver.get("https://www.instagram.com/")
+                # Remove WebDriver Flag
+                success = self.driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => false})")
             except Exception as e:
                 print(e)
 
@@ -21,7 +24,7 @@ class InstaLogIn:
             try:
                 self.page.getPageElement_tryHard("//button[contains(text(),'Accept')]").click()
             except Exception as e:
-                print(e)
+                print(f"Login Accept cookies click:\n{e}")
 
             self.page.getPageElement_tryHard("//input[@name=\"username\"]").send_keys(user)
             self.page.getPageElement_tryHard("//input[@name=\"password\"]").send_keys(pswd)
@@ -31,10 +34,10 @@ class InstaLogIn:
 
             try:
                 self.page.getPageElement_tryHard("//button[contains(text(), 'Not Now')]").click()
-                sleep(2)
+                sleep(4)
                 self.page.getPageElement_tryHard("//button[contains(text(), 'Not Now')]").click()
             except Exception as e:
-                print(e)
+                print(f"Login NotNow click:\n{e}")
 
             sleep(5)
 

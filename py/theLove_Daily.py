@@ -1,7 +1,5 @@
 import sys
 import InstaBotV2
-from random import randint
-from time import sleep
 
 
 def main():
@@ -19,19 +17,18 @@ def main():
         except Exception as e:
             print(e)
 
-    print([hdLess, type(hdLess), noOfLikesToGive, type(noOfLikesToGive), percentageOfUsersToCover,
-           type(percentageOfUsersToCover)])
-
-    sleepTime = randint((2 * 60), (20 * 60))
-    sleep(sleepTime)
-    print(f'Sleeping for {sleepTime / 60} minutes')
+    print([hdLess, type(hdLess), noOfLikesToGive, type(noOfLikesToGive), percentageOfUsersToCover, type(percentageOfUsersToCover)])
 
     v2Bot = InstaBotV2.InstaBot(hdLess)
+    # v2Bot.delayOps()
+    v2Bot.getBrowser()
     v2Bot.logIn()
+
     v2Bot.theLoveDaily('dailyLoveCSV', noOfLikesToGive, percentageOfUsersToCover)
     v2Bot.theLoveDaily('extraLoveCSV', noOfLikesToGive, 0.501)
-    # v2Bot.shutDown()
-    del v2Bot
+    v2Bot.delayOps(1, 9)
+
+    # del v2Bot
 
 
 if __name__ == "__main__": main()

@@ -1,6 +1,15 @@
+import random
+from random import randint
+
 from selenium.webdriver.common.keys import Keys
 from time import sleep
 import auth
+
+xpaths = {
+    'likeLimitMessage_Text': "//div[contains(text(),'community')]",
+    'likeLimitMessage_ReportButton': "//button[contains(text(),'Report a Problem')]",
+    'likeLimitMessage_OKButton': "//button[contains(text(),'OK')]",
+}
 
 
 class userPage_base:
@@ -86,7 +95,13 @@ class userPage_base:
             self.followAccess += 20  # @60
 
         # If we get to this point it turns out to be someone I am not following at all,
-        # or have requested to follow
+        # and neither have requested to follow. Do THEY follow me though?
+        try:
+            self.driver.find_element_by_xpath("//div[@class='nZSzR']//button[contains(text(),'Requested')]")
+            return
+        except Exception as e:
+            self.followAccess += 0  # @60
+
         # but it could also be an error page. Let's check
         try:
             self.driver.find_element_by_xpath("//h2[contains(text(),'Sorry')]")
@@ -238,6 +253,9 @@ class userPage(userPage_base):
             try:
                 self.page.getPageElement_tryHard(
                     "//button[contains(text(),'Follow')]").click()
+
+                self.actionsLimitHit()
+
             except Exception as e:
                 print('Cannot find the follow button')
 
@@ -266,6 +284,9 @@ class userPage(userPage_base):
                 if 'follow' in buttons.text:
                     buttons.click()
                     sleep(2)
+
+                    self.actionsLimitHit()
+
                     self.driver.refresh()
             else:
                 # if requested
@@ -275,6 +296,9 @@ class userPage(userPage_base):
                 if 'follow' in buttons.text:
                     buttons.click()
                     sleep(2)
+
+                    self.actionsLimitHit()
+
                     self.driver.refresh()
 
             self.determineLevelOfFollowAccess()
@@ -287,6 +311,36 @@ class userPage(userPage_base):
             print('nahh - no unfollow access for this user because:')
             self.printProfileTypeDescription()
             return 'OK'
+
+    def actionsLimitHit(self):
+        if self.checkForLikeLimitMessage():
+            self.escapeFromLikeLimitMessage(bool(random.getrandbits(1)))
+            print('### Too many Actions message ###')
+            sleep(randint(4, 10))
+
+    def checkForLikeLimitMessage(self):
+        try:
+            likeLimitMessage = self.driver.find_elements_by_xpath(xpaths['likeLimitMessage_Text'])
+            if likeLimitMessage:
+                return True
+            else:
+                return False
+        except Exception as e:
+            return False
+
+    def escapeFromLikeLimitMessage(self, isitok=True):
+        okButton = self.page.getPageElement_tryHard(xpaths['likeLimitMessage_OKButton'])
+        reportAProblemButton = self.page.getPageElement_tryHard(xpaths['likeLimitMessage_ReportButton'])
+
+        buttonToClick = reportAProblemButton
+        if isitok: buttonToClick = okButton
+
+        if buttonToClick:
+            self.driver.execute_script("arguments[0].click();", buttonToClick)
+            if self.checkForLikeLimitMessage():
+                self.escapeFromLikeLimitMessage()
+            else:
+                return True
 
     def __scroll_and_get(self, itemType='users', xpath="//div[@class='isgrP']", targetCount=0):
 
