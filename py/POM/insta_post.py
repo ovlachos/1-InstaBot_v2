@@ -25,7 +25,7 @@ class Post:
 
     def like_post(self):
         try:
-            sleep(randint(2, 6))
+            sleep(randint(2, 4))
             like_button = None
             try:
                 # If it's a picture or
@@ -44,6 +44,7 @@ class Post:
                     self.escapeFromLikeLimitMessage(bool(random.getrandbits(1)))
                     print('### Too many Likes message ###')
                     sleep(randint(4, 10))
+                    return 'busted'
 
                 return True
 

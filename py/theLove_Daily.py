@@ -18,17 +18,19 @@ def main():
             print(e)
 
     print([hdLess, type(hdLess), noOfLikesToGive, type(noOfLikesToGive), percentageOfUsersToCover, type(percentageOfUsersToCover)])
+    try:
+        v2Bot = InstaBotV2.InstaBot(hdLess)
+        # v2Bot.delayOps()
+        v2Bot.getBrowser()
+        v2Bot.logIn()
 
-    v2Bot = InstaBotV2.InstaBot(hdLess)
-    # v2Bot.delayOps()
-    v2Bot.getBrowser()
-    v2Bot.logIn()
-
-    v2Bot.theLoveDaily('dailyLoveCSV', noOfLikesToGive, percentageOfUsersToCover)
-    v2Bot.theLoveDaily('extraLoveCSV', noOfLikesToGive, 0.501)
-    v2Bot.delayOps(1, 9)
-
-    # del v2Bot
+        theDailyResponse = v2Bot.theLoveDaily('dailyLoveCSV', noOfLikesToGive, percentageOfUsersToCover)
+        if 'busted' in theDailyResponse:
+            return
+        theExtraResponse = v2Bot.theLoveDaily('extraLoveCSV', noOfLikesToGive, 0.501)
+    except:
+        # v2Bot.shutDown()
+        pass
 
 
 if __name__ == "__main__": main()

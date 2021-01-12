@@ -136,7 +136,7 @@ class SearchField:
         result = None
         while result is None:
             try:
-                self.typeIntoSearchBox(userName)
+                self.page.slowTypeIntoField(xpaths["searchBoxInput"], userName)
                 sleep(2)
 
                 if self.noResultsCheck():
@@ -144,6 +144,7 @@ class SearchField:
 
                 fuzzyMatch = self.getFuzzyResults(userName)
                 result = self.driver.find_element_by_xpath("//a[@href='/{}/']".format(fuzzyMatch))
+                userName = fuzzyMatch
 
                 # used to be result = self.getExactResult(userName)
 
@@ -166,14 +167,14 @@ class SearchField:
                     self.driver.get("https://www.instagram.com/")
 
     def navigateToHashTagPageThroughSearch(self, hashtag):
-        self.typeIntoSearchBox('#{}'.format(hashtag))
+        self.page.slowTypeIntoField(xpaths["searchBoxInput"], '#{}'.format(hashtag))
         self.page.getPageElement_tryHard("//a[@href='/explore/tags/{}/']".format(hashtag)).click()
         sleep(2)
 
         return self.page  # TODO create a POM of hashtag pages and have it return an instance of that
 
     def getHashTagPostCountThroughSearch(self, hashtag):
-        self.typeIntoSearchBox('#{}'.format(hashtag))
+        self.page.slowTypeIntoField(xpaths["searchBoxInput"], '#{}'.format(hashtag))
         tagResult = self.page.getPageElement_tryHard(
             "//a[@href='/explore/tags/{}/']//../div[@class='Fy4o8']/span/span".format(hashtag)).text
 

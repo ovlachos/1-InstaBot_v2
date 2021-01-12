@@ -1,5 +1,15 @@
 # All POMs require a webPage object to be instantiated/initialized.
 # The webPage object provides the webdriver and a "what page am I currently browsing" method
+import random
+from time import sleep
+
+xpaths = {
+    "GDPRcookies": "//button[contains(text(),'Accept')]",
+    "logIn_UserName": "//input[@name=\"username\"]",
+    "logIn_password": "//input[@name=\"password\"]",
+    "submitButton": "//button[@type='submit']",
+    "notNow": "//button[contains(text(), 'Not Now')]",
+}
 
 
 class InstaLogIn:
@@ -10,7 +20,6 @@ class InstaLogIn:
 
     def logIn(self, user, pswd):
         if self.page.instance.newSession:
-            from time import sleep
             from random import randint
             try:
                 self.driver.get("https://www.instagram.com/")
@@ -22,20 +31,20 @@ class InstaLogIn:
             sleep(randint(2, 6))
 
             try:
-                self.page.getPageElement_tryHard("//button[contains(text(),'Accept')]").click()
+                self.page.getPageElement_tryHard(xpaths['GDPRcookies']).click()
             except Exception as e:
                 print(f"Login Accept cookies click:\n{e}")
 
-            self.page.getPageElement_tryHard("//input[@name=\"username\"]").send_keys(user)
-            self.page.getPageElement_tryHard("//input[@name=\"password\"]").send_keys(pswd)
-            self.page.getPageElement_tryHard('//button[@type="submit"]').click()
+            self.page.slowTypeIntoField(xpaths['logIn_UserName'], user)
+            self.page.slowTypeIntoField(xpaths['logIn_password'], pswd)
+            self.page.getPageElement_tryHard(xpaths['submitButton']).click()
 
             sleep(4)
 
             try:
-                self.page.getPageElement_tryHard("//button[contains(text(), 'Not Now')]").click()
+                self.page.getPageElement_tryHard(xpaths['notNow']).click()
                 sleep(4)
-                self.page.getPageElement_tryHard("//button[contains(text(), 'Not Now')]").click()
+                self.page.getPageElement_tryHard(xpaths['notNow']).click()
             except Exception as e:
                 print(f"Login NotNow click:\n{e}")
 

@@ -1,3 +1,5 @@
+import time
+from datetime import datetime
 import random
 from random import randint
 
@@ -23,7 +25,7 @@ class userPage_base:
         self.infoAccess = 0
         self.determineLevelOfFollowAccess()
         self.determineLevelOfInfoAccess()
-        self.printProfileTypeDescription()
+        # self.printProfileTypeDescription()
 
         if self.iAmInAUserPage():
             self.altName = self.getAltname()
@@ -37,7 +39,7 @@ class userPage_base:
         try:
             return self.page.getPageElement_tryHard("//h1[@class='rhpdm']").text
         except Exception as e:
-            print("No altname cause: {}".format(e))
+            # print("No altname cause: {}".format(e))
             return ''
 
     def getPageElement_tryHard1(self, xpath):
@@ -70,6 +72,8 @@ class userPage_base:
         # 20 -  B: It's someone I'm following currently
         # 40 -  C: It's someone I've requested to follow (and they have not yet replied)
         # 60 -  D: It's someone I do not follow
+        # 70 -  E: It's someone I unfollowed and he still follows
+        # 80 -  F: It's someone I unfollowed but he did NOT follow back
 
         sleep(1)
         self.followAccess = 0
@@ -81,6 +85,7 @@ class userPage_base:
         # Ok so it is NOT me.
         # One step further away from me are people I am following. Check for that
         try:
+            # @20
             self.driver.find_element_by_xpath("//header//section//span[@aria-label='Following']")
             return
         except Exception as e:
@@ -89,6 +94,7 @@ class userPage_base:
         # Ok so it is NOT someone I am following.
         # One step further away from me are people I have requested to follow. Check for that
         try:
+            # @40
             self.driver.find_element_by_xpath("//div[@class='nZSzR']//button[contains(text(),'Requested')]")
             return
         except Exception as e:
@@ -97,10 +103,18 @@ class userPage_base:
         # If we get to this point it turns out to be someone I am not following at all,
         # and neither have requested to follow. Do THEY follow me though?
         try:
-            self.driver.find_element_by_xpath("//div[@class='nZSzR']//button[contains(text(),'Requested')]")
+            # @60
+            self.driver.find_element_by_xpath("//div[@class='nZSzR']//button[contains(text(),'Follow Back')]")
             return
         except Exception as e:
-            self.followAccess += 0  # @60
+            self.followAccess += 10  # @70
+
+        try:
+            # @70
+            self.driver.find_element_by_xpath("//div[@class='nZSzR']//button[contains(text(),'Follow')]")
+            return
+        except Exception as e:
+            self.followAccess += 10  # @80
 
         # but it could also be an error page. Let's check
         try:
@@ -138,15 +152,16 @@ class userPage_base:
             '0': 'full access since this is myself! good job finding me :P',
             '25': 'full access',
             '50': 'limited access to just the basics',
-            '100': 'no access. Is this an error page',
+            '100': 'no access. Is this an error page?',
         }
 
         descriptionFollowAccess = {
             '0': 'cannot follow myself i.e.',
             '20': 'am already following',
             '40': 'have requested to follow',
-            '60': 'am not following',
-            '100': 'am not following',
+            '60': 'am not following, but I am being followed by',
+            '70': 'am not following',
+            '100': 'no access. Is this an error page?',
         }
         return f"I {descriptionFollowAccess[str(self.followAccess)]} user {self.userName} and I have {descriptionInfoAccess[str(self.infoAccess)]}"  # description[str(self.type)]
 
@@ -181,7 +196,7 @@ class userPage(userPage_base):
                 sleep(3)
                 self.page.getPageElement_tryHard("//a[contains(@href,'/{}')]".format('followers')).click()
                 sleep(2)
-                followersList = self.__scroll_and_get(targetCount=self.stats['followers'])
+                followersList = self.__scroll_and_get_limitedTo1200(targetCount=self.stats['followers'])
                 self.page.getPageElement_tryHard("//button[@class='wpO6b ']//*[@aria-label='Close']").click()
                 return followersList
             except Exception as e:
@@ -198,7 +213,7 @@ class userPage(userPage_base):
                 sleep(3)
                 self.page.getPageElement_tryHard("//a[contains(@href,'/{}')]".format('following')).click()
                 sleep(2)
-                followingList = self.__scroll_and_get(targetCount=self.stats['following'])
+                followingList = self.__scroll_and_get_limitedTo1200(targetCount=self.stats['following'])
                 self.page.getPageElement_tryHard("//button[@class='wpO6b ']//*[@aria-label='Close']").click()
                 return followingList
             except Exception as e:
@@ -217,9 +232,9 @@ class userPage(userPage_base):
                 sleep(2)
                 self.page.getPageElement_tryHard("//a[contains(@href,'/{}')]".format('hashtag_following')).click()
                 sleep(2)
-                hashtagList = self.__scroll_and_get('hashTags', "//div[@class='_8zyFd']")
+                hashtagList = self.__scroll_and_get_limitedTo1200('hashTags', "//div[@class='_8zyFd']")
                 self.driver.find_element_by_tag_name('body').send_keys(Keys.ESCAPE)
-                # self.page.getPageElement_tryHard("//button[@class='wpO6b ']//*[@aria-label='Close']").click()
+                self.page.getPageElement_tryHard("//div[@class='QBdPU ']//*[@aria-label='Close']").click()
                 return hashtagList
             except Exception as e:
                 print('{} . Returning an empty hashtag list'.format(e))
@@ -302,6 +317,7 @@ class userPage(userPage_base):
                     self.driver.refresh()
 
             self.determineLevelOfFollowAccess()
+            self.printProfileTypeDescription()
             if self.followAccess > 45:
                 print('OK UNfollowed {}'.format(self.userName))
                 return 'OK'
@@ -342,51 +358,44 @@ class userPage(userPage_base):
             else:
                 return True
 
-    def __scroll_and_get(self, itemType='users', xpath="//div[@class='isgrP']", targetCount=0):
+    def __scroll_and_get_limitedTo1200(self, itemType='users', xpath="//div[@class='isgrP']", targetCount=10):
+
+        if targetCount > 1200:
+            targetCount = 1200
 
         xpath.strip("'\'")
-        sleep(2)
+        scrollCount = 0
+        s = 0
+        sleepTimeBetweenScrolls = 2
+        maxTimeDeltaAllowed = 1.05 * sleepTimeBetweenScrolls * targetCount / 10
         outputList = []
-        # TODO: need to do something about this target count. Return a value that makes sense if not reached. Now it's meaningless
+
+        sleep(1)
+
         try:
             scroll_box = self.page.getPageElement_tryHard(xpath)
         except Exception as e:
             print(e)
             return outputList
 
-        # try:
-        #     sugs = self.page.getPageElement_tryHard("//h4[text()='Suggestions')]")
-        #     self.driver.execute_script('arguments[0].scrollIntoView()', sugs)
-        # except Exception as e:
-        #     print(e)
-        #     sleep(1)
+        print(f'Max time allowed for scrolling  is {maxTimeDeltaAllowed}s')
+        startTime = datetime.now()
 
-        sleep(2)
-
-        # make sure you scroll to the end of the list
-        scrollCount = 0
-        while (len(outputList) < int(0.95 * targetCount)) or scrollCount < 2:
+        while scrollCount < 10:
             last_ht, ht = 0, 1
             while last_ht != ht:
                 last_ht = ht
-                sleep(1)
-                dialog = self.page.getPageElement_tryHard("//div[contains(@role, 'dialog')]")
-                currentAtags = dialog.find_elements_by_tag_name('a')
-                names = currentAtags
 
-                # names = dialog.find_elements_by_tag_name('a')
-                for name in names:
-                    try:
-                        if itemType == 'users':
-                            if len(name.get_attribute('title')) > 0:
-                                outputList.append(name.get_attribute('title'))
-                                outputList = list(dict.fromkeys(outputList))
-                        else:
-                            if '#' in name.text:
-                                outputList.append(name.text)
-                    except Exception as e:
-                        print(e)
-                        continue
+                sleep(sleepTimeBetweenScrolls)
+
+                s += 12
+                delta = int(time.mktime(datetime.now().timetuple()) - time.mktime(startTime.timetuple()))
+                # print(f"{datetime.now()}:: ht is {ht} items are approx {s} || delta is: {delta}")
+
+                ##### BREAKER OF TIME DELTA
+                if delta > maxTimeDeltaAllowed:
+                    # print(f'Scroll Count is {scrollCount} delta is {delta}s, which is greater than {maxTimeDeltaAllowed}s')
+                    break
 
                 try:
                     ht = self.driver.execute_script(
@@ -394,11 +403,26 @@ class userPage(userPage_base):
                         'return arguments[0].scrollHeight;',
                         scroll_box)
                 except Exception as e:
-                    print(e)
                     scrollCount = 666
+                    # print(f'scrollCount is {scrollCount} by some scrolling error')
                     break
 
+            # print(f"### {datetime.now()}:: Output has approx {s} items || delta is: {delta}\t {scrollCount}")
+
             scrollCount += 1
+
+        # Out of the Wile loops
+        try:
+            if itemType == 'users':
+                names = self.page.driver.find_elements_by_xpath("//a[@class='FPmhX notranslate  _0imsa ']")
+                outputList = list(map(self.page.getTitleAttributeFromWebElement, names))
+                print(f"~~~### {datetime.now()}:: Output has {len(outputList)} users out of the expected {targetCount} || delta is: {delta}")
+            else:
+                tags = self.page.driver.find_elements_by_xpath("//a[@class='hI7cq  xil3i']")
+                outputList = list(map(self.page.getTextFromWebElement, tags))
+                print(f"~~~### {datetime.now()}:: Output has {len(outputList)} #tags || delta is: {delta}")
+        except Exception as e:
+            print(e)
 
         outputList = list(dict.fromkeys(outputList))  # remove duplicates
         return list(outputList)

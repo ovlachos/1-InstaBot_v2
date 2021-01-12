@@ -1,4 +1,4 @@
 #!/bin/sh
 scriptdir="$(dirname "$0")"
 cd "$scriptdir"
-python ../py/playTheGame.py False 50
+python ../py/playTheGame.py False 70

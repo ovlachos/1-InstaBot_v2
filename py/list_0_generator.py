@@ -4,7 +4,7 @@ import InstaBotV2
 
 def main():
     hdLess = False
-    numberOfProfilesToProcess = 10
+    numberOfProfilesToProcess = 5
 
     if len(sys.argv) > 1:
         print(sys.argv)
@@ -19,14 +19,17 @@ def main():
 
     print([hdLess, type(hdLess), numberOfProfilesToProcess, type(numberOfProfilesToProcess)])
 
-    v2Bot = InstaBotV2.InstaBot(hdLess)
-    # v2Bot.delayOps()
-    v2Bot.getBrowser()
-    v2Bot.logIn()
+    try:
+        v2Bot = InstaBotV2.InstaBot(hdLess)
+        # v2Bot.delayOps()
+        v2Bot.getBrowser()
+        v2Bot.logIn()
 
-    v2Bot.list_getList_0(numberOfProfilesToProcess)
-
-    # del v2Bot
+        v2Bot.list_getList_0(numberOfProfilesToProcess)
+    except Exception as e:
+        print("we have a fail")
+        print(e)
+        v2Bot.shutDown()
 
 
 if __name__ == "__main__": main()

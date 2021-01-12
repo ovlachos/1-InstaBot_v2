@@ -1,15 +1,11 @@
+import random
 from time import sleep
 from selenium import webdriver
-from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
-
-
-# from selenium.webdriver.support.wait import WebDriverWait
 
 
 # All POMs require a webPage object to be instantiated/initialized.
 # The webPage object provides the webdriver and a "what page am I currently browsing" method
-
 
 class Browser:
 
@@ -23,7 +19,6 @@ class Browser:
         else:
             try:
                 self.driver = self.create_driver_session(sessionDataFromJSON_['session_id'], sessionDataFromJSON_['executor_url'])
-                self.driver.session_id = sessionDataFromJSON_['session_id']
 
                 # Old FireFox code
                 # self.driver = self.create_driver_session(sessionDataFromJSON_['session_id']
@@ -31,6 +26,11 @@ class Browser:
 
                 print(f"Got that old browser session with id {sessionDataFromJSON_['session_id']}")
                 self.driver.implicitly_wait(6)
+
+                # Testing if we really got that old session. If not we are getting an exception here
+                # self.driver.get('https://intoli.com/blog/not-possible-to-block-chrome-headless/')
+                self.driver.get('https://instagram.com')
+
                 self.newSession = False
                 print(f"It's final: ReUsing browser session with id {sessionDataFromJSON_['session_id']}")
             except Exception as e:
@@ -196,3 +196,27 @@ class WebPage:
                 actions.perform()
             except Exception as e:
                 print(e)
+
+    def slowTypeIntoField(self, fieldXPATH, query):
+        try:
+            self.getPageElement_tryHard(fieldXPATH).clear()
+            for ch in query:
+                sleep(random.uniform(0, 1))
+                self.getPageElement_tryHard(fieldXPATH).send_keys(ch)
+            sleep(1)
+        except Exception as e:
+            print(e)
+
+    def getListOfAtributeFromWebElementList(self, listOfWebElements, attribute):
+        newList = []
+        if listOfWebElements:
+            for elem in listOfWebElements:
+                newList.append(elem.get_attribute(attribute))
+
+        return newList
+
+    def getTitleAttributeFromWebElement(self, webElement):
+        return webElement.get_attribute('title')
+
+    def getTextFromWebElement(self, webElement):
+        return webElement.text

@@ -50,6 +50,20 @@ class CSVlists_creator:
         list.to_csv(self.filepath, index=False, encoding='utf-8')
 
 
+# New single file to replace List_0, 1 and Love daily
+class JSON_memoryfile_creator:
+    def __init__(self):
+        pass
+
+    def getDetails(self, filepath, columns):
+        self.filepath = filepath
+        self.columns = columns
+
+    def createFile(self):
+        list = pd.DataFrame(columns=self.columns)
+        list.to_csv(self.filepath, index=False, encoding='utf-8')
+
+
 factory = MemoryFileFactory()
 factory.register_fileType('.csv', CSVlists_creator)
 factory.register_fileType('.txt', TXTfiles_creator)
