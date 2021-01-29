@@ -19,15 +19,17 @@ class InstaLogIn:
         self.driver = self.page.driver
 
     def logIn(self, user, pswd):
-        if self.page.instance.newSession:
-            from random import randint
-            try:
-                self.driver.get("https://www.instagram.com/")
+
+        try:
+            self.driver.get("https://www.instagram.com/")
+            if self.page.instance.newSession:
                 # Remove WebDriver Flag
                 success = self.driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => false})")
-            except Exception as e:
-                print(e)
+        except Exception as e:
+            print(e)
 
+        if not self.alreadyLoggedIn():
+            from random import randint
             sleep(randint(2, 6))
 
             try:
@@ -39,7 +41,7 @@ class InstaLogIn:
             self.page.slowTypeIntoField(xpaths['logIn_password'], pswd)
             self.page.getPageElement_tryHard(xpaths['submitButton']).click()
 
-            sleep(4)
+            sleep(5)
 
             try:
                 self.page.getPageElement_tryHard(xpaths['notNow']).click()
@@ -48,9 +50,18 @@ class InstaLogIn:
             except Exception as e:
                 print(f"Login NotNow click:\n{e}")
 
-            sleep(5)
-
         return InstaMainPage(self.page)
+
+    def alreadyLoggedIn(self):
+
+        try:
+            button = self.page.getPageElement_tryHard(xpaths['logIn_password'])
+            if button:
+                return False
+        except:
+            pass
+
+        return True
 
 
 class InstaMainPage:

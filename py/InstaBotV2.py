@@ -112,6 +112,7 @@ class InstaBot:
             if userPage.infoAccess > 45 and userPage.followAccess > 65:
                 noLikeAccessList.append(row['theLoveDaily'])
                 print(f"No longer will I love {userPage.userName}")
+                continue
 
             # Check if we have new post since last time
             # Move to next user if there are no new posts since last check
