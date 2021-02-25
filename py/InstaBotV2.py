@@ -1,10 +1,12 @@
 import auth
 import time
+from BotServices import Love_Service as LVEs
 from random import randint
 from selenium.webdriver.common.keys import Keys
 from datetime import datetime, timedelta
 from time import sleep
 
+from BotMemory import UserMemoryManager
 from BotMemory import FileHandlerBot as fh
 from POM import webPage as wp
 from POM import insta_LogInPage_POM as login
@@ -15,6 +17,7 @@ class InstaBot:
 
     def __init__(self, headless=False):
         self.fileHandler = fh.FileHandlerBot()
+        self.memoryManager = UserMemoryManager.UserMemoryManager()
         self.headless = headless
         self.timeUpperBound = 48
         self.timeLowerBound = 34
@@ -53,6 +56,9 @@ class InstaBot:
         sleepTime = randint((minimum * 60), (maximum * 60))
         print(f'Sleeping for {int(sleepTime / 60)} minutes')
         sleep(sleepTime)
+
+    def loveService(self, fileName, numberOfLikes=1, percentageOfUsers=0.33):
+        LVEs.love(self, fileName, numberOfLikes, percentageOfUsers)
 
     def theLoveDaily(self, fileName, numberOflikes=2, percentageOfUsers=1):
         # 'Like' everyone's latest N posts

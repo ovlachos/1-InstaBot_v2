@@ -24,10 +24,10 @@ def main():
         v2Bot.getBrowser()
         v2Bot.logIn()
 
-        theDailyResponse = v2Bot.theLoveDaily('dailyLoveCSV', noOfLikesToGive, percentageOfUsersToCover)
+        theDailyResponse = v2Bot.loveService(fileName='daily', percentageOfUsers=1, numberOfLikes=1)
         if 'busted' in theDailyResponse:
             return
-        theExtraResponse = v2Bot.theLoveDaily('extraLoveCSV', noOfLikesToGive, 0.501)
+        theExtraResponse = v2Bot.loveService(fileName='extra', percentageOfUsers=1, numberOfLikes=1)
     except:
         # v2Bot.shutDown()
         pass

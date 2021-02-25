@@ -199,10 +199,12 @@ class WebPage:
 
     def slowTypeIntoField(self, fieldXPATH, query):
         try:
-            self.getPageElement_tryHard(fieldXPATH).clear()
+
+            field = self.getPageElement_tryHard(fieldXPATH)
+            field.clear()
             for ch in query:
                 sleep(random.uniform(0, 1))
-                self.getPageElement_tryHard(fieldXPATH).send_keys(ch)
+                field.send_keys(ch)
             sleep(1)
         except Exception as e:
             print(e)

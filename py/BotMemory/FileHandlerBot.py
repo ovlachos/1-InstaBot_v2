@@ -119,3 +119,27 @@ class FileHandlerBot:
                 self.CSV_removeRowFromCSV(kindOfLove, rowIndexOfUser)
             except Exception as e:
                 print("{0}, {1}".format(e, user))
+
+    def readMemoryFile(self, JSONdecoder):  # JSONdecoder is a function that translates JSON to User_M objects
+        import json
+
+        file = self.getFileFromFilename('User_Memory')
+
+        if file:
+            try:
+                with open(file['filepath']) as jUM:
+                    memoryfile = json.load(jUM, object_hook=JSONdecoder)
+            except:
+                memoryfile = []
+                print('WARNING: 0 users in memory file! No love can be given.')
+
+            return memoryfile
+
+    def writeToUserMemory(self, userMemory, JSONencoder):  # userMemory is a list of python dictionaries each containing a single user's info
+        import json
+
+        file = self.getFileFromFilename('User_Memory')
+
+        if file:
+            with open(file['filepath'], 'w') as jUM:
+                json.dump(userMemory, jUM, cls=JSONencoder, sort_keys=True, indent=4)

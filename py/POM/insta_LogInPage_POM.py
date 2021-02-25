@@ -30,7 +30,7 @@ class InstaLogIn:
 
         if not self.alreadyLoggedIn():
             from random import randint
-            sleep(randint(2, 6))
+            sleep(randint(1, 4))
 
             try:
                 self.page.getPageElement_tryHard(xpaths['GDPRcookies']).click()
@@ -41,11 +41,11 @@ class InstaLogIn:
             self.page.slowTypeIntoField(xpaths['logIn_password'], pswd)
             self.page.getPageElement_tryHard(xpaths['submitButton']).click()
 
-            sleep(5)
+            sleep(3)
 
             try:
                 self.page.getPageElement_tryHard(xpaths['notNow']).click()
-                sleep(4)
+                sleep(3)
                 self.page.getPageElement_tryHard(xpaths['notNow']).click()
             except Exception as e:
                 print(f"Login NotNow click:\n{e}")

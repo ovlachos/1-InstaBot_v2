@@ -3,7 +3,7 @@ import random
 from time import sleep
 
 xpaths = {
-    'likeButton': "//button[@class='wpO6b ']//*[contains(@aria-label,'ike')]/..",
+    'likeButton': "//button[@class='wpO6b  ']//*[contains(@aria-label,'ike')]/..",
     'closePostButton': "//*[@aria-label='Close']",
     'locationElements': "//a[contains(@href,'/explore/locations')]",
     'postDateTime': "//time[@class='_1o9PC Nzb55']",

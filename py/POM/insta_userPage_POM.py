@@ -57,7 +57,7 @@ class userPage_base:
         except Exception as e:
             print("No bio cause: {}".format(e))
 
-        return bioText
+        return bioText.split('Followed', 1)[0]
 
     def iAmInAUserPage(self):
         if self.userName in self.page.whichPageAmI():

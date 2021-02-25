@@ -7,7 +7,7 @@ import auth
 xpaths = {
     "searchBoxInput": "//input[@placeholder='Search']",
     "resultsListFrame": "//div[@class='fuqBx']",
-    "resultsList": "//div[@class='fuqBx']/a",
+    "resultsList": "//div[@class='fuqBx']/div",
     "clearSearch": "//div[contains(@class,'coreSpriteSearchClear')]",
     "logo": "//a[@href='/']",
     "cancelUnfollow": "//button[contains(text(),'Cancel')]",

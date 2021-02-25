@@ -64,5 +64,11 @@
 		"filepath" : "InstaBot.log",
 		"extension": ".log",
 		"columns"  :  null
+	},
+	{
+		"filename" : "User_Memory",
+		"filepath" : "Output/User_Memory/User_Memory.json",
+		"extension": ".json",
+		"columns"  :  null
 	}
 ]

@@ -10,5 +10,6 @@
 	"myStats_Mutineers" 					: "Output/MyStats/Mutineers/",
 	"hashtags"										:	"HashTags/",
 	"inputHashtags"								:	"HashTags/HashTags_Input/",
+	"User_Memory"								  :	"Output/User_Memory/",
 	"outputHashtags"							:	"HashTags/HashTags_Output/"
 }

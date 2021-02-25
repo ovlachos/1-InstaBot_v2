@@ -60,10 +60,11 @@ class JSON_memoryfile_creator:
         self.columns = columns
 
     def createFile(self):
-        list = pd.DataFrame(columns=self.columns)
-        list.to_csv(self.filepath, index=False, encoding='utf-8')
+        targetFile = Path(self.filepath)
+        targetFile.touch()
 
 
 factory = MemoryFileFactory()
 factory.register_fileType('.csv', CSVlists_creator)
 factory.register_fileType('.txt', TXTfiles_creator)
+factory.register_fileType('.json', JSON_memoryfile_creator)
