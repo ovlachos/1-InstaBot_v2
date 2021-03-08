@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import json
 
 from BotMemory import BotMemoryFilesFactory as BF
 
@@ -49,7 +50,6 @@ class FileHandlerBot:
                 self.fileFactoryCreator.create(mFile, file['extension'])
 
     def getConfig_JSON_paths(self, kindOfJSON='paths'):
-        import json
 
         os.chdir(self.projectFolder)
         if kindOfJSON == 'paths':
@@ -121,7 +121,6 @@ class FileHandlerBot:
                 print("{0}, {1}".format(e, user))
 
     def readMemoryFile(self, JSONdecoder):  # JSONdecoder is a function that translates JSON to User_M objects
-        import json
 
         file = self.getFileFromFilename('User_Memory')
 
@@ -135,11 +134,29 @@ class FileHandlerBot:
 
             return memoryfile
 
-    def writeToUserMemory(self, userMemory, JSONencoder):  # userMemory is a list of python dictionaries each containing a single user's info
-        import json
+    def readMemoryFiles(self, JSONdecoder):
+        import glob
 
-        file = self.getFileFromFilename('User_Memory')
+        directory = self.paths['User_Memory']
+        all_files = glob.glob(directory + "/*.json")
+
+        memoryfile = []
+        memoryfile1 = []
+        for file in all_files:
+            with open(file) as jUM:
+                memoryfile1.append(json.load(jUM, object_hook=JSONdecoder))
+
+        for item in memoryfile1:
+            memoryfile.append(item[0])
+
+        return memoryfile
+
+    def writeToUserMemory(self, userMemory, JSONencoder, file=None):
+        # userMemory is a list of python dictionaries each containing a single user's info
+
+        if not file:
+            file = self.getFileFromFilename('User_Memory')['filepath']
 
         if file:
-            with open(file['filepath'], 'w') as jUM:
+            with open(file, 'w') as jUM:
                 json.dump(userMemory, jUM, cls=JSONencoder, sort_keys=True, indent=4)

@@ -1,4 +1,5 @@
 import json
+from uuid import uuid4
 
 timeStampFormat = "%m/%d/%Y, %H:%M:%S"
 
@@ -10,6 +11,7 @@ class UserEncoderDecoder(json.JSONEncoder):
                 '__user__': 'true',
 
                 '0_Handle': us.handle,
+                'uid': us.uid,
                 'Bio': us.bio,
                 'AltName': us.altName,
                 'Stats': us.statsDict,
@@ -52,6 +54,7 @@ class User_M:
     def __init__(self, handle):
         # self.userID = ''
         self.handle = handle
+        self.uid = str(uuid4())
         self.bio = ''
         self.altName = ''
         self.statsDict = []  # contains statsDicts
@@ -64,25 +67,26 @@ class User_M:
         self.listOf_HashTagsfollowing = []
         self.listOf_HashTagsUsing = []
 
-        self.dateFollowed_byMe = ''
-        self.dateUnFollowed_byMe = ''
-        self._userIgotYouFrom_youWereFollowing = ''
+        self.dateFollowed_byMe = None  # The existense of a follow date means that the user has been followed ata some point and could be unfollowed
+        self.dateUnFollowed_byMe = None  # The existense of a unfollow date means that the cycle is over. No more follow/unfollow actions for this user
+        self._userIgotYouFrom_youWereFollowing = None
 
-        self._markL0 = False
-        self._markL1 = False
-        self._markL2 = False
+        self._markL0 = False  # MarkL0 can turn to MarkL1, MarkL2, or be rejected (all marks are faulse and follow/unfollow dates == None
+        self._markL1 = False  # MarkL1 can turn to a follow (marked by the existense of a follow date), or remain as MarkL1
+        self._markL2 = False  # MarkL2 will 100% turn to a follow (marked by the existense of a follow date)
 
-        self._dateTimeLovedlast = ''
-        self.dateUnLoved_byMe = ''
+        self._dateTimeLovedlast = None
+        self.dateUnLoved_byMe = None
         self._dailyLove = False
         self._extraLove = False
 
     def populate_overwrite(self, dict):
-        from datetime import datetime
+
         stats = {"posts": 0, "followers": 0, "following": 0}
 
         if "__user__" in dict:
             self.handle = dict.get('0_Handle', ' ')
+            self.uid = dict.get('uid', str(uuid4()))
             self.bio = dict.get('Bio', ' ')
             self.altName = dict.get('AltName', ' ')
             self.statsDict = dict.get('Stats', [stats])  # contains statsDicts
@@ -95,16 +99,16 @@ class User_M:
             self.listOf_HashTagsfollowing = dict.get('listOf_HashTagsfollowing', [])
             self.listOf_HashTagsUsing = dict.get('listOf_HashTagsUsing', [])
 
-            self.dateFollowed_byMe = dict.get('dateFollowed_byMe', ' ')
-            self.dateUnFollowed_byMe = dict.get('dateUnFollowed_byMe', ' ')
-            self._userIgotYouFrom_youWereFollowing = dict.get('userIgotYouFrom_youWereFollowing', ' ')
+            self.dateFollowed_byMe = dict.get('dateFollowed_byMe', None)
+            self.dateUnFollowed_byMe = dict.get('dateUnFollowed_byMe', None)
+            self._userIgotYouFrom_youWereFollowing = dict.get('userIgotYouFrom_youWereFollowing', None)
 
             self._markL0 = dict.get('markL0', False)
             self._markL1 = dict.get('markL1', False)
             self._markL2 = dict.get('markL2', False)
 
-            self._dateTimeLovedlast = dict.get('dateTimeLovedlast', ' ')
-            self.dateUnLoved_byMe = dict.get('dateUnLoved_byMe', ' ')
+            self._dateTimeLovedlast = dict.get('dateTimeLovedlast', None)
+            self.dateUnLoved_byMe = dict.get('dateUnLoved_byMe', None)
             self._dailyLove = dict.get('dailyLove', False)
             self._extraLove = dict.get('extraLove', False)
 
@@ -139,8 +143,12 @@ class User_M:
 
     def updateStats(self, statsDictIn):
         from datetime import datetime
-        self.statsDict.insert(0, statsDictIn)
-        self.statsDictTimestamp.insert(0, datetime.now().strftime(timeStampFormat))
+
+        if statsDictIn != self.statsDict[0]:
+            self.statsDict.insert(0, statsDictIn)
+            self.statsDictTimestamp.insert(0, datetime.now().strftime(timeStampFormat))
+        else:
+            self.statsDictTimestamp[0] = datetime.now().strftime(timeStampFormat)
 
     def getTimeLastVisited(self):
         try:
@@ -166,21 +174,51 @@ class User_M:
         except:
             return 0
 
+    def updateHashtagsFollwingList(self, newHashtags):
+        self.listOf_HashTagsfollowing.extend(newHashtags)
+        self.listOf_HashTagsfollowing = list(dict.fromkeys(self.listOf_HashTagsfollowing))  # remove duplicates
+
     def updateFollowersList(self, listF):
         self.listOf_followers.insert(0, listF)
 
     def updateFollowingList(self, listF):
         self.listOf_following.insert(0, listF)
 
+    def markUserRejected(self):
+        self._markL0 = False
+        self._markL1 = False
+        self._markL2 = False
+        self.dateFollowed_byMe = None
+        self.dateUnFollowed_byMe = None
+
     def addToL0(self, sponsorUser):
         self._markL0 = True
+        self._markL1 = False
+        self._markL2 = False
         self._userIgotYouFrom_youWereFollowing = sponsorUser
 
     def addToL1(self):
+        self._markL0 = False
         self._markL1 = True
+        self._markL2 = False
 
     def addToL2(self):
+        self._markL0 = False
+        self._markL1 = False
         self._markL2 = True
+
+    def markTimeFollowed(self):
+        from datetime import datetime
+        self.dateFollowed_byMe = datetime.now().strftime(timeStampFormat)
+        self._markL0 = False
+        self._markL1 = False
+        self._markL2 = False
+
+    def markDateUnfollowed(self):
+        from datetime import datetime
+
+        timestamp = datetime.now().strftime(timeStampFormat)
+        self.dateUnFollowed_byMe = timestamp
 
     def addToLoveDaily(self):
         self._dailyLove = True
@@ -201,12 +239,6 @@ class User_M:
         timestamp = datetime.now().strftime(timeStampFormat)
         self._extraLove = False
         self.dateUnLoved_byMe = timestamp
-
-    def markDateUnfollowed(self):
-        from datetime import datetime
-
-        timestamp = datetime.now().strftime(timeStampFormat)
-        self.dateUnFollowed_byMe = timestamp
 
     def printHowLongItHasBeenSinceYouGotAnyLove(self):
         from datetime import datetime
@@ -245,8 +277,27 @@ class User_M:
         else:
             pass
 
+    def iShouldFollowThisUser(self):
+        answer = False
+
+        if self._markL2 and not self.dateFollowed_byMe:
+            answer = True
+
+        return answer
+
+    def iShouldUnFollowThisUser(self):
+        answer = False
+
+        if self.dateFollowed_byMe and not self.dateUnFollowed_byMe:
+            answer = True
+
+        return answer
+
     def thereIsNoPointLovingYou(self, userPage):
         if userPage.infoAccess > 45 and userPage.followAccess > 65:
             self.removeFromLove()
             print(f"No longer will I love {userPage.userName}")
             return True
+
+    def getSponsor(self):
+        return self._userIgotYouFrom_youWereFollowing

@@ -1,10 +1,7 @@
-from random import randint
 from time import sleep
 
-timeLimitSinceLastLoved = 30
 
-
-def love(bot, loveType, numberOfLikes=1, percentageOfUsers=1):
+def love(bot, loveType='extra', numberOfLikes=1, percentageOfUsers=0.33):
     # 'Like' everyone's latest N posts
     print(f"\n\n~~> Now processing the {loveType} list with {numberOfLikes} likes/user going for {(percentageOfUsers * 100)}%")
 
@@ -16,7 +13,7 @@ def love(bot, loveType, numberOfLikes=1, percentageOfUsers=1):
 
     loveTotal = len(userLoveList)
     loveCount = loveTotal
-    print(f'{loveTotal} users to love')
+    print(f'{int(percentageOfUsers * loveTotal)} of {loveTotal} users to love')
 
     # Go through the list line by line and like things
     printMark = 0.0
@@ -24,7 +21,7 @@ def love(bot, loveType, numberOfLikes=1, percentageOfUsers=1):
 
         if (loveTotal - loveCount) > (loveTotal * percentageOfUsers): break
 
-        if user.printHowLongItHasBeenSinceYouGotAnyLove() <= timeLimitSinceLastLoved: continue
+        if user.printHowLongItHasBeenSinceYouGotAnyLove() <= bot.timeLimitSinceLastLoved: continue
 
         printMark = printCompletionRate(loveCount, loveTotal, printMark)
 
@@ -69,7 +66,7 @@ def love(bot, loveType, numberOfLikes=1, percentageOfUsers=1):
 
         bot.memoryManager.updateUserRecord(user)
 
-        # sleep(randint(bot.timeLowerBound, bot.timeUpperBound))
+        bot.botSleep()
 
     return 'OK'
 
@@ -81,15 +78,17 @@ def likeTheXlatestPostsOfAUser(userPage, numberOfLikes):
                 post = userPage.navigateTo_X_latestPost(i)
                 sleep(1)
                 response = post.like_post()
-                if response:
-                    print("### Like pressed on user {0}".format(userPage.userName))
-                    if 'busted' in response:
-                        return 'busted'
-                sleep(1)
                 post.close_post()
                 sleep(1)
 
-            except:
+                if response:
+                    print("### Like pressed on user {0}".format(userPage.userName))
+                    if not isinstance(response, bool):
+                        return 'busted'
+                sleep(1)
+
+            except Exception as e:
+                print(e)
                 continue
 
     return "OK"

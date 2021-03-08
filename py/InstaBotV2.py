@@ -1,11 +1,11 @@
 import auth
-import time
-from BotServices import Love_Service as LVEs
 from random import randint
-from selenium.webdriver.common.keys import Keys
 from datetime import datetime, timedelta
 from time import sleep
 
+from BotServices import Love_Service
+from BotServices import L0_Service
+from BotServices import L1_2_Service
 from BotMemory import UserMemoryManager
 from BotMemory import FileHandlerBot as fh
 from POM import webPage as wp
@@ -21,6 +21,9 @@ class InstaBot:
         self.headless = headless
         self.timeUpperBound = 48
         self.timeLowerBound = 34
+        self.timeLimitSinceLastLoved = 1
+        self.followMana = 100
+        self.followManaMax = 100
 
         # Game vars
         self.daysBeforeIunFollow = 14 - 1
@@ -52,190 +55,22 @@ class InstaBot:
     def getBrowser(self):
         self.webPage = wp.WebPage(self.headless)
 
+    def botSleep(self):
+        sleep(randint(self.timeLowerBound, self.timeUpperBound))
+
     def delayOps(self, minimum=2, maximum=20):
         sleepTime = randint((minimum * 60), (maximum * 60))
         print(f'Sleeping for {int(sleepTime / 60)} minutes')
         sleep(sleepTime)
 
-    def loveService(self, fileName, numberOfLikes=1, percentageOfUsers=0.33):
-        LVEs.love(self, fileName, numberOfLikes, percentageOfUsers)
+    def loveService(self, fileName, numberOfLikes, percentageOfUsers):
+        return Love_Service.love(self, fileName, numberOfLikes, percentageOfUsers)
 
-    def theLoveDaily(self, fileName, numberOflikes=2, percentageOfUsers=1):
-        # 'Like' everyone's latest N posts
-        import pandas as pd
+    def l0_Service(self, numberOfProfilesToProcess):
+        return L0_Service.list_getList_0(self, numberOfProfilesToProcess)
 
-        print("\n\n~~> Now processing the {0} list with {1} likes/user going for {2}".format(fileName, numberOflikes, percentageOfUsers))
-
-        # Make sure I remove profiles where I have no access to like
-        noLikeAccessList = []
-
-        # Sorted by date last checked
-        # Least recently checked profiles come first
-        lovedOnes_frame = self.fileHandler.CSV_getFrameFromCSVfile(fileName)
-        lovedOnes_frame.t_sinceLast = pd.to_datetime(lovedOnes_frame.t_sinceLast)
-        lovedOnes_frame = lovedOnes_frame.sort_values(by='t_sinceLast', ascending=True)
-        lovedOnes_frame = lovedOnes_frame.reset_index(drop=True)
-
-        loveTotal = lovedOnes_frame['theLoveDaily'].count()
-        loveCount = loveTotal
-        loveCount2 = 0
-
-        # TODO: Check for duplicates and see if you can remove one based on date last loved
-        loveList = list(dict.fromkeys(lovedOnes_frame['theLoveDaily'].tolist()))
-        if len(loveList) < loveTotal:
-            print(f'#### POSSIBLE DUPLICATES IN LOVE LIST: {fileName} ####')
-        print(f'{loveTotal} users to love')
-
-        # Go through the list line by line and like things
-        printmark = 0.0
-        for index, row in lovedOnes_frame.iterrows():
-
-            if (loveTotal - loveCount) > (loveTotal * percentageOfUsers):
-                break
-
-            completionrate = round(100 * (1 - (loveCount / loveTotal)), 1)
-            if completionrate > printmark:
-                print('\n~~~~> {}% of 100% completed\n'.format(printmark))
-                printmark += 5
-
-            loveCount2 += 1
-            deltaT = self.theLoveDaily_timeCheck(row, loveCount2)
-            if deltaT <= 30:
-                continue
-
-            # Navigate to user's profile
-            userPage = self.mainPage.topRibbon_SearchField.navigateToUserPageThroughSearch(row['theLoveDaily'])
-
-            if not userPage:
-                noLikeAccessList.append(row['theLoveDaily'])
-                print(f"User {row['theLoveDaily']} probably does not exist. Will remove")
-                lovedOnes_frame.iloc[index, 2] = datetime.now()  # t_sinceLast
-                self.fileHandler.CSV_saveFrametoCSVfile(fileName, lovedOnes_frame)
-                continue
-
-            loveCount -= 1
-
-            if userPage.infoAccess > 45 and userPage.followAccess > 65:
-                noLikeAccessList.append(row['theLoveDaily'])
-                print(f"No longer will I love {userPage.userName}")
-                continue
-
-            # Check if we have new post since last time
-            # Move to next user if there are no new posts since last check
-            if row["Post Count"] >= userPage.stats['posts']:
-                lovedOnes_frame.iloc[index, 1] = userPage.stats['posts']
-                lovedOnes_frame.iloc[index, 2] = datetime.now()  # t_sinceLast
-                self.fileHandler.CSV_saveFrametoCSVfile(fileName, lovedOnes_frame)
-                del userPage
-                continue
-
-            # Adjust number of likes to just new posts
-            if int(userPage.stats['posts'] - row["Post Count"]) < numberOflikes:
-                numberOflikes = int(userPage.stats['posts'] - row["Post Count"])
-
-            # Liking photos
-            if userPage.infoAccess < 45:
-                for i in range(0, numberOflikes):
-                    try:
-                        post = userPage.navigateTo_X_latestPost(i)
-                        sleep(1)
-                        response = post.like_post()
-                        if response:
-                            print("### Like pressed on user {0}".format(row['theLoveDaily']))
-                            if 'busted' in response:
-                                return 'busted'
-                        sleep(1)
-                        post.close_post()
-                        sleep(1)
-                    except:
-                        self.webPage.driver.find_element_by_tag_name('body').send_keys(Keys.ESCAPE)
-                        continue
-
-            lovedOnes_frame.iloc[index, 1] = userPage.stats['posts']
-            lovedOnes_frame.iloc[index, 2] = datetime.now()  # t_sinceLast
-            self.fileHandler.CSV_saveFrametoCSVfile(fileName, lovedOnes_frame)
-
-            sleep(randint(self.timeLowerBound, self.timeUpperBound))
-
-        # Make sure I remove profiles where I have not access to like
-        print("#!#! {0} users to be removed due to no like access".format(len(noLikeAccessList)))
-        for uusseerr in noLikeAccessList:
-            self.fileHandler.removeUserfrom_the_Love(uusseerr, fileName)
-
-        return 'OK'
-
-    def theLoveDaily_timeCheck(self, row, loveCount2):
-        try:
-            lastCheck_Time = row['t_sinceLast']
-            now_DateTime = datetime.now()
-            # Convert to Unix timestamp
-            d1_ts = time.mktime(lastCheck_Time.timetuple())
-            d2_ts = time.mktime(now_DateTime.timetuple())
-            deltaT = int(d2_ts - d1_ts) / 60 / 60
-            print('{0}:  {1} hours since last checked on {2} with {3} posts on record | {4}'.format(
-                datetime.today(), str(round(deltaT, 2)), row['theLoveDaily'], row["Post Count"], loveCount2))
-            # Skip user if it has been less than X hours since we last checked
-            return deltaT
-        except Exception as e:
-            print(e)
-            # add a time to the row by fully going through the
-            # love daily for this user
-            return 48
-
-    def list_getList_0(self, numberOfProfilesToProcess=3):
-        # Get TheList_0: A list of all people following a number of profiles
-        old_frame = self.fileHandler.CSV_getFrameFromCSVfile('theList_1_fileCSV')
-
-        # If the name of the source user is already there do not re-examine
-        sourceUsersAlreadyExamined = old_frame[old_frame.columns[0]].tolist()
-        sourceUsersAlreadyExamined = list(dict.fromkeys(sourceUsersAlreadyExamined))  # Remove duplicates
-
-        # If a source user's follower is already in the list we need not add a duplicate
-        usersAlreadyInList = old_frame[old_frame.columns[1]].tolist()
-        usersAlreadyInList = list(dict.fromkeys(usersAlreadyInList))  # Remove duplicates
-
-        # Get a list of target source users
-        targetuserInput = self.fileHandler.CSV_getFrameFromCSVfile("usersToTargetCSV")  # usersToTarget
-        targetuserInputPyList = targetuserInput[targetuserInput.columns[0]].tolist()
-
-        targetuserInputPyList = list(dict.fromkeys(targetuserInputPyList))  # Remove duplicates
-        l3 = [x for x in targetuserInputPyList if
-              x not in sourceUsersAlreadyExamined]  # Remove source users already examined
-
-        if len(l3) > 0:
-            targetuserInputPyList = l3[:numberOfProfilesToProcess]
-
-            for user in targetuserInputPyList:
-
-                # Navigate to user's profile
-                userPage = self.mainPage.topRibbon_SearchField.navigateToUserPageThroughSearch(user)
-
-                if userPage:
-                    print(f"User {user} has {userPage.stats['followers']} followers")
-                    followers_ = userPage.getFollowersList()
-
-                    for follower in followers_:
-                        if follower not in usersAlreadyInList:
-                            newFrameRow = {old_frame.columns[0]: user,
-                                           old_frame.columns[1]: follower,
-                                           old_frame.columns[2]: '',
-                                           old_frame.columns[3]: '',
-                                           old_frame.columns[4]: '',
-                                           old_frame.columns[5]: '',
-                                           old_frame.columns[6]: '',
-                                           old_frame.columns[7]: ''}
-
-                            # append row to the dataframe
-                            old_frame = old_frame.append(newFrameRow, ignore_index=True)
-                            self.fileHandler.CSV_saveFrametoCSVfile('theList_1_fileCSV', old_frame)
-
-                        # Update list of users already in dataframe so that we may not add a duplicate
-                        usersAlreadyInList = old_frame[old_frame.columns[1]].tolist()
-                        usersAlreadyInList = list(dict.fromkeys(usersAlreadyInList))  # Remove duplicates
-
-                    sleep(randint(self.timeLowerBound, self.timeUpperBound))
-
-        return 'OK'
+    def l1_2_Service(self):
+        return L1_2_Service.userScraping(self, self.followMana)
 
     def list_getList_1(self, processStep=70):
         # Get TheList_1: A list of all people following certain profiles that:

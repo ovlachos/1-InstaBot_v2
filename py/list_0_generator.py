@@ -25,7 +25,7 @@ def main():
         v2Bot.getBrowser()
         v2Bot.logIn()
 
-        v2Bot.list_getList_0(numberOfProfilesToProcess)
+        v2Bot.l0_Service(numberOfProfilesToProcess)
     except Exception as e:
         print("we have a fail")
         print(e)

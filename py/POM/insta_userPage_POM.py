@@ -194,10 +194,20 @@ class userPage(userPage_base):
         if self.infoAccess < 45:
             try:
                 sleep(3)
-                self.page.getPageElement_tryHard("//a[contains(@href,'/{}')]".format('followers')).click()
+
+                fol_button = self.page.getPageElement_tryHard("//a[contains(@href,'/{}')]".format('followers'))
+
+                if fol_button:
+                    fol_button.click()
+
                 sleep(2)
+
                 followersList = self.__scroll_and_get_limitedTo1200(targetCount=self.stats['followers'])
-                self.page.getPageElement_tryHard("//button[@class='wpO6b ']//*[@aria-label='Close']").click()
+
+                closeButton = self.page.getPageElement_tryHard("//button[@class='wpO6b  ']//*[@aria-label='Close']")
+                if closeButton:
+                    closeButton.click()
+
                 return followersList
             except Exception as e:
                 print(e)
@@ -244,7 +254,7 @@ class userPage(userPage_base):
             self.printProfileTypeDescription()
 
     def navigateTo_X_latestPost(self, numberX):
-        from POM import insta_post as post
+        from POM import insta_post_POM as post
         # numberX runs from 0 to whatever
         if self.infoAccess < 45:
             try:
