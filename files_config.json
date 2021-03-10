@@ -1,0 +1,74 @@
+[
+	{
+		"filename" : "extraLoveCSV",
+		"filepath" : "Input/Love/extraLove.csv",
+		"extension": ".csv",
+		"columns"  :  ["theLoveDaily","Post Count","t_sinceLast","PostsPerDay"]
+	},
+	{
+		"filename" : "addUserTotheGameCSV",
+		"filepath" : "Input/Love/addUserTotheGameCSV.csv",
+		"extension": ".csv",
+		"columns"  :  ["userToAdd"]
+	},
+	{
+		"filename" : "usersToTargetCSV",
+		"filepath" : "Input/Games_Input/usersToTarget.csv",
+		"extension": ".csv",
+		"columns"  :  ["usersToTarget"]
+	},
+	{
+		"filename" : "unfollowListCSV",
+		"filepath" : "Input/Games_Input/unfollowList.csv",
+		"extension": ".csv",
+		"columns"  :  ["usersToUnfollow"]
+	},
+	{
+		"filename" : "hashtagsToLookForCSV",
+		"filepath" : "Input/Games_Input/targetUserHashtags.csv",
+		"extension": ".csv",
+		"columns"  :  ["hashtagsToLookFor"]
+	},
+	{
+		"filename" : "wordsToLookForInBioCSV",
+		"filepath" : "Input/Games_Input/wordsToLookForInBio.csv",
+		"extension": ".csv",
+		"columns"  :  ["words"]
+	},
+	{
+		"filename" : "theList_1_fileCSV",
+		"filepath" : "Output/Games_Output/TheList_1.csv",
+		"extension": ".csv",
+		"columns"  :  ["a0_User_a1_follows","a1_User","a2_Count_of_Followers_of_a1","a3_TheList_1_keep_drop","a4_TheList_2_keep_drop","a5_TheList_3_keep_drop","a6_theGame_Follow_Date","a7_theGame_UnFollow_Date"]
+	},
+	{
+		"filename" : "topFansCSV",
+		"filepath" : "Output/Games_Output/topFans.csv",
+		"extension": ".csv",
+		"columns"  :  ["User","TotalLikes","LikesPerPost","IsAFollower"]
+	},
+	{
+		"filename" : "hashtagRunTimeArgsTXT",
+		"filepath" : "HashTags/HashTags_Input/hashtagRunTimeArgs.txt",
+		"extension": ".txt",
+		"columns"  :  null
+	},
+	{
+		"filename" : "hashtagFollowershipStatsCSV",
+		"filepath" : "HashTags/HashTags_Output/hashtags_followersihp_stats.csv",
+		"extension": ".csv",
+		"columns"  :  null
+	},
+	{
+		"filename" : "InstaBotLog",
+		"filepath" : "InstaBot.log",
+		"extension": ".log",
+		"columns"  :  null
+	},
+	{
+		"filename" : "User_Memory",
+		"filepath" : "Output/User_Memory/User_Memory.json",
+		"extension": ".json",
+		"columns"  :  null
+	}
+]
