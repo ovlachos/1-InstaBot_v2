@@ -1,8 +1,9 @@
 import random
+import auth
+
 from time import sleep
 from selenium.webdriver.common.keys import Keys
 from fuzzywuzzy import process
-import auth
 
 xpaths = {
     "searchBoxInput": "//input[@placeholder='Search']",
@@ -143,14 +144,14 @@ class SearchField:
                     return None
 
                 fuzzyMatch = self.getFuzzyResults(userName)
-                result = self.driver.find_element_by_xpath("//a[@href='/{}/']".format(fuzzyMatch))
+                result = self.driver.find_element_by_xpath("//a[contains(@href,'{}')]".format(fuzzyMatch))  # //a[contains(@href,'hd35mm')]
                 userName = fuzzyMatch
 
                 # used to be result = self.getExactResult(userName)
 
                 if not result:
                     fuzzyMatch = self.getFuzzyResults(userName)
-                    result = self.driver.find_element_by_xpath("//a[@href='/{}/']".format(fuzzyMatch))
+                    result = self.driver.find_element_by_xpath("//a[contains(@href,'{}')]".format(fuzzyMatch))
                     userName = fuzzyMatch
 
                 result.click()

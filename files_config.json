@@ -1,15 +1,15 @@
 [
 	{
-		"filename" : "dailyLoveCSV",
-		"filepath" : "Input/Love/dailyLove.csv",
-		"extension": ".csv",
-		"columns"  :  ["theLoveDaily","Post Count","t_sinceLast","PostsPerDay"]
-	},
-	{
 		"filename" : "extraLoveCSV",
 		"filepath" : "Input/Love/extraLove.csv",
 		"extension": ".csv",
 		"columns"  :  ["theLoveDaily","Post Count","t_sinceLast","PostsPerDay"]
+	},
+	{
+		"filename" : "addUserTotheGameCSV",
+		"filepath" : "Input/Love/addUserTotheGameCSV.csv",
+		"extension": ".csv",
+		"columns"  :  ["userToAdd"]
 	},
 	{
 		"filename" : "usersToTargetCSV",

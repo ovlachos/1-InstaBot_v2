@@ -1,7 +1,11 @@
 import json
+import time
+
 from uuid import uuid4
+from datetime import datetime
 
 timeStampFormat = "%m/%d/%Y, %H:%M:%S"
+timeStampFormat_old = "%Y_%m_%d"
 
 
 class UserEncoderDecoder(json.JSONEncoder):
@@ -135,20 +139,26 @@ class User_M:
         self._dateTimeLovedlast = datetime.now().strftime(timeStampFormat)
 
     def updateHandle(self, handleNew):
-        if self.listOfPastNames:
-            if not handleNew in self.listOfPastNames[0]:
-                self.listOfPastNames.insert(0, handleNew)
+        if len(self.listOfPastNames) > 0:
+            if handleNew != self.listOfPastNames[0]:
+                self.listOfPastNames.insert(0, self.handle)
+        else:
+            self.listOfPastNames.insert(0, self.handle)
 
         self.handle = handleNew
 
     def updateStats(self, statsDictIn):
         from datetime import datetime
 
-        if statsDictIn != self.statsDict[0]:
+        if len(self.statsDict) > 0:
+            if statsDictIn != self.statsDict[0]:
+                self.statsDict.insert(0, statsDictIn)
+                self.statsDictTimestamp.insert(0, datetime.now().strftime(timeStampFormat))
+            else:
+                self.statsDictTimestamp[0] = datetime.now().strftime(timeStampFormat)
+        else:
             self.statsDict.insert(0, statsDictIn)
             self.statsDictTimestamp.insert(0, datetime.now().strftime(timeStampFormat))
-        else:
-            self.statsDictTimestamp[0] = datetime.now().strftime(timeStampFormat)
 
     def getTimeLastVisited(self):
         try:
@@ -198,14 +208,16 @@ class User_M:
         self._userIgotYouFrom_youWereFollowing = sponsorUser
 
     def addToL1(self):
-        self._markL0 = False
-        self._markL1 = True
-        self._markL2 = False
+        if self._markL0:
+            self._markL0 = False
+            self._markL1 = True
+            self._markL2 = False
 
     def addToL2(self):
-        self._markL0 = False
-        self._markL1 = False
-        self._markL2 = True
+        if self._markL1:
+            self._markL0 = False
+            self._markL1 = False
+            self._markL2 = True
 
     def markTimeFollowed(self):
         from datetime import datetime
@@ -222,27 +234,32 @@ class User_M:
 
     def addToLoveDaily(self):
         self._dailyLove = True
+        self._dateTimeLovedlast = "01/01/2020, 14:10:04"
+
+        if self.getLatestPostCount() > 0:
+            self.statsDict[0]['posts'] -= 2  # This is done to make sure the user gets a like the next time I visit
 
     def addToLoveExtra(self):
         self._extraLove = True
+        self._dateTimeLovedlast = "01/01/2020, 14:10:04"
+
+        if self.getLatestPostCount() > 0:
+            self.statsDict[0]['posts'] -= 2  # This is done to make sure the user gets a like the next time I visit
 
     def removeFromLoveDaily(self):
-        from datetime import datetime
 
         timestamp = datetime.now().strftime(timeStampFormat)
         self._dailyLove = False
         self.dateUnLoved_byMe = timestamp
 
     def removeFromLoveExtra(self):
-        from datetime import datetime
 
         timestamp = datetime.now().strftime(timeStampFormat)
         self._extraLove = False
         self.dateUnLoved_byMe = timestamp
 
     def printHowLongItHasBeenSinceYouGotAnyLove(self):
-        from datetime import datetime
-        import time
+
         try:
             lastCheck_Time = datetime.strptime(self._dateTimeLovedlast, timeStampFormat)
             now_DateTime = datetime.now()
@@ -253,12 +270,44 @@ class User_M:
             deltaT = int(d2_ts - d1_ts) / 60 / 60
 
             print(
-                f'{datetime.today()}:  {str(round(deltaT, 2))} hours since last checked on {self.handle} with {self.getLatestPostCount()} posts on record')
+                f'#### {datetime.today()}:  {str(round(deltaT, 2))} hours since last checked on {self.handle} with {self.getLatestPostCount()} posts on record')
             # Skip user if it has been less than X hours since we last checked
             return deltaT
         except Exception as e:
             print(e)
             return 48
+
+    def daysSinceYouGotFollowed_Unfollowed(self, action, verbose=False):
+
+        if "un" in action:
+            date = self.dateUnFollowed_byMe
+        else:
+            date = self.dateFollowed_byMe
+
+        try:
+            startingDate = datetime.strptime(date, timeStampFormat)
+        except ValueError:
+            startingDate = datetime.strptime(date, timeStampFormat_old)
+        except Exception as e:
+            print(e)
+            startingDate = datetime.now()
+            time.sleep(2)
+
+        try:
+            now_DateTime = datetime.now()
+
+            # Convert to Unix timestamp
+            d1_ts = time.mktime(startingDate.timetuple())
+            d2_ts = time.mktime(now_DateTime.timetuple())
+            deltaT = int(d2_ts - d1_ts) / 60 / 60 / 24
+
+            if verbose:
+                print(f'{datetime.today()}:  {str(round(deltaT, 1))} days since I followed {self.handle}')
+
+            return deltaT
+        except Exception as e:
+            print(e)
+            return 1
 
     def thisUserDeservesDailyLove(self):
         return self._dailyLove

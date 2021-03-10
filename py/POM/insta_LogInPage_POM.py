@@ -25,6 +25,7 @@ class InstaLogIn:
             if self.page.instance.newSession:
                 # Remove WebDriver Flag
                 success = self.driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => false})")
+                self.driver.get("https://www.instagram.com/")
         except Exception as e:
             print(e)
 

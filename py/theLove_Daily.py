@@ -18,16 +18,23 @@ def main():
             print(e)
 
     print([hdLess, type(hdLess), noOfLikesToGive, type(noOfLikesToGive), percentageOfUsersToCover, type(percentageOfUsersToCover)])
+    print('\n')
+    
     try:
         v2Bot = InstaBotV2.InstaBot(hdLess)
         # v2Bot.delayOps()
         v2Bot.getBrowser()
         v2Bot.logIn()
 
-        theDailyResponse = v2Bot.loveService(fileName='daily', percentageOfUsers=1, numberOfLikes=1)
+        theDailyResponse = v2Bot.love_Service('daily', noOfLikesToGive, percentageOfUsersToCover)
         if 'busted' in theDailyResponse:
+            print("Busted!")
             return
-        theExtraResponse = v2Bot.loveService(fileName='extra', percentageOfUsers=1, numberOfLikes=1)
+
+        theExtraResponse = v2Bot.love_Service('extra', noOfLikesToGive, percentageOfUsersToCover)
+        if 'busted' in theExtraResponse:
+            print("Busted!")
+            return
     except:
         # v2Bot.shutDown()
         pass

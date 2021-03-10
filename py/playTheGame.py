@@ -18,6 +18,7 @@ def main():
             print(e)
 
     print([hdLess, type(hdLess), numberOfProfilesToProcess, type(numberOfProfilesToProcess)])
+    print('\n')
 
     try:
         v2Bot = InstaBotV2.InstaBot(hdLess)
@@ -25,7 +26,7 @@ def main():
         v2Bot.getBrowser()
         v2Bot.logIn()
 
-        v2Bot.theGame(numberOfProfilesToProcess)
+        v2Bot.theGame_Service()
     except:
         # v2Bot.shutDown()
         pass

@@ -18,6 +18,7 @@ def main():
         hdLess = False
 
     print([hdLess, type(hdLess), numberOfProfilesToProcess, type(numberOfProfilesToProcess)])
+    print('\n')
 
     try:
         v2Bot = InstaBotV2.InstaBot(hdLess)

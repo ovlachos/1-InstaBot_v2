@@ -1,9 +1,12 @@
 from time import sleep
 
 
-def love(bot, loveType='extra', numberOfLikes=1, percentageOfUsers=0.33):
+def love(bot, loveType='extra', numberOfLikes=1, percentageOfUsers=0.501):
+    print("\n")
+    print("### theLoveDaily ~ Extra ###")
+    print("\n")
     # 'Like' everyone's latest N posts
-    print(f"\n\n~~> Now processing the {loveType} list with {numberOfLikes} likes/user going for {(percentageOfUsers * 100)}%")
+    print(f"### ~~> Now processing the {loveType} list with {numberOfLikes} likes/user going for {(percentageOfUsers * 100)}%")
 
     # Sorted by date last checked
     # Least recently checked profiles come first
@@ -13,17 +16,18 @@ def love(bot, loveType='extra', numberOfLikes=1, percentageOfUsers=0.33):
 
     loveTotal = len(userLoveList)
     loveCount = loveTotal
-    print(f'{int(percentageOfUsers * loveTotal)} of {loveTotal} users to love')
+    print(f'#### {int(percentageOfUsers * loveTotal)} of {loveTotal} users to love')
 
     # Go through the list line by line and like things
     printMark = 0.0
     for user in userLoveList:
-
-        if (loveTotal - loveCount) > (loveTotal * percentageOfUsers): break
-
-        if user.printHowLongItHasBeenSinceYouGotAnyLove() <= bot.timeLimitSinceLastLoved: continue
-
         printMark = printCompletionRate(loveCount, loveTotal, printMark)
+
+        if (loveTotal - loveCount) > (loveTotal * percentageOfUsers):
+            break
+
+        if user.printHowLongItHasBeenSinceYouGotAnyLove() <= bot.timeLimitSinceLastLoved:
+            continue
 
         # Navigate to user's profile
         userPage = bot.mainPage.topRibbon_SearchField.navigateToUserPageThroughSearch(user.handle)
@@ -31,7 +35,7 @@ def love(bot, loveType='extra', numberOfLikes=1, percentageOfUsers=0.33):
         user.updateTimelastLoved()
 
         if not userPage:
-            print(f"User {user.handle} probably does not exist. Will remove")
+            print(f"#### User {user.handle} probably does not exist. Will remove")
             bot.memoryManager.updateUserRecord(user)
             continue
 
@@ -57,7 +61,7 @@ def love(bot, loveType='extra', numberOfLikes=1, percentageOfUsers=0.33):
         # the same usrename as my query, then this new username will ovwrwrite the old
         # one in the db. This could be a mistake as a user that changed his name from Maria.98
         # to blacksofa will get mached to a completely unrelated user (e.g. mar.i.a.97).
-        # So maybe a data validation check should be in place: does the new user have the same roughly stats?
+        # So maybe a data validation check should be in place: does the new user have roughly the same stats?
 
         # Liking photos
         response = likeTheXlatestPostsOfAUser(userPage, numberOfLikes)
@@ -68,6 +72,7 @@ def love(bot, loveType='extra', numberOfLikes=1, percentageOfUsers=0.33):
 
         bot.botSleep()
 
+    print("\n### theEnd ###")
     return 'OK'
 
 
@@ -82,7 +87,7 @@ def likeTheXlatestPostsOfAUser(userPage, numberOfLikes):
                 sleep(1)
 
                 if response:
-                    print("### Like pressed on user {0}".format(userPage.userName))
+                    print("#### Like pressed on user {0}".format(userPage.userName))
                     if not isinstance(response, bool):
                         return 'busted'
                 sleep(1)
@@ -103,7 +108,7 @@ def adjustNoOfLikes(numberOfLikes, user, userPage):
 def printCompletionRate(loveCount, loveTotal, printMark):
     completionRate = round(100 * (1 - (loveCount / loveTotal)), 1)
     if completionRate > printMark:
-        print('\n~~~~> {}% of 100% completed\n'.format(printMark))
+        print('\n#### ~> {}% of 100% completed\n'.format(printMark))
         printMark += 5
 
     return printMark

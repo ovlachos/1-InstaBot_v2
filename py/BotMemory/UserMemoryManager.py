@@ -1,6 +1,5 @@
 from BotMemory import FileHandlerBot as fh
 from BotMemory import Users_M as UM
-import json
 
 
 class UserMemoryManager:
@@ -68,6 +67,25 @@ class UserMemoryManager:
     def filterByListOfHandles(self, listOfHandles):
         return [x for x in self.listOfUserMemory if x.handle in listOfHandles]
 
+    def getListOfUsersToUnLove(self, daysBeforeIunLove):
+        one = self.getListOfUsersAlreadyFollowedOnly()
+        firstDraft = [x for x in one if x.daysSinceYouGotFollowed_Unfollowed('follow') > daysBeforeIunLove]
+        return [x for x in firstDraft if not x.dateUnLoved_byMe]
+
+    def getListOfUsersToUnFollow(self, daysBeforeIunFollow):
+        one = self.getListOfUsersAlreadyFollowedOnly()
+        firstDraft = [x for x in one if x.daysSinceYouGotFollowed_Unfollowed('follow') > daysBeforeIunFollow]
+        return [x for x in firstDraft if not x.dateUnFollowed_byMe]
+
+    def getListOfUsersAlreadyFollowedOnly(self):
+        alreadyFollowed = [x for x in self.listOfUserMemory if x.dateFollowed_byMe]
+        return [x for x in alreadyFollowed if not x.dateUnFollowed_byMe]
+
+    def cleanUpMemory(self):
+        listToDelete = [x for x in self.listOfUserMemory if (x.bio == '-666' and x.altName == '-666')]
+        for user in listToDelete:
+            self.removeUserFromRecord(user)
+
     ### User level
     def userExistsInMemory(self, handle):
         flag = False
@@ -85,6 +103,14 @@ class UserMemoryManager:
         else:
             return None
 
+    def userPageCannotBeFound(self, user):
+        print(f"Dropping user: {user.handle}. No page found (code -666)")
+        user.markUserRejected()
+        user.removeFromLoveDaily()
+        user.bio = '-666'
+        user.altName = '-666'  # TODO: find a way to remove these user records from memory file (as if they never existed). Self cleaning memory routine called on first read?
+        self.updateUserRecord(user)
+
     def getUID_fromHandle(self, handle):
         userM = self.readMemoryFileFromDrive()
         return userM.uid
@@ -95,11 +121,16 @@ class UserMemoryManager:
             self.listOfUserMemory.append(userM)
             self.writeMemoryFileToDrive()
 
+    def removeUserFromRecord(self, userObj):
+        if self.userExistsInMemory(userObj.handle):
+            oldUserObj = self.retrieveUserFromMemory(userObj.handle)
+            del self.listOfUserMemory[self.listOfUserMemory.index(oldUserObj)]
+
     def updateUserRecord(self, userObj):
         if self.userExistsInMemory(userObj.handle):
+
             # remove old
-            oldUserObj = [x for x in self.listOfUserMemory if x.handle == userObj.handle][0]
-            del self.listOfUserMemory[self.listOfUserMemory.index(oldUserObj)]
+            self.removeUserFromRecord(userObj)
 
             # add new
             self.listOfUserMemory.append(userObj)

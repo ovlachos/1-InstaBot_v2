@@ -29,7 +29,7 @@ class Browser:
 
                 # Testing if we really got that old session. If not we are getting an exception here
                 # self.driver.get('https://intoli.com/blog/not-possible-to-block-chrome-headless/')
-                self.driver.get('https://instagram.com')
+                # self.driver.get('https://instagram.com')
 
                 self.newSession = False
                 print(f"It's final: ReUsing browser session with id {sessionDataFromJSON_['session_id']}")
@@ -174,7 +174,7 @@ class WebPage:
             return True
 
     def getPageElement_tryHard(self, xpath):
-        attempts = 5
+        attempts = 3
         result = None
         while result is None:
             try:

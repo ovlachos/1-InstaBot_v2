@@ -1,11 +1,11 @@
 import time
-from datetime import datetime
 import random
-from random import randint
+import auth
 
+from datetime import datetime
+from random import randint
 from selenium.webdriver.common.keys import Keys
 from time import sleep
-import auth
 
 xpaths = {
     'likeLimitMessage_Text': "//div[contains(text(),'community')]",
@@ -288,12 +288,12 @@ class userPage(userPage_base):
             self.determineLevelOfFollowAccess()
 
             if self.followAccess < 45:
-                print('OK followed {}'.format(self.userName))
+                print('#### OK followed {}'.format(self.userName))
                 return 'OK'
             else:
                 return 'fail'
         else:
-            print('nahh - no follow access for this user because:')
+            print('#### nahh - no follow access for this user because:')
             self.printProfileTypeDescription()
             return 'OK'
 
@@ -327,14 +327,14 @@ class userPage(userPage_base):
                     self.driver.refresh()
 
             self.determineLevelOfFollowAccess()
-            self.printProfileTypeDescription()
+            # self.printProfileTypeDescription()
             if self.followAccess > 45:
-                print('OK UNfollowed {}'.format(self.userName))
+                print('#### OK UNfollowed {}'.format(self.userName))
                 return 'OK'
             else:
                 return 'fail'
         else:
-            print('nahh - no unfollow access for this user because:')
+            print('#### nahh - no unfollow access for this user because:')
             self.printProfileTypeDescription()
             return 'OK'
 
@@ -388,7 +388,6 @@ class userPage(userPage_base):
             print(e)
             return outputList
 
-        print(f'Max time allowed for scrolling  is {maxTimeDeltaAllowed}s')
         startTime = datetime.now()
 
         while scrollCount < 10:

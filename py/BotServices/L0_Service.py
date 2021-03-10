@@ -1,4 +1,7 @@
 def list_getList_0(bot, numberOfProfilesToProcess=5):
+    print("\n")
+    print("### theL0 ###")
+    print("\n")
     # Get users marked as L0: A list of all people following a number of profiles
 
     # If a source user's follower is already in the list we need not add a duplicate
@@ -28,9 +31,10 @@ def list_getList_0(bot, numberOfProfilesToProcess=5):
         userPage = bot.mainPage.topRibbon_SearchField.navigateToUserPageThroughSearch(sponsorUser.handle)
 
         if not userPage:
+            bot.memoryManager.userPageCannotBeFound(sponsorUser)
             continue
 
-        print(f"User {sponsorUser.handle} has {userPage.stats['followers']} followers")
+        print(f"#### User {sponsorUser.handle} has {userPage.stats['followers']} followers")
 
         followers_ = userPage.getFollowersList()  # a list of handles as strings
         sponsorUser.updateInfoFromLivePage_Landing(userPage)
@@ -43,6 +47,7 @@ def list_getList_0(bot, numberOfProfilesToProcess=5):
 
         bot.botSleep()
 
+    print("\n### theEnd ###")
     return 'OK'
 
 
@@ -64,7 +69,7 @@ def addSponsorsFollowersToUserMemory(followers_, sponsorUser, usersAlreadyInList
             usersAlreadyInList.append(follower)
 
             end = time.time()
-            print(f"{int(end - start)} | User {follower} added to memory")
+            print(f"##### {round((end - start), 1)} | User {follower} added to memory")
 
     return usersAlreadyInList
 

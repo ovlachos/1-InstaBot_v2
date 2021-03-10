@@ -4,7 +4,7 @@ import InstaBotV2
 
 def main():
     hdLess = False
-    numberOfProfilesToProcess = 20
+    numberOfProfilesToProcess = 200
 
     if len(sys.argv) > 1:
         print(sys.argv)
@@ -18,6 +18,7 @@ def main():
         hdLess = False
 
     print([hdLess, type(hdLess), numberOfProfilesToProcess, type(numberOfProfilesToProcess)])
+    print('\n')
 
     try:
         v2Bot = InstaBotV2.InstaBot(hdLess)
@@ -25,7 +26,7 @@ def main():
         v2Bot.getBrowser()
         v2Bot.logIn()
 
-        v2Bot.list_getList_1(numberOfProfilesToProcess)
+        v2Bot.l1_2_Service(numberOfProfilesToProcess)
     except:
         # v2Bot.shutDown()
         pass
