@@ -1,4 +1,4 @@
 #!/bin/sh
 scriptdir="$(dirname "$0")"
 cd "$scriptdir"
-python ../py/list_1_generator.py False 250
+python ../py/list_0_generator.py False 10

@@ -1,17 +1,35 @@
-import InstaFameBot as ib
-import auth
 import sys
+import InstaBotV2
 
-if len(sys.argv) > 1:
-    hdLess = sys.argv[1]
-else:
+
+def main():
     hdLess = False
+    numberOfProfilesToProcess = 40
 
-ib.log.error('\n\n')
-ib.log.error('~~<>~~ Let the Game Begin')
-gamingBot = ib.InstaBot(auth.username, auth.password, headless=hdLess)
-gamingBot.tH_logIn()
-gamingBot.t2_theGame(30)
-print("~~<>~~ The Game is over")
-gamingBot.tH_logOut()
-gamingBot.tH_close_browser()
+    if len(sys.argv) > 1:
+
+        print(sys.argv)
+
+        if sys.argv[1] == 'True':
+            hdLess = True
+        try:
+            numberOfProfilesToProcess = int(sys.argv[2])
+        except Exception as e:
+            print(e)
+
+    print([hdLess, type(hdLess), numberOfProfilesToProcess, type(numberOfProfilesToProcess)])
+    print('\n')
+
+    try:
+        v2Bot = InstaBotV2.InstaBot(hdLess)
+        # v2Bot.delayOps()
+        v2Bot.getBrowser()
+        v2Bot.logIn()
+
+        v2Bot.theGame_Service()
+    except:
+        # v2Bot.shutDown()
+        pass
+
+
+if __name__ == "__main__": main()

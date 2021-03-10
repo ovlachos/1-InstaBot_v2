@@ -1,37 +1,35 @@
-import InstaFameBot
-import auth
 import sys
-import datetime
-from time import sleep
-from os import path
+import InstaBotV2
 
-if len(sys.argv) > 1:
-    hdLess = sys.argv[1]
-else:
+
+def main():
     hdLess = False
+    numberOfProfilesToProcess = 200
 
-InstaFameBot.log.error('\n\n')
-numberOfUsersToProcess = 100
-passes = 1
-bot = InstaFameBot.InstaBot(auth.username, auth.password, headless=hdLess)
+    if len(sys.argv) > 1:
+        print(sys.argv)
+        if sys.argv[1] == 'True':
+            hdLess = True
+        try:
+            numberOfProfilesToProcess = int(sys.argv[2])
+        except Exception as e:
+            print(e)
+    else:
+        hdLess = False
 
-for innn in reversed(range(0, passes)):
-    InstaFameBot.log.error(
-        '{0}: Building the List 1 for the pass {1} out of {2}'.format(str(path.basename(__file__))[:-3],
-                                                                      (passes - innn), (passes)))
-    bot.tH_logIn()
-    answer = bot.t2_getList_1(numberOfUsersToProcess)
+    print([hdLess, type(hdLess), numberOfProfilesToProcess, type(numberOfProfilesToProcess)])
+    print('\n')
 
-    if answer == bot.tooManyActionsBreakCode:
-        break
+    try:
+        v2Bot = InstaBotV2.InstaBot(hdLess)
+        # v2Bot.delayOps()
+        v2Bot.getBrowser()
+        v2Bot.logIn()
 
-    bot.tH_logOut()
+        v2Bot.l1_2_Service(numberOfProfilesToProcess)
+    except:
+        # v2Bot.shutDown()
+        pass
 
-    print('-- Now asleep')
-    for five_minute in reversed(range(0, 3)):
-        sleep(5 * 60)
-        print('{0} -- Still {1} minutes of sleep left'.format(datetime.datetime.today(), str(five_minute * 5)))
-    print('-- Now awake')
 
-bot.tH_escapeSequence()
-InstaFameBot.log.error('\n ~~~ L-1 END ~~~ \n\n')
+if __name__ == "__main__": main()

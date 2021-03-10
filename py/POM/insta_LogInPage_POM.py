@@ -1,47 +1,68 @@
-import auth
-
-
 # All POMs require a webPage object to be instantiated/initialized.
 # The webPage object provides the webdriver and a "what page am I currently browsing" method
+import random
+from time import sleep
+
+xpaths = {
+    "GDPRcookies": "//button[contains(text(),'Accept')]",
+    "logIn_UserName": "//input[@name=\"username\"]",
+    "logIn_password": "//input[@name=\"password\"]",
+    "submitButton": "//button[@type='submit']",
+    "notNow": "//button[contains(text(), 'Not Now')]",
+}
+
 
 class InstaLogIn:
 
     def __init__(self, webPage):
         self.page = webPage
         self.driver = self.page.driver
-        self.user = auth.username
-        self.pw = auth.password
 
-    def logIn(self):
-        from time import sleep
-        from random import randint
+    def logIn(self, user, pswd):
+
         try:
-            self.driver.get("https://www.instagram.com/accounts/login/")
+            self.driver.get("https://www.instagram.com/")
+            if self.page.instance.newSession:
+                # Remove WebDriver Flag
+                success = self.driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => false})")
+                self.driver.get("https://www.instagram.com/")
         except Exception as e:
             print(e)
 
-        sleep(randint(2, 6))
+        if not self.alreadyLoggedIn():
+            from random import randint
+            sleep(randint(1, 4))
 
-        try:
-            self.driver.find_element_by_xpath("//button[contains(text(),'Accept')]").click()
-        except Exception as e:
-            print(e)
+            try:
+                self.page.getPageElement_tryHard(xpaths['GDPRcookies']).click()
+            except Exception as e:
+                print(f"Login Accept cookies click:\n{e}")
 
-        self.driver.find_element_by_xpath("//input[@name=\"username\"]").send_keys(self.user)
-        self.driver.find_element_by_xpath("//input[@name=\"password\"]").send_keys(self.pw)
-        self.driver.find_element_by_xpath('//button[@type="submit"]').click()
+            self.page.slowTypeIntoField(xpaths['logIn_UserName'], user)
+            self.page.slowTypeIntoField(xpaths['logIn_password'], pswd)
+            self.page.getPageElement_tryHard(xpaths['submitButton']).click()
 
-        sleep(4)
-
-        try:
-            self.driver.find_element_by_xpath("//button[contains(text(), 'Not Now')]").click()
             sleep(3)
-            self.driver.find_element_by_xpath("//button[contains(text(), 'Not Now')]").click()
-        except Exception as e:
-            print(e)
 
-        sleep(5)
+            try:
+                self.page.getPageElement_tryHard(xpaths['notNow']).click()
+                sleep(3)
+                self.page.getPageElement_tryHard(xpaths['notNow']).click()
+            except Exception as e:
+                print(f"Login NotNow click:\n{e}")
+
         return InstaMainPage(self.page)
+
+    def alreadyLoggedIn(self):
+
+        try:
+            button = self.page.getPageElement_tryHard(xpaths['logIn_password'])
+            if button:
+                return False
+        except:
+            pass
+
+        return True
 
 
 class InstaMainPage:

@@ -1,39 +1,43 @@
-import InstaFameBot
-import auth
 import sys
-import time
-from os import path
+import InstaBotV2
 
 
-def main(likesPerUser=1, hoursOfWait=0):
+def main():
+    hdLess = False
+    noOfLikesToGive = 1
+    percentageOfUsersToCover = 0.501
+
     if len(sys.argv) > 1:
-        hdLess = sys.argv[2]
-    else:
-        hdLess = False
+        print(sys.argv)
+        if sys.argv[1] == 'True':
+            hdLess = True
+        try:
+            noOfLikesToGive = int(sys.argv[2])
+            percentageOfUsersToCover = float(sys.argv[3])
+        except Exception as e:
+            print(e)
 
-    start_time = time.time()
-    if len(sys.argv) > 1:
-        likesPerUser = int(sys.argv[1])
-        if len(sys.argv) > 2:
-            hoursOfWait = int(sys.argv[2])
+    print([hdLess, type(hdLess), noOfLikesToGive, type(noOfLikesToGive), percentageOfUsersToCover, type(percentageOfUsersToCover)])
+    print('\n')
+    
+    try:
+        v2Bot = InstaBotV2.InstaBot(hdLess)
+        # v2Bot.delayOps()
+        v2Bot.getBrowser()
+        v2Bot.logIn()
 
-    InstaFameBot.log.error('\n\n')
-    InstaFameBot.log.error('{0}: -- -- gearing up for the Love Daily'.format(str(path.basename(__file__))[:-3]))
+        theDailyResponse = v2Bot.love_Service('daily', noOfLikesToGive, percentageOfUsersToCover)
+        if 'busted' in theDailyResponse:
+            print("Busted!")
+            return
 
-    InstaFameBot.log.error(
-        '{0}: --I will be giving out {1} likes per user today mylord'.format(str(path.basename(__file__))[:-3],
-                                                                             likesPerUser))
-    bot = InstaFameBot.InstaBot(auth.username, auth.password, headless=hdLess)
-
-    # args: likesPerUser, True/False, File path
-    bot.tH_logIn()
-    success = bot.t2_theLoveDaily(likesPerUser, percentageOfUsers=0.52)
-
-    elapsed_time = time.time() - start_time
-    InstaFameBot.log.error('{0} -- I gave out {1} likes per user today mylord'.format(success, likesPerUser))
-    InstaFameBot.log.error('~~ TheLoveDay ~~ The time ellapsed was {} minutes'.format((elapsed_time / 60)))
-
-    bot.tH_escapeSequence()
+        theExtraResponse = v2Bot.love_Service('extra', noOfLikesToGive, percentageOfUsersToCover)
+        if 'busted' in theExtraResponse:
+            print("Busted!")
+            return
+    except:
+        # v2Bot.shutDown()
+        pass
 
 
 if __name__ == "__main__": main()
