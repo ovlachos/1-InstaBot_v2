@@ -146,6 +146,7 @@ Input/
 HashTags/
 
 *.csv
+*.app
 
 result.html
 
@@ -163,8 +164,4 @@ Scripts/tl_1.txt
 
 Scripts/Archive/
 
-theLoveDaily.app/
-
 BrowserSession.json
-
-getBrowser.app/
