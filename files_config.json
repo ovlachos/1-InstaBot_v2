@@ -3,11 +3,11 @@
 		"filename" : "extraLoveCSV",
 		"filepath" : "Input/Love/extraLove.csv",
 		"extension": ".csv",
-		"columns"  :  ["theLoveDaily","Post Count","t_sinceLast","PostsPerDay"]
+		"columns"  :  ["theLoveExtra"]
 	},
 	{
 		"filename" : "addUserTotheGameCSV",
-		"filepath" : "Input/Love/addUserTotheGameCSV.csv",
+		"filepath" : "Input/Games_Input/addUserTotheGameCSV.csv",
 		"extension": ".csv",
 		"columns"  :  ["userToAdd"]
 	},
@@ -34,12 +34,6 @@
 		"filepath" : "Input/Games_Input/wordsToLookForInBio.csv",
 		"extension": ".csv",
 		"columns"  :  ["words"]
-	},
-	{
-		"filename" : "theList_1_fileCSV",
-		"filepath" : "Output/Games_Output/TheList_1.csv",
-		"extension": ".csv",
-		"columns"  :  ["a0_User_a1_follows","a1_User","a2_Count_of_Followers_of_a1","a3_TheList_1_keep_drop","a4_TheList_2_keep_drop","a5_TheList_3_keep_drop","a6_theGame_Follow_Date","a7_theGame_UnFollow_Date"]
 	},
 	{
 		"filename" : "topFansCSV",

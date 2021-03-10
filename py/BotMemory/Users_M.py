@@ -242,9 +242,7 @@ class User_M:
     def addToLoveExtra(self):
         self._extraLove = True
         self._dateTimeLovedlast = "01/01/2020, 14:10:04"
-
-        if self.getLatestPostCount() > 0:
-            self.statsDict[0]['posts'] -= 2  # This is done to make sure the user gets a like the next time I visit
+        print(f"#### {self.handle} added to theLoveExtra")
 
     def removeFromLoveDaily(self):
 
@@ -253,10 +251,8 @@ class User_M:
         self.dateUnLoved_byMe = timestamp
 
     def removeFromLoveExtra(self):
-
-        timestamp = datetime.now().strftime(timeStampFormat)
         self._extraLove = False
-        self.dateUnLoved_byMe = timestamp
+        print(f"#### {self.handle} removed from theLoveExtra")
 
     def printHowLongItHasBeenSinceYouGotAnyLove(self):
 

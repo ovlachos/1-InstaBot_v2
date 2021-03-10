@@ -86,6 +86,28 @@ class UserMemoryManager:
         for user in listToDelete:
             self.removeUserFromRecord(user)
 
+    def redistributeExtraLove(self):
+        currentLoves = [x.handle for x in self.getExtraLoveList()]  # list of handles
+        newLoves = self.memoryFileHandler.CSV_getFrameFromCSVfile('extraLoveCSV')['theLoveExtra'].tolist()  # list of handles
+
+        # Remove dropped users
+        droppedLoves = [x for x in currentLoves if x not in newLoves]  # list of handles
+        for droppedLove in droppedLoves:
+            user = self.retrieveUserFromMemory(droppedLove)
+            if user:
+                user.removeFromLoveExtra()
+
+        # Add new loves
+        newLoves = [x for x in newLoves if x not in currentLoves]  # list of handles
+        for newLove in newLoves:
+            user = self.retrieveUserFromMemory(newLove)
+            if user:
+                user.addToLoveExtra()
+            else:
+                self.addUserToMemory(newLove)
+                user = self.retrieveUserFromMemory(newLove)
+                user.addToLoveExtra()
+
     ### User level
     def userExistsInMemory(self, handle):
         flag = False

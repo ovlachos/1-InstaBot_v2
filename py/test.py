@@ -1,7 +1,9 @@
 import InstaBotV2
 
 bot = InstaBotV2.InstaBot()
-bot.getBrowser()
-bot.logIn()
+# bot.getBrowser()
+# bot.logIn()
 
-theDailyResponse = bot.theGame_Service()
+bot.memoryManager.readMemoryFileFromDrive()
+bot.memoryManager.redistributeExtraLove()
+bot.memoryManager.writeMemoryFileToDrive()

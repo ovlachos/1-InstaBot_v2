@@ -120,4 +120,5 @@ def getList(bot, loveType):
     if "daily" in loveType:
         return bot.memoryManager.getDailyLoveList()
     else:
+        bot.memoryManager.redistributeExtraLove()
         return bot.memoryManager.getExtraLoveList()

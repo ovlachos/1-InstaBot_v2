@@ -108,7 +108,7 @@ class FileHandlerBot:
             oldFrame = pd.read_csv(file['filepath'])
 
             if not user in oldFrame[file['columns'][0]].tolist():
-                self.CSV_addNewRowToCSV(kindOfLove, [user, 1, datetime.now(), 0])
+                self.CSV_addNewRowToCSV(kindOfLove, [user])
 
     def removeUserfrom_the_Love(self, user, kindOfLove):
         file = self.getFileFromFilename(kindOfLove)
