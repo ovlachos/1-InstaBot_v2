@@ -1,15 +1,15 @@
-import auth
 from random import randint
 from time import sleep
 
-from BotServices import Love_Service
+import auth
+from BotMemory import FileHandlerBot as fh
+from BotMemory import UserMemoryManager
 from BotServices import L0_Service
 from BotServices import L1_2_Service
+from BotServices import Love_Service
 from BotServices import theGame_Service
-from BotMemory import UserMemoryManager
-from BotMemory import FileHandlerBot as fh
-from POM import webPage as wp
 from POM import insta_LogInPage_POM as login
+from POM import webPage as wp
 
 
 class InstaBot:
@@ -22,11 +22,11 @@ class InstaBot:
         self.timeUpperBound = 48
         self.timeLowerBound = 34
         self.timeLimitSinceLastLoved = 30
-        self.followMana = 100
-        self.followManaMax = 100
+        self.followMana = 50
+        self.followManaMax = 50
 
         # Game vars
-        self.daysBeforeIunFollow = 14 - 1
+        self.daysBeforeIunFollow = 20 - 1
         self.daysBeforeIunLove = self.daysBeforeIunFollow + 5
 
         # List vars

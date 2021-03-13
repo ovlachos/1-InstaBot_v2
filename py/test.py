@@ -6,4 +6,5 @@ bot = InstaBotV2.InstaBot()
 
 bot.memoryManager.readMemoryFileFromDrive()
 bot.memoryManager.redistributeExtraLove()
+
 bot.memoryManager.writeMemoryFileToDrive()

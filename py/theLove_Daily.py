@@ -1,4 +1,5 @@
 import sys
+
 import InstaBotV2
 
 
@@ -35,9 +36,9 @@ def main():
         if 'busted' in theExtraResponse:
             print("Busted!")
             return
-    except:
+    except Exception as e:
         # v2Bot.shutDown()
-        pass
+        print(e)
 
 
 if __name__ == "__main__": main()

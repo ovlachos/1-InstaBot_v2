@@ -1,6 +1,7 @@
-import os
-import pandas as pd
 import json
+import os
+
+import pandas as pd
 
 from BotMemory import BotMemoryFilesFactory as BF
 
@@ -76,6 +77,9 @@ class FileHandlerBot:
 
         return frame
 
+    def listToFrame(self, inputList):
+        return pd.DataFrame(data=inputList)
+
     def CSV_saveFrametoCSVfile(self, filename, frame):
         file = self.getFileFromFilename(filename)
         frame.to_csv(file['filepath'], index=False, encoding='utf-8')
@@ -101,7 +105,6 @@ class FileHandlerBot:
                 frame_new.to_csv(file['filepath'], index=False, encoding='utf-8')
 
     def addUserto_the_Love(self, user, kindOfLove):
-        from datetime import datetime
 
         file = self.getFileFromFilename(kindOfLove)  # e.g. 'dailyLoveCSV'
         if file:

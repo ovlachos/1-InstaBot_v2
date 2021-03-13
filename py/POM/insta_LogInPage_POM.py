@@ -1,6 +1,5 @@
 # All POMs require a webPage object to be instantiated/initialized.
 # The webPage object provides the webdriver and a "what page am I currently browsing" method
-import random
 from time import sleep
 
 xpaths = {
@@ -21,7 +20,7 @@ class InstaLogIn:
     def logIn(self, user, pswd):
 
         try:
-            self.driver.get("https://www.instagram.com/")
+            # self.driver.get("https://www.instagram.com/")
             if self.page.instance.newSession:
                 # Remove WebDriver Flag
                 success = self.driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => false})")

@@ -1,8 +1,7 @@
 import json
 import time
-
-from uuid import uuid4
 from datetime import datetime
+from uuid import uuid4
 
 timeStampFormat = "%m/%d/%Y, %H:%M:%S"
 timeStampFormat_old = "%Y_%m_%d"
@@ -314,7 +313,7 @@ class User_M:
     def thisUserDeservesAnyKindOfLove(self):
         return self.thisUserDeservesDailyLove() or self.thisUserDeservesExtraLove()
 
-    def removeFromLove(self, name):
+    def removeFromLove(self, name="daily"):
         if 'daily' in name:
             self.removeFromLoveDaily()
         elif 'extra' in name:
@@ -340,7 +339,8 @@ class User_M:
 
     def thereIsNoPointLovingYou(self, userPage):
         if userPage.infoAccess > 45 and userPage.followAccess > 65:
-            self.removeFromLove()
+            self.removeFromLove("daily")
+            self.removeFromLove("extra")
             print(f"No longer will I love {userPage.userName}")
             return True
 

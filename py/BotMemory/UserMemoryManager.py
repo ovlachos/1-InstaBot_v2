@@ -1,3 +1,5 @@
+import auth
+
 from BotMemory import FileHandlerBot as fh
 from BotMemory import Users_M as UM
 
@@ -19,6 +21,9 @@ class UserMemoryManager:
     def readMemoryFileFromDrive(self):  # JSONdecoder is a function that translates JSON to User_M objects
         JSONdecoder = UM.UserEncoderDecoder.decode_user
         self.listOfUserMemory = self.memoryFileHandler.readMemoryFile(JSONdecoder)
+
+        # Startup routines
+        # self.manuallyAddNewUsersTo_theGame()
 
     def readMemoryFilesFromDrive(self):  # JSONdecoder is a function that translates JSON to User_M objects
         JSONdecoder = UM.UserEncoderDecoder.decode_user
@@ -81,10 +86,27 @@ class UserMemoryManager:
         alreadyFollowed = [x for x in self.listOfUserMemory if x.dateFollowed_byMe]
         return [x for x in alreadyFollowed if not x.dateUnFollowed_byMe]
 
-    def cleanUpMemory(self):
+    def cleanUpMemoryFromNonExistentProfiles(self):
         listToDelete = [x for x in self.listOfUserMemory if (x.bio == '-666' and x.altName == '-666')]
         for user in listToDelete:
             self.removeUserFromRecord(user)
+
+    def manuallyAddNewUsersTo_theGame(self):
+        newGameParticipants = self.memoryFileHandler.CSV_getFrameFromCSVfile('addUserTotheGameCSV')['userToAdd'].tolist()  # list of handles
+
+        for handle in newGameParticipants:
+            user = self.retrieveUserFromMemory(handle)
+            if user:
+                if not user.dateFollowed_byMe:
+                    user.addToL0(auth.username)
+            else:
+                self.addUserToMemory(handle)
+                user = self.retrieveUserFromMemory(handle)
+                user.addToL0(auth.username)
+
+            # self.updateUserRecord(user)
+
+        self.writeMemoryFileToDrive()
 
     def redistributeExtraLove(self):
         currentLoves = [x.handle for x in self.getExtraLoveList()]  # list of handles
@@ -107,6 +129,12 @@ class UserMemoryManager:
                 self.addUserToMemory(newLove)
                 user = self.retrieveUserFromMemory(newLove)
                 user.addToLoveExtra()
+
+        # Record current situation
+        currentLoves = [x.handle for x in self.getExtraLoveList()]  # list of handles
+        currentLovesDict = {'theLoveExtra': currentLoves}
+        love_frame = self.memoryFileHandler.listToFrame(currentLovesDict)
+        self.memoryFileHandler.CSV_saveFrametoCSVfile('extraLoveCSV', love_frame)
 
     ### User level
     def userExistsInMemory(self, handle):
@@ -134,7 +162,7 @@ class UserMemoryManager:
         self.updateUserRecord(user)
 
     def getUID_fromHandle(self, handle):
-        userM = self.readMemoryFileFromDrive()
+        userM = self.retrieveUserFromMemory(handle)
         return userM.uid
 
     def addUserToMemory(self, handleOfNewUser):
@@ -161,7 +189,3 @@ class UserMemoryManager:
             # add new
             self.listOfUserMemory.append(userObj)
             self.writeMemoryFileToDrive()
-
-    def getUID_fromHandle(self, handle):
-        userM = self.readMemoryFileFromDrive()
-        return userM.uid

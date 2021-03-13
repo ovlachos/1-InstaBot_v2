@@ -1,5 +1,5 @@
-from random import randint
 import random
+from random import randint
 from time import sleep
 
 xpaths = {
