@@ -22,8 +22,10 @@ class UserMemoryManager:
         JSONdecoder = UM.UserEncoderDecoder.decode_user
         self.listOfUserMemory = self.memoryFileHandler.readMemoryFile(JSONdecoder)
 
-        # Startup routines
+        ### Startup routines
+        # self.redistributeExtraLove()
         # self.manuallyAddNewUsersTo_theGame()
+        # self.cleanUpMemoryFromNonExistentProfiles()
 
     def readMemoryFilesFromDrive(self):  # JSONdecoder is a function that translates JSON to User_M objects
         JSONdecoder = UM.UserEncoderDecoder.decode_user
@@ -109,30 +111,30 @@ class UserMemoryManager:
         self.writeMemoryFileToDrive()
 
     def redistributeExtraLove(self):
-        currentLoves = [x.handle for x in self.getExtraLoveList()]  # list of handles
-        newLoves = self.memoryFileHandler.CSV_getFrameFromCSVfile('extraLoveCSV')['theLoveExtra'].tolist()  # list of handles
+        memoryLoves = [x.handle for x in self.getExtraLoveList()]  # list of handles
+        driveLoves = self.memoryFileHandler.CSV_getFrameFromCSVfile('extraLoveCSV')['theLoveExtra'].tolist()  # list of handles
 
         # Remove dropped users
-        droppedLoves = [x for x in currentLoves if x not in newLoves]  # list of handles
+        droppedLoves = [x for x in memoryLoves if x not in driveLoves]  # list of handles
         for droppedLove in droppedLoves:
             user = self.retrieveUserFromMemory(droppedLove)
             if user:
                 user.removeFromLoveExtra()
 
         # Add new loves
-        newLoves = [x for x in newLoves if x not in currentLoves]  # list of handles
-        for newLove in newLoves:
+        newDriveLoves = [x for x in driveLoves if x not in memoryLoves]  # list of handles
+        for newLove in newDriveLoves:
             user = self.retrieveUserFromMemory(newLove)
             if user:
                 user.addToLoveExtra()
             else:
-                self.addUserToMemory(newLove)
+                self.addUserToMemory(newLove) # this routine adds to both the memory object and writes the whole thing on the drive
                 user = self.retrieveUserFromMemory(newLove)
                 user.addToLoveExtra()
 
         # Record current situation
-        currentLoves = [x.handle for x in self.getExtraLoveList()]  # list of handles
-        currentLovesDict = {'theLoveExtra': currentLoves}
+        memoryLoves = [x.handle for x in self.getExtraLoveList()]  # list of handles
+        currentLovesDict = {'theLoveExtra': memoryLoves}
         love_frame = self.memoryFileHandler.listToFrame(currentLovesDict)
         self.memoryFileHandler.CSV_saveFrametoCSVfile('extraLoveCSV', love_frame)
 

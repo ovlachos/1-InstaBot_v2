@@ -6,7 +6,7 @@ import InstaBotV2
 def main():
     hdLess = False
     noOfLikesToGive = 1
-    percentageOfUsersToCover = 0.501
+    percentageOfUsersToCover = 0.01
 
     if len(sys.argv) > 1:
         print(sys.argv)

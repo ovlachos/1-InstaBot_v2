@@ -1,10 +1,14 @@
 import InstaBotV2
 
 bot = InstaBotV2.InstaBot()
-# bot.getBrowser()
-# bot.logIn()
+bot.getBrowser()
+bot.logIn()
 
-bot.memoryManager.readMemoryFileFromDrive()
-bot.memoryManager.redistributeExtraLove()
+# bot.memoryManager.readMemoryFileFromDrive()
 
-bot.memoryManager.writeMemoryFileToDrive()
+theExtraResponse = bot.love_Service('extra', 1, 0.501)
+if 'busted' in theExtraResponse:
+    print("Busted!")
+
+# bot.memoryManager.redistributeExtraLove()
+# bot.memoryManager.writeMemoryFileToDrive()
