@@ -1,6 +1,7 @@
-import os
-import pandas as pd
 import json
+import os
+
+import pandas as pd
 
 from BotMemory import BotMemoryFilesFactory as BF
 
@@ -76,6 +77,9 @@ class FileHandlerBot:
 
         return frame
 
+    def listToFrame(self, inputList):
+        return pd.DataFrame(data=inputList)
+
     def CSV_saveFrametoCSVfile(self, filename, frame):
         file = self.getFileFromFilename(filename)
         frame.to_csv(file['filepath'], index=False, encoding='utf-8')
@@ -101,14 +105,13 @@ class FileHandlerBot:
                 frame_new.to_csv(file['filepath'], index=False, encoding='utf-8')
 
     def addUserto_the_Love(self, user, kindOfLove):
-        from datetime import datetime
 
         file = self.getFileFromFilename(kindOfLove)  # e.g. 'dailyLoveCSV'
         if file:
             oldFrame = pd.read_csv(file['filepath'])
 
             if not user in oldFrame[file['columns'][0]].tolist():
-                self.CSV_addNewRowToCSV(kindOfLove, [user, 1, datetime.now(), 0])
+                self.CSV_addNewRowToCSV(kindOfLove, [user])
 
     def removeUserfrom_the_Love(self, user, kindOfLove):
         file = self.getFileFromFilename(kindOfLove)

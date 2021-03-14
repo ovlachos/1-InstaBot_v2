@@ -1,11 +1,12 @@
 import sys
+
 import InstaBotV2
 
 
 def main():
     hdLess = False
     noOfLikesToGive = 1
-    percentageOfUsersToCover = 0.501
+    percentageOfUsersToCover = 0.01
 
     if len(sys.argv) > 1:
         print(sys.argv)
@@ -35,9 +36,9 @@ def main():
         if 'busted' in theExtraResponse:
             print("Busted!")
             return
-    except:
+    except Exception as e:
         # v2Bot.shutDown()
-        pass
+        print(e)
 
 
 if __name__ == "__main__": main()

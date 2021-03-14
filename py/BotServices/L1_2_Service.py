@@ -74,11 +74,18 @@ def L1(myFollowersCount, user):
     # Filter out users with more followers than myself - aka L1
     userLatestStats = user.getLatestStats()
 
-    if userLatestStats['followers'] > (1.05 * myFollowersCount) or userLatestStats['followers'] < 100 or (userLatestStats['posts'] < 3):
+    if userLatestStats['followers'] > (1.05 * myFollowersCount):
         wording = 'Dropping'
-        user.markUserRejected()
+    elif userLatestStats['followers'] < 100:
+        wording = 'Dropping'
+    elif userLatestStats['posts'] < 3:
+        wording = 'Dropping'
     else:
         wording = 'Keeping'
+
+    if "Dropping" in wording:
+        user.markUserRejected()
+    else:
         user.addToL1()
 
     print(f"#### L1 - {wording} user: {user.handle} has {userLatestStats['followers']} followers and {userLatestStats['posts']} posts")

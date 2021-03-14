@@ -1,9 +1,10 @@
 import random
-import auth
-
 from time import sleep
-from selenium.webdriver.common.keys import Keys
+
 from fuzzywuzzy import process
+from selenium.webdriver.common.keys import Keys
+
+import auth
 
 xpaths = {
     "searchBoxInput": "//input[@placeholder='Search']",

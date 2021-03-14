@@ -1,11 +1,12 @@
-import time
 import random
-import auth
-
+import time
 from datetime import datetime
 from random import randint
-from selenium.webdriver.common.keys import Keys
 from time import sleep
+
+from selenium.webdriver.common.keys import Keys
+
+import auth
 
 xpaths = {
     'likeLimitMessage_Text': "//div[contains(text(),'community')]",

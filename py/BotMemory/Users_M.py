@@ -1,8 +1,7 @@
 import json
 import time
-
-from uuid import uuid4
 from datetime import datetime
+from uuid import uuid4
 
 timeStampFormat = "%m/%d/%Y, %H:%M:%S"
 timeStampFormat_old = "%Y_%m_%d"
@@ -242,9 +241,7 @@ class User_M:
     def addToLoveExtra(self):
         self._extraLove = True
         self._dateTimeLovedlast = "01/01/2020, 14:10:04"
-
-        if self.getLatestPostCount() > 0:
-            self.statsDict[0]['posts'] -= 2  # This is done to make sure the user gets a like the next time I visit
+        print(f"#### {self.handle} added to theLoveExtra")
 
     def removeFromLoveDaily(self):
 
@@ -253,10 +250,8 @@ class User_M:
         self.dateUnLoved_byMe = timestamp
 
     def removeFromLoveExtra(self):
-
-        timestamp = datetime.now().strftime(timeStampFormat)
         self._extraLove = False
-        self.dateUnLoved_byMe = timestamp
+        print(f"#### {self.handle} removed from theLoveExtra")
 
     def printHowLongItHasBeenSinceYouGotAnyLove(self):
 
@@ -318,7 +313,7 @@ class User_M:
     def thisUserDeservesAnyKindOfLove(self):
         return self.thisUserDeservesDailyLove() or self.thisUserDeservesExtraLove()
 
-    def removeFromLove(self, name):
+    def removeFromLove(self, name="daily"):
         if 'daily' in name:
             self.removeFromLoveDaily()
         elif 'extra' in name:
@@ -344,7 +339,8 @@ class User_M:
 
     def thereIsNoPointLovingYou(self, userPage):
         if userPage.infoAccess > 45 and userPage.followAccess > 65:
-            self.removeFromLove()
+            self.removeFromLove("daily")
+            self.removeFromLove("extra")
             print(f"No longer will I love {userPage.userName}")
             return True
 
