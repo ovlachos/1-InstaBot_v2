@@ -5,5 +5,7 @@ try:
     v2Bot.getBrowser()
     v2Bot.logIn()
     a = input()
-except:
+except Exception as e:
+    # v2Bot.shutDown()
+    print(e)
     v2Bot.shutDown()

@@ -28,9 +28,9 @@ def main():
         v2Bot.logIn()
 
         v2Bot.theGame_Service()
-    except:
+    except Exception as e:
         # v2Bot.shutDown()
-        pass
+        print(e)
 
 
 if __name__ == "__main__": main()

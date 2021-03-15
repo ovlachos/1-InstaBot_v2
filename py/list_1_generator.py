@@ -28,9 +28,9 @@ def main():
         v2Bot.logIn()
 
         v2Bot.l1_2_Service(numberOfProfilesToProcess)
-    except:
+    except Exception as e:
+        print(e)
         # v2Bot.shutDown()
-        pass
 
 
 if __name__ == "__main__": main()
