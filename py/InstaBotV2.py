@@ -2,12 +2,14 @@ from random import randint
 from time import sleep
 
 import auth
+
 from BotMemory import FileHandlerBot as fh
 from BotMemory import UserMemoryManager
 from BotServices import L0_Service
 from BotServices import L1_2_Service
 from BotServices import Love_Service
 from BotServices import theGame_Service
+from BotServices import PostBooster_Service
 from POM import insta_LogInPage_POM as login
 from POM import webPage as wp
 
@@ -59,6 +61,7 @@ class InstaBot:
         print(f'Sleeping for {int(sleepTime / 60)} minutes')
         sleep(sleepTime)
 
+    ### SERVICES ###
     def love_Service(self, fileName, numberOfLikes, percentageOfUsers):
         return Love_Service.love(self, fileName, numberOfLikes, percentageOfUsers)
 
@@ -70,3 +73,6 @@ class InstaBot:
 
     def theGame_Service(self):
         return theGame_Service.playTheGame(self)
+
+    def postBoostService(self, hashTagPage=10, numberOfPostsPerTag=5):
+        return PostBooster_Service.boostLatestPost(self, hashTagPage, numberOfPostsPerTag)

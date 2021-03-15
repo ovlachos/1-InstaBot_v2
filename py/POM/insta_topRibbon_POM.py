@@ -169,18 +169,32 @@ class SearchField:
                     self.driver.get("https://www.instagram.com/")
 
     def navigateToHashTagPageThroughSearch(self, hashtag):
+        from POM import insta_HashTagPage_POM as hp
+        hashtag = hashtag.replace("#", "")
+
         self.page.slowTypeIntoField(xpaths["searchBoxInput"], '#{}'.format(hashtag))
-        self.page.getPageElement_tryHard("//a[@href='/explore/tags/{}/']".format(hashtag)).click()
+        sleep(1)
+
+        fuzzyMatch = self.getFuzzyResults(hashtag).replace("#", "")
+        result = self.page.getPageElement_tryHard("//a[@href='/explore/tags/{}/']".format(fuzzyMatch))
+
+        if result:
+            result.click()
         sleep(2)
 
-        return self.page  # TODO create a POM of hashtag pages and have it return an instance of that
+        return hp.HashTagPage(self.page, hashtag)
 
     def getHashTagPostCountThroughSearch(self, hashtag):
-        self.page.slowTypeIntoField(xpaths["searchBoxInput"], '#{}'.format(hashtag))
-        tagResult = self.page.getPageElement_tryHard(
-            "//a[@href='/explore/tags/{}/']//../div[@class='Fy4o8']/span/span".format(hashtag)).text
+        tagResult = -1
 
-        return int(tagResult.replace(',', ''))
+        hashtag = hashtag.replace("#", "")
+        self.page.slowTypeIntoField(xpaths["searchBoxInput"], '#{}'.format(hashtag))
+        tagResult = self.page.getPageElement_tryHard("//a[@href='/explore/tags/{}/']//span//span".format(hashtag))
+
+        if tagResult:
+            tagResult = tagResult.text.replace(',', '')
+
+        return int(tagResult)
 
     def getAllSearchResults_List(self, query):
         sleep(1)

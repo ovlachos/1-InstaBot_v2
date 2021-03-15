@@ -1,3 +1,5 @@
+# All POMs require a webPage object to be instantiated/initialized.
+# The webPage object provides the webdriver and a "what page am I currently browsing" method
 import random
 import time
 from datetime import datetime
