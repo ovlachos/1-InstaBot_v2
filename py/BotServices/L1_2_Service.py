@@ -10,25 +10,29 @@ def userScraping(bot, userCount):
     usersL0 = bot.memoryManager.getListOfMarkedUsers(0)
 
     # Get people already following me and remove them
-    myFollowersCount = 1012  # indicative 2021/03/09
-    try:
-        myPage = bot.mainPage.topRibbon_myAccount.navigateToOwnProfile()
-
-        if not myPage:
-            raise RuntimeError
-
-        myFollowers = myPage.getFollowersList()
-        myFollowersCount = myPage.stats['followers']  # TODO: Record my latest stats into my profile's memory file
-
-        usersL0 = [x for x in usersL0 if x.handle not in myFollowers]
-
-    except Exception as e:
-        print(e)
+    myFollowersCount = 1100  # indicative 2021/03/14
+    # try:
+    #     myPage = bot.mainPage.topRibbon_myAccount.navigateToOwnProfile()
+    #
+    #     if not myPage:
+    #         raise RuntimeError
+    #
+    #     myFollowers = myPage.getFollowersList()
+    #     myFollowersCount = myPage.stats['followers']  # TODO: Record my latest stats into my profile's memory file
+    #
+    #     usersL0 = [x for x in usersL0 if x.handle not in myFollowers]
+    #
+    # except Exception as e:
+    #     print(e)
 
     # Bring users with relevant usernames to the top of the list, that they may be examined first
     usersL01 = [x for x in usersL0 if checkHandle(bot.words, x.handle)]
-    for user in usersL01:
-        usersL0.insert(0, usersL0.pop(usersL0.index(user)))
+    usersL0 = moveListOfUsersToTop(usersL0, usersL01)
+
+    # move manual additions to theGame to the top of the list
+    fileOfGameParticipants = bot.fileHandler.CSV_getFrameFromCSVfile('addUserTotheGameCSV')['userToAdd'].tolist()  # list of handles
+    usersL02 = [x for x in usersL0 if x.handle in fileOfGameParticipants]
+    usersL0 = moveListOfUsersToTop(usersL0, usersL02)
 
     # reduce the number of accounts to be examined, to the first N number of accounts
     usersL0 = usersL0[:userCount]
@@ -68,6 +72,13 @@ def userScraping(bot, userCount):
     print(f"#### {user_counter} people followed this time around")
     print("\n### theEnd ###")
     return 'OK'
+
+
+def moveListOfUsersToTop(originalList, usersToMove):
+    for user in usersToMove:
+        originalList.insert(0, originalList.pop(originalList.index(user)))
+
+    return originalList
 
 
 def L1(myFollowersCount, user):

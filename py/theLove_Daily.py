@@ -20,7 +20,7 @@ def main():
 
     print([hdLess, type(hdLess), noOfLikesToGive, type(noOfLikesToGive), percentageOfUsersToCover, type(percentageOfUsersToCover)])
     print('\n')
-    
+
     try:
         v2Bot = InstaBotV2.InstaBot(hdLess)
         # v2Bot.delayOps()

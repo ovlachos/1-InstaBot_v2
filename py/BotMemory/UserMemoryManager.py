@@ -23,8 +23,8 @@ class UserMemoryManager:
         self.listOfUserMemory = self.memoryFileHandler.readMemoryFile(JSONdecoder)
 
         ### Startup routines
+        self.manuallyAddNewUsersTo_theGame()
         # self.redistributeExtraLove()
-        # self.manuallyAddNewUsersTo_theGame()
         # self.cleanUpMemoryFromNonExistentProfiles()
 
     def readMemoryFilesFromDrive(self):  # JSONdecoder is a function that translates JSON to User_M objects
@@ -94,7 +94,9 @@ class UserMemoryManager:
             self.removeUserFromRecord(user)
 
     def manuallyAddNewUsersTo_theGame(self):
-        newGameParticipants = self.memoryFileHandler.CSV_getFrameFromCSVfile('addUserTotheGameCSV')['userToAdd'].tolist()  # list of handles
+        fileOfGameParticipants = self.memoryFileHandler.CSV_getFrameFromCSVfile('addUserTotheGameCSV')['userToAdd'].tolist()  # list of handles
+        l0 = [x.handle for x in self.getListOfMarkedUsers(0)]
+        newGameParticipants = [x for x in fileOfGameParticipants if x not in l0]
 
         for handle in newGameParticipants:
             user = self.retrieveUserFromMemory(handle)
@@ -106,9 +108,7 @@ class UserMemoryManager:
                 user = self.retrieveUserFromMemory(handle)
                 user.addToL0(auth.username)
 
-            # self.updateUserRecord(user)
-
-        self.writeMemoryFileToDrive()
+            self.updateUserRecord(user)
 
     def redistributeExtraLove(self):
         memoryLoves = [x.handle for x in self.getExtraLoveList()]  # list of handles
@@ -128,7 +128,7 @@ class UserMemoryManager:
             if user:
                 user.addToLoveExtra()
             else:
-                self.addUserToMemory(newLove) # this routine adds to both the memory object and writes the whole thing on the drive
+                self.addUserToMemory(newLove)  # this routine adds to both the memory object and writes the whole thing on the drive
                 user = self.retrieveUserFromMemory(newLove)
                 user.addToLoveExtra()
 
