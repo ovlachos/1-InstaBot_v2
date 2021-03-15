@@ -346,3 +346,14 @@ class User_M:
 
     def getSponsor(self):
         return self._userIgotYouFrom_youWereFollowing
+
+    def thisUserHasBeenRejected(self):
+        response = True
+        if self._markL0: response = False
+        if self._markL1: response = False
+        if self._markL2: response = False
+
+        if self.dateFollowed_byMe: response = False
+        if self.dateUnFollowed_byMe: response = False
+
+        return response

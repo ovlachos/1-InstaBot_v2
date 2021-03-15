@@ -7,7 +7,8 @@ xpaths = {
     'closePostButton': "//*[@aria-label='Close']",
     'locationElements': "//a[contains(@href,'/explore/locations')]",
     'postDateTime': "//time[@class='_1o9PC Nzb55']",
-    'commentElements': "//a[@class='sqdOP yWX7d     _8A5w5   ZIAjV ']",
+    'comenteUserHandles': "//a[@class='sqdOP yWX7d     _8A5w5   ZIAjV ']",
+    'hashTagsInComments': "//div[@class='C4VMK']//span//a[@class=' xil3i']",
     'likeLimitMessage_Text': "//div[contains(text(),'community')]",
     'likeLimitMessage_ReportButton': "//button[contains(text(),'Report a Problem')]",
     'likeLimitMessage_OKButton': "//button[contains(text(),'OK')]",
@@ -22,6 +23,7 @@ class Post:
         self.location = ""
         self.datePosted = ""
         self.usersCommented = []
+        self.hashTagsUsed = []
 
     def like_post(self):
         try:
@@ -80,9 +82,18 @@ class Post:
         except Exception as e:
             print(e)
 
+    def updateHashTagsUsed(self):
+        try:
+            tagElements = self.driver.find_elements_by_xpath(xpaths['hashTagsInComments'])
+            for tag in tagElements:
+                self.hashTagsUsed.append(tag.text.replace("#", ""))
+
+        except Exception as e:
+            print(e)
+
     def updateUsers_commented_underPost(self):
         try:
-            elements = self.driver.find_elements_by_xpath(xpaths['commentElements'])
+            elements = self.driver.find_elements_by_xpath(xpaths['comenteUserHandles'])
             for element in elements:
                 self.usersCommented.append(element.text)
 
