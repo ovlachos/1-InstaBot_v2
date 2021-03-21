@@ -8,11 +8,13 @@ def love(bot, loveType='extra', numberOfLikes=1, percentageOfUsers=0.501):
     # 'Like' everyone's latest N posts
     print(f"### ~~> Now processing the {loveType} list with {numberOfLikes} likes/user going for {(percentageOfUsers * 100)}%")
 
+    bot.mainPage.driver.refresh()
+
     # Sorted by date last checked
     # Least recently checked profiles come first
     userLoveList = getList(bot, loveType)
 
-    userLoveList = sorted(userLoveList, key=lambda User_M: User_M._dateTimeLovedlast)  # TODO: Test this: does it sort things the right way?
+    userLoveList = sorted(userLoveList, key=lambda User_M: User_M._dateTimeLovedlast)
 
     loveTotal = len(userLoveList)
     loveCount = loveTotal
@@ -20,6 +22,7 @@ def love(bot, loveType='extra', numberOfLikes=1, percentageOfUsers=0.501):
 
     # Go through the list line by line and like things
     printMark = 0.0
+    userNotFound_counter = 0
     for user in userLoveList:
         printMark = printCompletionRate(loveCount, loveTotal, printMark)
 
@@ -36,7 +39,12 @@ def love(bot, loveType='extra', numberOfLikes=1, percentageOfUsers=0.501):
 
         if not userPage:
             print(f"#### User {user.handle} probably does not exist. Will remove")
-            bot.memoryManager.updateUserRecord(user)
+            bot.memoryManager.userPageCannotBeFound(user)
+
+            userNotFound_counter += 1
+            if userNotFound_counter > 5:
+                if bot.internetConnectionLost():
+                    return "No Internet"
             continue
 
         loveCount -= 1
@@ -80,18 +88,26 @@ def likeTheXlatestPostsOfAUser(userPage, numberOfLikes):
     if userPage.infoAccess < 45:
         for i in range(0, numberOfLikes):
             try:
+                response = None
+
                 post = userPage.navigateTo_X_latestPost(i)
-                sleep(1)
-                response = post.like_post()
-                post.close_post()
-                sleep(1)
+
+                if post:
+                    sleep(1)
+                    response = post.like_post()
+                    post.close_post()
+                    sleep(1)
 
                 if response:
                     print("#### Like pressed on user {0}".format(userPage.userName))
+
                     if not isinstance(response, bool):
                         return 'busted'
-                sleep(1)
 
+                elif post and not response:
+                    return 'OK'
+
+                sleep(1)
             except Exception as e:
                 print(e)
                 continue

@@ -29,9 +29,9 @@ def main():
 
         v2Bot.l0_Service(numberOfProfilesToProcess)
     except Exception as e:
+        v2Bot.memoryManager.writeMemoryFileToDrive()
         print("we have a fail")
         print(e)
-        v2Bot.shutDown()
 
 
 if __name__ == "__main__": main()

@@ -1,3 +1,5 @@
+from time import sleep
+
 import auth
 
 from BotMemory import FileHandlerBot as fh
@@ -8,9 +10,11 @@ class UserMemoryManager:
     def __init__(self):
         self.memoryFileHandler = fh.FileHandlerBot()
         self.listOfUserMemory = []
+        self.rejected_Users = []
 
     ### Memory level
-    def writeMemoryFileToDrive(self):
+    def writeMemoryFileToDrive(self):  # TODO: Re-think when this method is called and if it should always be done explicitly outside this object
+        self.slimDownRejectedMemoryRecords()
         self.memoryFileHandler.writeToUserMemory(self.listOfUserMemory, UM.UserEncoderDecoder)
 
     def writeToIndividualUserMemory(self, userM):
@@ -19,17 +23,39 @@ class UserMemoryManager:
         self.memoryFileHandler.writeToUserMemory([userM], JSONencoder, file)
 
     def readMemoryFileFromDrive(self):  # JSONdecoder is a function that translates JSON to User_M objects
+        self.readRejected_Users()
+
         JSONdecoder = UM.UserEncoderDecoder.decode_user
-        self.listOfUserMemory = self.memoryFileHandler.readMemoryFile(JSONdecoder)
+
+        attemptsAtReadingM = 0
+        while len(self.listOfUserMemory) < 3:  # number "3" here is arbitrarily chosen
+            attemptsAtReadingM += 1
+            self.listOfUserMemory = self.memoryFileHandler.readMemoryFile(JSONdecoder)
+            sleep(2)
+
+            if attemptsAtReadingM > 2:
+                print(f"**** Trouble {attemptsAtReadingM} reading MEMORY FILE FROM DRIVE ****")
+            if attemptsAtReadingM > 5:
+                print("**** COULD NOT READ MEMORY FILE FROM DRIVE ****")
+                raise Exception
+
+        print(f"Succesfully read user memory with {len(self.listOfUserMemory)} users on record")
 
         ### Startup routines
-        self.manuallyAddNewUsersTo_theGame()
+        # self.manuallyAddNewUsersTo_theGame()
         # self.redistributeExtraLove()
-        # self.cleanUpMemoryFromNonExistentProfiles()
 
     def readMemoryFilesFromDrive(self):  # JSONdecoder is a function that translates JSON to User_M objects
         JSONdecoder = UM.UserEncoderDecoder.decode_user
         self.listOfUserMemory = self.memoryFileHandler.readMemoryFiles(JSONdecoder)
+
+    def readRejected_Users(self):
+        frame = self.memoryFileHandler.CSV_getFrameFromCSVfile('rejected_UsersCSV')
+        self.rejected_Users = frame['0'].tolist()
+
+    def writeRejected_Users(self):
+        frame = self.memoryFileHandler.listToFrame(self.rejected_Users)
+        self.memoryFileHandler.CSV_saveFrametoCSVfile('rejected_UsersCSV', frame)
 
     def getMemoryFile(self):
         return self.listOfUserMemory
@@ -88,6 +114,24 @@ class UserMemoryManager:
         alreadyFollowed = [x for x in self.listOfUserMemory if x.dateFollowed_byMe]
         return [x for x in alreadyFollowed if not x.dateUnFollowed_byMe]
 
+    def getListOfRejectedUserHandles(self):
+        rejected_in_memory = [x.handle for x in self.listOfUserMemory if x.thisUserHasBeenRejected()]
+        rejected_on_file_unique = [x for x in self.rejected_Users if x not in rejected_in_memory]
+        rejected = rejected_in_memory + rejected_on_file_unique
+        return rejected
+
+    def slimDownRejectedMemoryRecords(self):  # this is not the right way. Users I've added to the love are flagged as rejected
+
+        theListOfRejectedUsersInMemory = [x for x in self.listOfUserMemory if x.thisUserHasBeenRejected()]
+
+        for user in theListOfRejectedUsersInMemory:
+            handle = self.slimDownRejectedUserRecord(user)
+
+            if handle not in self.rejected_Users:
+                self.rejected_Users.append(handle)
+
+        self.writeRejected_Users()
+
     def cleanUpMemoryFromNonExistentProfiles(self):
         listToDelete = [x for x in self.listOfUserMemory if (x.bio == '-666' and x.altName == '-666')]
         for user in listToDelete:
@@ -97,18 +141,20 @@ class UserMemoryManager:
         fileOfGameParticipants = self.memoryFileHandler.CSV_getFrameFromCSVfile('addUserTotheGameCSV')['userToAdd'].tolist()  # list of handles
         l0 = [x.handle for x in self.getListOfMarkedUsers(0)]
         newGameParticipants = [x for x in fileOfGameParticipants if x not in l0]
+        newGameParticipants = [x for x in newGameParticipants if x not in self.rejected_Users]
 
         for handle in newGameParticipants:
             user = self.retrieveUserFromMemory(handle)
             if user:
-                if not user.dateFollowed_byMe:
+                if not user.thisUserHasBeenThroughTheSystem():
                     user.addToL0(auth.username)
+                    self.updateUserRecord(user)
             else:
                 self.addUserToMemory(handle)
                 user = self.retrieveUserFromMemory(handle)
-                user.addToL0(auth.username)
-
-            self.updateUserRecord(user)
+                if user:
+                    user.addToL0(auth.username)
+                    self.updateUserRecord(user)
 
     def redistributeExtraLove(self):
         memoryLoves = [x.handle for x in self.getExtraLoveList()]  # list of handles
@@ -148,6 +194,15 @@ class UserMemoryManager:
 
         return flag
 
+    def userHasBeenRejected(self, handle):
+        flag = False
+        for u in self.rejected_Users:
+            if u == handle:
+                flag = True
+                break
+
+        return flag
+
     def retrieveUserFromMemory(self, handle):
         if self.userExistsInMemory(handle):
             userObj = [x for x in self.listOfUserMemory if x.handle == handle][0]
@@ -159,19 +214,28 @@ class UserMemoryManager:
         print(f"Dropping user: {user.handle}. No page found (code -666)")
         user.markUserRejected()
         user.removeFromLoveDaily()
-        user.bio = '-666'
-        user.altName = '-666'  # TODO: find a way to remove these user records from memory file (as if they never existed). Self cleaning memory routine called on first read?
+        # user.bio = '-666'
+        # user.altName = '-666'
         self.updateUserRecord(user)
 
     def getUID_fromHandle(self, handle):
         userM = self.retrieveUserFromMemory(handle)
         return userM.uid
 
-    def addUserToMemory(self, handleOfNewUser):
-        if not self.userExistsInMemory(handleOfNewUser):
+    def addUserToMemory(self, handleOfNewUser, write=True):
+        if not self.userExistsInMemory(handleOfNewUser) and not self.userHasBeenRejected(handleOfNewUser):
             userM = UM.User_M(handleOfNewUser)
             self.listOfUserMemory.append(userM)
-            self.writeMemoryFileToDrive()
+            if write:
+                self.writeMemoryFileToDrive()
+
+    def slimDownRejectedUserRecord(self, userOdj):
+        user = userOdj
+
+        userHandle = userOdj.handle
+        self.removeUserFromRecord(user)
+
+        return userHandle
 
     def removeUserFromRecord(self, userObj):
         if self.userExistsInMemory(userObj.handle):
@@ -189,5 +253,6 @@ class UserMemoryManager:
             self.writeMemoryFileToDrive()
         else:
             # add new
-            self.listOfUserMemory.append(userObj)
-            self.writeMemoryFileToDrive()
+            if not self.userHasBeenRejected(userObj.handle):
+                self.listOfUserMemory.append(userObj)
+                self.writeMemoryFileToDrive()

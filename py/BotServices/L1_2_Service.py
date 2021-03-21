@@ -5,12 +5,14 @@ def userScraping(bot, userCount):
 
     # Read User Memory
     bot.memoryManager.readMemoryFileFromDrive()
+    bot.memoryManager.manuallyAddNewUsersTo_theGame()
+    bot.mainPage.driver.refresh()
 
     # Filter users down to L0
     usersL0 = bot.memoryManager.getListOfMarkedUsers(0)
 
     # Get people already following me and remove them
-    myFollowersCount = 1100  # indicative 2021/03/14
+    myFollowersCount = 1130  # indicative 2021/03/14
     # try:
     #     myPage = bot.mainPage.topRibbon_myAccount.navigateToOwnProfile()
     #
@@ -35,15 +37,22 @@ def userScraping(bot, userCount):
     usersL0 = moveListOfUsersToTop(usersL0, usersL02)
 
     # reduce the number of accounts to be examined, to the first N number of accounts
+    print(f"### {len(usersL0)} users still to be examined")
     usersL0 = usersL0[:userCount]
 
     user_counter = 0
+    userNotFound_counter = 0
     for user in usersL0:
 
         userPage = bot.mainPage.topRibbon_SearchField.navigateToUserPageThroughSearch(user.handle)
 
         if not userPage:
             bot.memoryManager.userPageCannotBeFound(user)
+
+            userNotFound_counter += 1
+            if userNotFound_counter > 5:
+                if bot.internetConnectionLost():
+                    return "No Internet"
             continue
 
         user.updateInfoFromLivePage_Landing(userPage)

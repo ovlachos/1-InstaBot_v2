@@ -37,7 +37,8 @@ def main():
             print("Busted!")
             return
     except Exception as e:
-        # v2Bot.shutDown()
+        v2Bot.memoryManager.writeMemoryFileToDrive()
+        print("we have a fail")
         print(e)
 
 

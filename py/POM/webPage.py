@@ -189,6 +189,21 @@ class WebPage:
 
         return result
 
+    def getPageElements_tryHard(self, xpath):
+        attempts = 3
+        result = None
+        while result is None:
+            try:
+                result = self.driver.find_elements_by_xpath(xpath)
+            except Exception as e:
+                # print(f"getPageElement_tryHard:\n{e}At XPATH:\n{xpath}")
+                attempts -= 1
+                sleep(1)
+                if attempts == 0:
+                    break
+
+        return result
+
     def sendKey(self, key):
         if isinstance(key, str):
             try:
@@ -197,6 +212,15 @@ class WebPage:
                 actions.perform()
             except Exception as e:
                 print(e)
+
+    def sendESC(self):
+        from selenium.webdriver.common.keys import Keys
+        try:
+            actions = ActionChains(self.driver)
+            actions.send_keys(Keys.ESCAPE).perform()
+            self.driver.refresh()
+        except Exception as e:
+            print(e)
 
     def slowTypeIntoField(self, fieldXPATH, query):
         try:

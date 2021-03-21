@@ -34,6 +34,7 @@ class UserEncoderDecoder(json.JSONEncoder):
                 'markL0': us._markL0,
                 'markL1': us._markL1,
                 'markL2': us._markL2,
+                'rejected': us._rejected,
 
                 'dateTimeLovedlast': us._dateTimeLovedlast,
                 'dateUnLoved_byMe': us.dateUnLoved_byMe,
@@ -77,6 +78,7 @@ class User_M:
         self._markL0 = False  # MarkL0 can turn to MarkL1, MarkL2, or be rejected (all marks are faulse and follow/unfollow dates == None
         self._markL1 = False  # MarkL1 can turn to a follow (marked by the existense of a follow date), or remain as MarkL1
         self._markL2 = False  # MarkL2 will 100% turn to a follow (marked by the existense of a follow date)
+        self._rejected = False  # rejected
 
         self._dateTimeLovedlast = None
         self.dateUnLoved_byMe = None
@@ -90,8 +92,8 @@ class User_M:
         if "__user__" in dict:
             self.handle = dict.get('0_Handle', ' ')
             self.uid = dict.get('uid', str(uuid4()))
-            self.bio = dict.get('Bio', ' ')
-            self.altName = dict.get('AltName', ' ')
+            self.bio = dict.get('Bio', None)
+            self.altName = dict.get('AltName', None)
             self.statsDict = dict.get('Stats', [stats])  # contains statsDicts
             self.statsDictTimestamp = dict.get('StatsTime', [])  # contains strings of datetime objects
             self.listOfPastNames = dict.get('Past Names', [])
@@ -109,6 +111,7 @@ class User_M:
             self._markL0 = dict.get('markL0', False)
             self._markL1 = dict.get('markL1', False)
             self._markL2 = dict.get('markL2', False)
+            self._rejected = dict.get('rejected', False)
 
             self._dateTimeLovedlast = dict.get('dateTimeLovedlast', None)
             self.dateUnLoved_byMe = dict.get('dateUnLoved_byMe', None)
@@ -199,6 +202,8 @@ class User_M:
         self._markL2 = False
         self.dateFollowed_byMe = None
         self.dateUnFollowed_byMe = None
+
+        self._rejected = True
 
     def addToL0(self, sponsorUser):
         self._markL0 = True
@@ -304,6 +309,22 @@ class User_M:
             print(e)
             return 1
 
+    def thisUserHasBeenRejected(self):
+        return self._rejected
+
+    def thisUserHasBeenThroughTheSystem(self):
+        response = False
+
+        # if self._markL0: response = True
+        if self._markL1: response = True
+        if self._markL2: response = True
+        if self._rejected: response = True
+
+        if self.dateFollowed_byMe: response = True
+        if self.dateUnFollowed_byMe: response = True
+
+        return response
+
     def thisUserDeservesDailyLove(self):
         return self._dailyLove
 
@@ -346,14 +367,3 @@ class User_M:
 
     def getSponsor(self):
         return self._userIgotYouFrom_youWereFollowing
-
-    def thisUserHasBeenRejected(self):
-        response = True
-        if self._markL0: response = False
-        if self._markL1: response = False
-        if self._markL2: response = False
-
-        if self.dateFollowed_byMe: response = False
-        if self.dateUnFollowed_byMe: response = False
-
-        return response

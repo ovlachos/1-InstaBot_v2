@@ -29,7 +29,8 @@ def main():
 
         v2Bot.theGame_Service()
     except Exception as e:
-        # v2Bot.shutDown()
+        v2Bot.memoryManager.writeMemoryFileToDrive()
+        print("we have a fail")
         print(e)
 
 

@@ -59,6 +59,7 @@ class Post:
         try:
             sleep(1)
             self.page.getPageElement_tryHard(xpaths['closePostButton']).click()
+            return True
         except Exception as e:
             print(e)
 

@@ -9,7 +9,8 @@ import auth
 xpaths = {
     "searchBoxInput": "//input[@placeholder='Search']",
     "resultsListFrame": "//div[@class='fuqBx']",
-    "resultsList": "//div[@class='fuqBx']/div",
+    "resultsList": "//a[contains(@href,'/')]//..//..//div[contains(@role,'none')]",
+    "noResults": "//div[contains(text(),'No results found.')]",
     "clearSearch": "//div[contains(@class,'coreSpriteSearchClear')]",
     "logo": "//a[@href='/']",
     "cancelUnfollow": "//button[contains(text(),'Cancel')]",
@@ -115,15 +116,6 @@ class SearchField:
         self.page = webPage
         self.driver = self.page.driver
 
-    def noResultsCheck(self):
-        try:
-            noResults = self.driver.find_element_by_xpath("//div[contains(text(),'No results')]")
-            if noResults:
-                return True
-            return False
-        except:
-            return False
-
     def goHomeWhereYouAreSafe_s(self, e):
         try:
             if 'obscures it' in e.msg:
@@ -141,7 +133,7 @@ class SearchField:
                 self.page.slowTypeIntoField(xpaths["searchBoxInput"], userName)
                 sleep(2)
 
-                if self.noResultsCheck():
+                if self.noResults():
                     return None
 
                 fuzzyMatch = self.getFuzzyResults(userName)
@@ -236,3 +228,7 @@ class SearchField:
             sleep(1)
         except Exception as e:
             print(e)
+
+    def noResults(self):
+        noResults = self.page.getPageElement_tryHard(xpaths['noResults'])
+        return noResults
