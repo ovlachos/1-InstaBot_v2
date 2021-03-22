@@ -38,13 +38,13 @@ def love(bot, loveType='extra', numberOfLikes=1, percentageOfUsers=0.501):
         user.updateTimelastLoved()
 
         if not userPage:
-            print(f"#### User {user.handle} probably does not exist. Will remove")
-            bot.memoryManager.userPageCannotBeFound(user)
-
-            userNotFound_counter += 1
-            if userNotFound_counter > 5:
-                if bot.internetConnectionLost():
-                    return "No Internet"
+            print(f"###### User {user.handle} cannot be found")
+            # bot.memoryManager.userPageCannotBeFound(user)
+            #
+            # userNotFound_counter += 1
+            # if userNotFound_counter > 5:
+            #     if bot.internetConnectionLost():
+            #         return "No Internet"
             continue
 
         loveCount -= 1

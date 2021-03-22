@@ -230,5 +230,8 @@ class SearchField:
             print(e)
 
     def noResults(self):
-        noResults = self.page.getPageElement_tryHard(xpaths['noResults'])
-        return noResults
+        try:
+            noResults = self.driver.find_element_by_xpath(xpaths['noResults'])
+            return noResults
+        except:
+            return None

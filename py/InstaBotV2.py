@@ -25,7 +25,7 @@ class InstaBot:
         self.timeLowerBound = 34
         self.timeLimitSinceLastLoved = 30
         self.followMana = 50
-        self.followManaMax = 50
+        self.followManaMax = 100
 
         # Game vars
         self.daysBeforeIunFollow = 20 - 1

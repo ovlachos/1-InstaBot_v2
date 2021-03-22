@@ -102,6 +102,11 @@ class Post:
         except Exception as e:
             print(e)
 
+    def getPostingUsersHandle(self):
+        self.updateUsers_commented_underPost()
+        if self.usersCommented:
+            return self.usersCommented[0]
+
     def escapeFromLikeLimitMessage(self, isitok=True):
         okButton = self.page.getPageElement_tryHard(xpaths['likeLimitMessage_OKButton'])
         reportAProblemButton = self.page.getPageElement_tryHard(xpaths['likeLimitMessage_ReportButton'])

@@ -58,7 +58,7 @@ def userScraping(bot, userCount):
         user.updateInfoFromLivePage_Landing(userPage)
 
         ### L1 ###
-        user = L1(myFollowersCount, user)
+        user = userHasMoreThan_X_followers(myFollowersCount, user)
 
         ### L2 ###
         if user._markL1:
@@ -90,11 +90,11 @@ def moveListOfUsersToTop(originalList, usersToMove):
     return originalList
 
 
-def L1(myFollowersCount, user):
+def userHasMoreThan_X_followers(followerCountLimit, user):
     # Filter out users with more followers than myself - aka L1
     userLatestStats = user.getLatestStats()
 
-    if userLatestStats['followers'] > (1.05 * myFollowersCount):
+    if userLatestStats['followers'] > (1.05 * followerCountLimit):
         wording = 'Dropping'
     elif userLatestStats['followers'] < 100:
         wording = 'Dropping'
