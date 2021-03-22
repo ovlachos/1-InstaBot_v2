@@ -42,6 +42,12 @@
 		"columns"  :  ["User","TotalLikes","LikesPerPost","IsAFollower"]
 	},
 	{
+		"filename" : "rejected_UsersCSV",
+		"filepath" : "Output/Games_Output/rejected_Users.csv",
+		"extension": ".csv",
+		"columns"  :  ["User"]
+	},
+	{
 		"filename" : "hashtagRunTimeArgsTXT",
 		"filepath" : "HashTags/HashTags_Input/hashtagRunTimeArgs.txt",
 		"extension": ".txt",

@@ -4,7 +4,7 @@ import InstaBotV2
 
 def main():
     hdLess = False
-    numberOfTags = 5
+    numberOfTags = 10
     numberOfPostsPerTag = 10
 
     if len(sys.argv) > 1:
@@ -32,7 +32,7 @@ def main():
             return
 
     except Exception as e:
-        # v2Bot.shutDown()
+        print("we have a fail")
         print(e)
 
 

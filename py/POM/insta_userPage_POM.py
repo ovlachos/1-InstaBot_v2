@@ -14,6 +14,7 @@ xpaths = {
     'likeLimitMessage_Text': "//div[contains(text(),'community')]",
     'likeLimitMessage_ReportButton': "//button[contains(text(),'Report a Problem')]",
     'likeLimitMessage_OKButton': "//button[contains(text(),'OK')]",
+    'posts': "//a[contains(@href,'/p/')]"
 }
 
 
@@ -257,19 +258,22 @@ class userPage(userPage_base):
             self.printProfileTypeDescription()
 
     def navigateTo_X_latestPost(self, numberX):
-        from POM import insta_post_POM as post
+        from POM import insta_post_POM as pst
         # numberX runs from 0 to whatever
         if self.infoAccess < 45:
             try:
                 # self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-                posts = self.driver.find_elements_by_xpath("//a[contains(@href,'/p/')]")
-                if len(posts) > 0 and len(posts) > numberX:
-                    self.driver.execute_script("arguments[0].scrollIntoView();", posts[numberX])
-                    self.driver.execute_script("arguments[0].click();", posts[numberX])
+                post = self.page.getPageElements_tryHard(xpaths['posts'])[numberX]
+                if post:
+                    self.driver.execute_script("arguments[0].scrollIntoView();", post)
+                    sleep(0.5)
+                    post.click()
+                    sleep(0.5)
             except Exception as e:
+                self.page.driver.refresh()
                 print(e)
                 print('Opening post number {} failed'.format(numberX))
-            return post.Post(self.page)
+            return pst.Post(self.page)
         else:
             print('nahh cannot navigate to a post because:')
             self.printProfileTypeDescription()

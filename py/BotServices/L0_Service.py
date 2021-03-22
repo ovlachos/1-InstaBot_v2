@@ -2,6 +2,8 @@ def list_getList_0(bot, numberOfProfilesToProcess=5):
     print("\n")
     print("### theL0 ###")
     print("\n")
+    bot.mainPage.driver.refresh()
+
     # Get users marked as L0: A list of all people following a number of profiles
 
     # If a source user's follower is already in the list we need not add a duplicate
@@ -25,13 +27,20 @@ def list_getList_0(bot, numberOfProfilesToProcess=5):
 
     targetUsers = targetUsers[:numberOfProfilesToProcess]
 
+    userNotFound_counter = 0
     for sponsorUser in targetUsers:  # a list of user memory objects
 
         # Navigate to user's profile
         userPage = bot.mainPage.topRibbon_SearchField.navigateToUserPageThroughSearch(sponsorUser.handle)
 
         if not userPage:
-            bot.memoryManager.userPageCannotBeFound(sponsorUser)
+            bot.memoryManager.userPageCannotBeFound(user)
+
+            userNotFound_counter += 1
+            if userNotFound_counter > 5:
+                if bot.internetConnectionLost():
+                    return "No Internet"
+
             continue
 
         print(f"#### User {sponsorUser.handle} has {userPage.stats['followers']} followers")

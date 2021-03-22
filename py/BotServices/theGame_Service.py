@@ -5,6 +5,8 @@ def playTheGame(bot):
 
     print(f"Follow Mana: {bot.followMana}")
 
+    bot.mainPage.driver.refresh()
+
     ### Read User Memory
     bot.memoryManager.readMemoryFileFromDrive()
 
@@ -27,6 +29,8 @@ def playTheGame(bot):
     ### Un Follow ###
     if unfollowList:
         print(f"### - {len(unfollowList)} users to be un-Followed")
+
+        userNotFound_counter = 0
         for user in unfollowList:
             user.daysSinceYouGotFollowed_Unfollowed('follow', True)
 
@@ -34,6 +38,12 @@ def playTheGame(bot):
 
             if not userPage:
                 bot.memoryManager.userPageCannotBeFound(user)
+
+                userNotFound_counter += 1
+                if userNotFound_counter > 5:
+                    if bot.internetConnectionLost():
+                        return "No Internet"
+
                 continue
 
             print(f"Will unfollow user {user.handle}")
@@ -50,11 +60,19 @@ def playTheGame(bot):
     ### Follow Reserves ###
     if mark2_list:
         print(f"### - {len(mark2_list)} reserve users to be Followed")
+
+        userNotFound_counter = 0
         for user in mark2_list:
             userPage = bot.mainPage.topRibbon_SearchField.navigateToUserPageThroughSearch(user.handle)
 
             if not userPage:
                 bot.memoryManager.userPageCannotBeFound(user)
+
+                userNotFound_counter += 1
+                if userNotFound_counter > 5:
+                    if bot.internetConnectionLost():
+                        return "No Internet"
+
                 continue
 
             print(f"Will follow user {user.handle}")
@@ -72,3 +90,4 @@ def playTheGame(bot):
         print(f"### - {0} reserve users to be Followed")
 
     print("\n### theEnd ###")
+    return "OK"

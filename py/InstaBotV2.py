@@ -25,7 +25,7 @@ class InstaBot:
         self.timeLowerBound = 34
         self.timeLimitSinceLastLoved = 30
         self.followMana = 50
-        self.followManaMax = 50
+        self.followManaMax = 100
 
         # Game vars
         self.daysBeforeIunFollow = 20 - 1
@@ -54,12 +54,32 @@ class InstaBot:
         self.webPage = wp.WebPage(self.headless)
 
     def botSleep(self, factor=1):
-        sleep(randint(factor * self.timeLowerBound, factor * self.timeUpperBound))
+        time = randint(self.timeLowerBound, self.timeUpperBound)
+        time = int(factor * time)
+        # print(f"Sleeping {time}")
+        sleep(time)
 
     def delayOps(self, minimum=2, maximum=20):
         sleepTime = randint((minimum * 60), (maximum * 60))
         print(f'Sleeping for {int(sleepTime / 60)} minutes')
         sleep(sleepTime)
+
+    def internetConnectionLost(self):
+        self.mainPage.driver.refresh()
+        try:
+            myPage = self.mainPage.topRibbon_myAccount.navigateToOwnProfile()
+            sleep(1)
+            mylatestPost = myPage.navigateTo_X_latestPost(0)
+
+            if mylatestPost:
+                mylatestPost.close_post()
+                return True
+            else:
+                return False
+
+        except Exception as e:
+            print(e)
+            return False
 
     ### SERVICES ###
     def love_Service(self, fileName, numberOfLikes, percentageOfUsers):
