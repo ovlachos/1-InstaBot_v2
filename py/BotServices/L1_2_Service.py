@@ -63,7 +63,8 @@ def userScraping(bot, userCount):
         ### L2 ###
         if user._markL1:
 
-            user = L2(user, userPage, bot.words, bot.targetHashtags_List)
+            if not user._markL2:
+                user = L2(user, userPage, bot.words, bot.targetHashtags_List)
 
             ### Follow on the spot if the user is an L2 and there's still mana left.
             if user.iShouldFollowThisUser() and bot.followMana > 0:
@@ -124,9 +125,21 @@ def L2(user, userPage, words, targetHashtags_List):
 
     # Check the hashtags the user follows
     hashtags = []
+    hashtagsUsing = []
     try:
         hashtags = userPage.getHashtagsFollowingList()
-        user.updateHashtagsFollwingList(hashtags)
+        user.updateHashtagsFollowingList(hashtags)
+
+        for x in range(0, 3):
+            post = userPage.navigateTo_X_latestPost(x)
+            post.updateHashTagsUsed()
+            hashtagsUsing.extend(post.hashTagsUsed)
+            post.page.sleepPage(1)
+            post.close_post()
+
+        user.updateHashtagsUsing(hashtagsUsing)
+        hashtags.extend(hashtagsUsing)
+
     except Exception as e:
         print(e)
 

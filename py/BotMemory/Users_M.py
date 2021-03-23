@@ -75,9 +75,9 @@ class User_M:
         self.dateUnFollowed_byMe = None  # The existense of a unfollow date means that the cycle is over. No more follow/unfollow actions for this user
         self._userIgotYouFrom_youWereFollowing = None
 
-        self._markL0 = False  # MarkL0 can turn to MarkL1, MarkL2, or be rejected (all marks are faulse and follow/unfollow dates == None
-        self._markL1 = False  # MarkL1 can turn to a follow (marked by the existense of a follow date), or remain as MarkL1
-        self._markL2 = False  # MarkL2 will 100% turn to a follow (marked by the existense of a follow date)
+        self._markL0 = False  # MarkL0 means I should investigate this user for L1, and maybe then L2.
+        self._markL1 = False  # MarkL1 means this user has fewer followers within a set range and more than X posts.
+        self._markL2 = False  # MarkL2 means this user uses hashtags or wording that suggests he/she are interested at a given topic.
         self._rejected = False  # rejected
 
         self._dateTimeLovedlast = None
@@ -117,11 +117,6 @@ class User_M:
             self.dateUnLoved_byMe = dict.get('dateUnLoved_byMe', None)
             self._dailyLove = dict.get('dailyLove', False)
             self._extraLove = dict.get('extraLove', False)
-
-    def serializeTo_JSON(self, format=False):
-        if not format:
-            return json.dumps(self, cls=UserEncoderDecoder)
-        return json.dumps(self, cls=UserEncoderDecoder, sort_keys=True, indent=4)
 
     def updateInfoFromLivePage_Landing(self, userPagePOM):
 
@@ -186,7 +181,11 @@ class User_M:
         except:
             return 0
 
-    def updateHashtagsFollwingList(self, newHashtags):
+    def updateHashtagsUsing(self, hashTags):
+        self.listOf_HashTagsUsing.extend(hashTags)
+        self.listOf_HashTagsUsing = list(dict.fromkeys(self.listOf_HashTagsUsing))  # remove duplicates
+
+    def updateHashtagsFollowingList(self, newHashtags):
         self.listOf_HashTagsfollowing.extend(newHashtags)
         self.listOf_HashTagsfollowing = list(dict.fromkeys(self.listOf_HashTagsfollowing))  # remove duplicates
 
@@ -198,37 +197,26 @@ class User_M:
 
     def markUserRejected(self):
         self._markL0 = False
-        self._markL1 = False
-        self._markL2 = False
-        self.dateFollowed_byMe = None
-        self.dateUnFollowed_byMe = None
-
         self._rejected = True
 
     def addToL0(self, sponsorUser):
         self._markL0 = True
-        self._markL1 = False
-        self._markL2 = False
         self._userIgotYouFrom_youWereFollowing = sponsorUser
 
     def addToL1(self):
         if self._markL0:
-            self._markL0 = False
             self._markL1 = True
-            self._markL2 = False
 
     def addToL2(self):
-        if self._markL1:
-            self._markL0 = False
-            self._markL1 = False
-            self._markL2 = True
+        self._markL2 = True
+
+    def thisUserHasBeenRejected(self):
+        return self._rejected
 
     def markTimeFollowed(self):
         from datetime import datetime
-        self.dateFollowed_byMe = datetime.now().strftime(timeStampFormat)
         self._markL0 = False
-        self._markL1 = False
-        self._markL2 = False
+        self.dateFollowed_byMe = datetime.now().strftime(timeStampFormat)
 
     def markDateUnfollowed(self):
         from datetime import datetime
@@ -249,7 +237,6 @@ class User_M:
         print(f"#### {self.handle} added to theLoveExtra")
 
     def removeFromLoveDaily(self):
-
         timestamp = datetime.now().strftime(timeStampFormat)
         self._dailyLove = False
         self.dateUnLoved_byMe = timestamp
@@ -309,10 +296,7 @@ class User_M:
             print(e)
             return 1
 
-    def thisUserHasBeenRejected(self):
-        return self._rejected
-
-    def thisUserHasBeenThroughTheSystem(self):
+    def thisUserHasBeenThroughTheSystem(self):  # TODO : Need to rethink this
         response = False
 
         # if self._markL0: response = True
@@ -342,19 +326,12 @@ class User_M:
         else:
             pass
 
-    def iShouldFollowThisUser(self):
+    def iShouldFollowThisUser(self):  # TODO : Need to rethink this
         answer = False
 
-        if self._markL2 and not self.dateFollowed_byMe:
-            answer = True
-
-        return answer
-
-    def iShouldUnFollowThisUser(self):
-        answer = False
-
-        if self.dateFollowed_byMe and not self.dateUnFollowed_byMe:
-            answer = True
+        if self._markL1 and self._markL2:
+            if not self._rejected and not self.dateFollowed_byMe:
+                answer = True
 
         return answer
 

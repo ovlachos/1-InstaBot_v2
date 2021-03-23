@@ -247,3 +247,6 @@ class WebPage:
 
     def getTextFromWebElement(self, webElement):
         return webElement.text
+
+    def sleepPage(self, secs):
+        sleep(secs)
