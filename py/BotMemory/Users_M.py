@@ -85,38 +85,38 @@ class User_M:
         self._dailyLove = False
         self._extraLove = False
 
-    def populate_overwrite(self, dict):
+    def populate_overwrite(self, dictio):
 
         stats = {"posts": 0, "followers": 0, "following": 0}
 
-        if "__user__" in dict:
-            self.handle = dict.get('0_Handle', ' ')
-            self.uid = dict.get('uid', str(uuid4()))
-            self.bio = dict.get('Bio', None)
-            self.altName = dict.get('AltName', None)
-            self.statsDict = dict.get('Stats', [stats])  # contains statsDicts
-            self.statsDictTimestamp = dict.get('StatsTime', [])  # contains strings of datetime objects
-            self.listOfPastNames = dict.get('Past Names', [])
-            # self.dateTimeVisitedLast = dict['LastVisited'] #This will be calculated by dict variable and retrieved only by function
+        if "__user__" in dictio:
+            self.handle = dictio.get('0_Handle', ' ')
+            self.uid = dictio.get('uid', str(uuid4()))
+            self.bio = dictio.get('Bio', None)
+            self.altName = dictio.get('AltName', None)
+            self.statsDict = dictio.get('Stats', [stats])  # contains statsDicts
+            self.statsDictTimestamp = dictio.get('StatsTime', [])  # contains strings of datetime objects
+            self.listOfPastNames = dictio.get('Past Names', [])
+            # self.dateTimeVisitedLast = dictio['LastVisited'] #This will be calculated by dict variable and retrieved only by function
 
-            self.listOf_followers = dict.get('listOf_followers', [])
-            self.listOf_following = dict.get('listOf_following', [])
-            self.listOf_HashTagsfollowing = dict.get('listOf_HashTagsfollowing', [])
-            self.listOf_HashTagsUsing = dict.get('listOf_HashTagsUsing', [])
+            self.listOf_followers = dictio.get('listOf_followers', [])
+            self.listOf_following = dictio.get('listOf_following', [])
+            self.listOf_HashTagsfollowing = dictio.get('listOf_HashTagsfollowing', [])
+            self.listOf_HashTagsUsing = dictio.get('listOf_HashTagsUsing', [])
 
-            self.dateFollowed_byMe = dict.get('dateFollowed_byMe', None)
-            self.dateUnFollowed_byMe = dict.get('dateUnFollowed_byMe', None)
-            self._userIgotYouFrom_youWereFollowing = dict.get('userIgotYouFrom_youWereFollowing', None)
+            self.dateFollowed_byMe = dictio.get('dateFollowed_byMe', None)
+            self.dateUnFollowed_byMe = dictio.get('dateUnFollowed_byMe', None)
+            self._userIgotYouFrom_youWereFollowing = dictio.get('userIgotYouFrom_youWereFollowing', None)
 
-            self._markL0 = dict.get('markL0', False)
-            self._markL1 = dict.get('markL1', False)
-            self._markL2 = dict.get('markL2', False)
-            self._rejected = dict.get('rejected', False)
+            self._markL0 = dictio.get('markL0', False)
+            self._markL1 = dictio.get('markL1', False)
+            self._markL2 = dictio.get('markL2', False)
+            self._rejected = dictio.get('rejected', False)
 
-            self._dateTimeLovedlast = dict.get('dateTimeLovedlast', None)
-            self.dateUnLoved_byMe = dict.get('dateUnLoved_byMe', None)
-            self._dailyLove = dict.get('dailyLove', False)
-            self._extraLove = dict.get('extraLove', False)
+            self._dateTimeLovedlast = dictio.get('dateTimeLovedlast', None)
+            self.dateUnLoved_byMe = dictio.get('dateUnLoved_byMe', None)
+            self._dailyLove = dictio.get('dailyLove', False)
+            self._extraLove = dictio.get('extraLove', False)
 
     def updateInfoFromLivePage_Landing(self, userPagePOM):
 

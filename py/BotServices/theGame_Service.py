@@ -58,7 +58,7 @@ def playTheGame(bot):
         print(f"### - {0} users to be un-Followed")
 
     ### Follow Reserves ###
-    if reservesList:
+    if reservesList and bot.followMana > 0:
         print(f"### - {len(reservesList)} reserve users to be Followed")
 
         userNotFound_counter = 0
@@ -81,7 +81,7 @@ def playTheGame(bot):
                 if 'OK' in userPage.follow():
                     user.markTimeFollowed()
                     user.addToLoveDaily()
-                    bot.followMana = bot.followMana - 1
+                    bot.decrementFolowMana(1)
 
             bot.memoryManager.updateUserRecord(user)
             if user.dateFollowed_byMe:

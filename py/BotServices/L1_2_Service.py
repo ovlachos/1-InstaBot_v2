@@ -71,7 +71,7 @@ def userScraping(bot, userCount):
                 if 'OK' in userPage.follow():
                     user.markTimeFollowed()
                     user.addToLoveDaily()
-                    bot.followMana = bot.followMana - 1
+                    bot.decrementFolowMana(1)
                     user_counter += 1
                     print(f"#### {user_counter} people followed so far")
 
@@ -152,9 +152,12 @@ def L2(user, userPage, words, targetHashtags_List):
 
 
 def checkHandle(words, hanlde):
-    for word in words:
-        if word in hanlde:
-            return True
+    try:
+        for word in words:
+            if word in hanlde:
+                return True
+    except:
+        pass
 
 
 def checkProfile(words, userPage):

@@ -7,21 +7,24 @@ def main():
     hdLess = False
     numberOfProfilesToProcess = 5
     typeOfList = 'hashtags'
-    numberOfTags = 1
-    numberOfPostsPerTag = 3
+    numberOfTags = 10
+    numberOfPostsPerTag = 5
 
     if len(sys.argv) > 1:
         print(sys.argv)
         if sys.argv[1] == 'True':
             hdLess = True
         try:
-            numberOfProfilesToProcess = int(sys.argv[2])
+            typeOfList = int(sys.argv[2])
+            numberOfProfilesToProcess = int(sys.argv[3])
+            numberOfTags = int(sys.argv[4])
+            numberOfPostsPerTag = int(sys.argv[5])
         except Exception as e:
             print(e)
     else:
         hdLess = False
 
-    print([hdLess, type(hdLess), numberOfProfilesToProcess, type(numberOfProfilesToProcess)])
+    print([hdLess, type(hdLess), typeOfList, numberOfProfilesToProcess, type(numberOfProfilesToProcess)], numberOfTags, numberOfPostsPerTag)
     print('\n')
 
     try:

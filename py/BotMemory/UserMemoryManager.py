@@ -151,14 +151,14 @@ class UserMemoryManager:
             if user:
                 if not user.thisUserHasBeenThroughTheSystem():
                     user.addToL0(auth.username)
-                    user.addToL2(auth.username)
+                    user.addToL2()
                     self.updateUserRecord(user)
             else:
                 self.addUserToMemory(handle)
                 user = self.retrieveUserFromMemory(handle)
                 if user:
                     user.addToL0(auth.username)
-                    user.addToL2(auth.username)
+                    user.addToL2()
                     self.updateUserRecord(user)
 
     def redistributeExtraLove(self):

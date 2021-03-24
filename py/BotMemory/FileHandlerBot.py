@@ -123,6 +123,28 @@ class FileHandlerBot:
             except Exception as e:
                 print("{0}, {1}".format(e, user))
 
+    def readSimpleJSONfiles(self, fileName):
+
+        memoryfile = None
+        file = self.getFileFromFilename(fileName)
+
+        if file:
+            try:
+                with open(file['filepath']) as jUM:
+                    memoryfile = json.load(jUM)
+            except Exception as e:
+                print(f'WARNING: fail in reading {fileName}. Falling back to defaults')
+
+            return memoryfile
+
+    def writeSimpleJSONfiles(self, fileName, fileObj):
+
+        file = self.getFileFromFilename(fileName)['filepath']
+
+        if file:
+            with open(file, 'w') as jUM:
+                json.dump(fileObj, jUM, sort_keys=True, indent=4)
+
     def readMemoryFile(self, JSONdecoder):  # JSONdecoder is a function that translates JSON to User_M objects
 
         file = self.getFileFromFilename('User_Memory')

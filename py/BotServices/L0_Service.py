@@ -140,7 +140,7 @@ def list_getList_0_FromTagedPosts(bot, numberOfTags, numberOfPostsPerTag):
     return 'OK'
 
 
-def getUserHandles(hashTagPage, numberOfPostsPerTag, escapeFunc, bot):
+def getUserHandles(hashTagPage, numberOfPostsPerTag, escapeFunc, bot, toLike=True):
     usersToReturn = []
     for i in range(0, numberOfPostsPerTag):
         try:
@@ -148,11 +148,19 @@ def getUserHandles(hashTagPage, numberOfPostsPerTag, escapeFunc, bot):
 
             bot.mainPage.page.sleepPage(2)
 
+            if toLike:
+                liked = post.like_post()
+
             usersToReturn.append(post.getPostingUsersHandle())
 
             bot.mainPage.page.sleepPage(2)
             postExists = post.close_post()
 
+            if liked:
+                if not isinstance(liked, bool):
+                    return 'busted'
+
+                bot.botSleep()
             if not postExists:
                 escapeFunc()
 
