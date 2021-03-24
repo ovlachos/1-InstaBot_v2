@@ -59,6 +59,7 @@ def love(bot, loveType='extra', numberOfLikes=1, percentageOfUsers=0.501):
         if user.getLatestPostCount() >= userPage.stats['posts']:
             user.updateInfoFromLivePage_Landing(userPage)
             bot.memoryManager.updateUserRecord(user)
+            bot.botSleep(.2)
             continue
 
         # Adjust number of likes to just new posts
@@ -78,7 +79,7 @@ def love(bot, loveType='extra', numberOfLikes=1, percentageOfUsers=0.501):
 
         bot.memoryManager.updateUserRecord(user)
 
-        bot.botSleep()
+        bot.botSleep(1.2)
 
     print("\n### theEnd ###")
     return 'OK'

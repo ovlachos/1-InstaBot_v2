@@ -20,10 +20,11 @@ class Post:
     def __init__(self, webPage):
         self.page = webPage
         self.driver = self.page.driver
-        self.location = ""
-        self.datePosted = ""
+        self.location = None
+        self.datePosted = None
         self.usersCommented = []
         self.hashTagsUsed = []
+        self.postingUser = None
 
     def like_post(self):
         try:
@@ -105,7 +106,8 @@ class Post:
     def getPostingUsersHandle(self):
         self.updateUsers_commented_underPost()
         if self.usersCommented:
-            return self.usersCommented[0]
+            self.postingUser = self.usersCommented[0]
+            return self.postingUser
 
     def escapeFromLikeLimitMessage(self, isitok=True):
         okButton = self.page.getPageElement_tryHard(xpaths['likeLimitMessage_OKButton'])

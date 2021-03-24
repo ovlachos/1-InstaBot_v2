@@ -31,7 +31,7 @@ def boostLatestPost(bot, numberOfTags, numberOfPostsPerTag):
 
         print(f"### HashTag: {hashPage.hashtag}")
 
-        response = likeThe_X_mostRecentPostsUnderHashtag(hashPage, numberOfPostsPerTag, bot.mainPage.page.sendESC)
+        response = likeThe_X_mostRecentPostsUnderHashtag(hashPage, numberOfPostsPerTag, bot.mainPage.page.sendESC, bot)
         if 'busted' in response:
             return 'busted'
 
@@ -41,7 +41,7 @@ def boostLatestPost(bot, numberOfTags, numberOfPostsPerTag):
     return 'OK'
 
 
-def likeThe_X_mostRecentPostsUnderHashtag(hashTagPage, numberOfPostsPerTag, escapeFunc):
+def likeThe_X_mostRecentPostsUnderHashtag(hashTagPage, numberOfPostsPerTag, escapeFunc, bot):
     for i in range(0, numberOfPostsPerTag):
         try:
             post = hashTagPage.navigateTo_X_mostRecentPosts(i)
@@ -57,6 +57,7 @@ def likeThe_X_mostRecentPostsUnderHashtag(hashTagPage, numberOfPostsPerTag, esca
                 if not isinstance(liked, bool):
                     return 'busted'
 
+                bot.botSleep()
             elif postExists:
                 return 'OK'
             elif not postExists:

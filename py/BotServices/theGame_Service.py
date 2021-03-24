@@ -13,7 +13,7 @@ def playTheGame(bot):
     gameList = bot.memoryManager.getListOfUsersAlreadyFollowedOnly()
 
     ### Derive Lists
-    mark2_list = bot.memoryManager.getListOfMarkedUsers(2)
+    reservesList = bot.memoryManager.getListOfReserveUsersToFollow()
     unfollowList = bot.memoryManager.getListOfUsersToUnFollow(bot.daysBeforeIunFollow)
     unLoveList = bot.memoryManager.getListOfUsersToUnLove(bot.daysBeforeIunLove)
 
@@ -58,11 +58,11 @@ def playTheGame(bot):
         print(f"### - {0} users to be un-Followed")
 
     ### Follow Reserves ###
-    if mark2_list:
-        print(f"### - {len(mark2_list)} reserve users to be Followed")
+    if reservesList and bot.followMana > 0:
+        print(f"### - {len(reservesList)} reserve users to be Followed")
 
         userNotFound_counter = 0
-        for user in mark2_list:
+        for user in reservesList:
             userPage = bot.mainPage.topRibbon_SearchField.navigateToUserPageThroughSearch(user.handle)
 
             if not userPage:
@@ -81,7 +81,7 @@ def playTheGame(bot):
                 if 'OK' in userPage.follow():
                     user.markTimeFollowed()
                     user.addToLoveDaily()
-                    bot.followMana = bot.followMana - 1
+                    bot.decrementFolowMana(1)
 
             bot.memoryManager.updateUserRecord(user)
             if user.dateFollowed_byMe:

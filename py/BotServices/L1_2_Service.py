@@ -28,7 +28,7 @@ def userScraping(bot, userCount):
     #     print(e)
 
     # Bring users with relevant usernames to the top of the list, that they may be examined first
-    usersL01 = [x for x in usersL0 if checkHandle(bot.words, x.handle)]
+    usersL01 = [x for x in usersL0 if checkHandle(bot.words, x.handle) or x._markL2]
     usersL0 = moveListOfUsersToTop(usersL0, usersL01)
 
     # move manual additions to theGame to the top of the list
@@ -63,14 +63,15 @@ def userScraping(bot, userCount):
         ### L2 ###
         if user._markL1:
 
-            user = L2(user, userPage, bot.words, bot.targetHashtags_List)
+            if not user._markL2:
+                user = L2(user, userPage, bot.words, bot.targetHashtags_List)
 
             ### Follow on the spot if the user is an L2 and there's still mana left.
             if user.iShouldFollowThisUser() and bot.followMana > 0:
                 if 'OK' in userPage.follow():
                     user.markTimeFollowed()
                     user.addToLoveDaily()
-                    bot.followMana = bot.followMana - 1
+                    bot.decrementFolowMana(1)
                     user_counter += 1
                     print(f"#### {user_counter} people followed so far")
 
@@ -124,9 +125,21 @@ def L2(user, userPage, words, targetHashtags_List):
 
     # Check the hashtags the user follows
     hashtags = []
+    hashtagsUsing = []
     try:
         hashtags = userPage.getHashtagsFollowingList()
-        user.updateHashtagsFollwingList(hashtags)
+        user.updateHashtagsFollowingList(hashtags)
+
+        for x in range(0, 3):
+            post = userPage.navigateTo_X_latestPost(x)
+            post.updateHashTagsUsed()
+            hashtagsUsing.extend(post.hashTagsUsed)
+            post.page.sleepPage(1)
+            post.close_post()
+
+        user.updateHashtagsUsing(hashtagsUsing)
+        hashtags.extend(hashtagsUsing)
+
     except Exception as e:
         print(e)
 
@@ -139,9 +152,12 @@ def L2(user, userPage, words, targetHashtags_List):
 
 
 def checkHandle(words, hanlde):
-    for word in words:
-        if word in hanlde:
-            return True
+    try:
+        for word in words:
+            if word in hanlde:
+                return True
+    except:
+        pass
 
 
 def checkProfile(words, userPage):

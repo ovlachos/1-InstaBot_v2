@@ -70,5 +70,11 @@
 		"filepath" : "Output/User_Memory/User_Memory.json",
 		"extension": ".json",
 		"columns"  :  null
+	},
+	{
+		"filename" : "BotParams",
+		"filepath" : "Input/BotParams.json",
+		"extension": ".json",
+		"columns"  :  null
 	}
 ]

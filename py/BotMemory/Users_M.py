@@ -75,9 +75,9 @@ class User_M:
         self.dateUnFollowed_byMe = None  # The existense of a unfollow date means that the cycle is over. No more follow/unfollow actions for this user
         self._userIgotYouFrom_youWereFollowing = None
 
-        self._markL0 = False  # MarkL0 can turn to MarkL1, MarkL2, or be rejected (all marks are faulse and follow/unfollow dates == None
-        self._markL1 = False  # MarkL1 can turn to a follow (marked by the existense of a follow date), or remain as MarkL1
-        self._markL2 = False  # MarkL2 will 100% turn to a follow (marked by the existense of a follow date)
+        self._markL0 = False  # MarkL0 means I should investigate this user for L1, and maybe then L2.
+        self._markL1 = False  # MarkL1 means this user has fewer followers within a set range and more than X posts.
+        self._markL2 = False  # MarkL2 means this user uses hashtags or wording that suggests he/she are interested at a given topic.
         self._rejected = False  # rejected
 
         self._dateTimeLovedlast = None
@@ -85,43 +85,38 @@ class User_M:
         self._dailyLove = False
         self._extraLove = False
 
-    def populate_overwrite(self, dict):
+    def populate_overwrite(self, dictio):
 
         stats = {"posts": 0, "followers": 0, "following": 0}
 
-        if "__user__" in dict:
-            self.handle = dict.get('0_Handle', ' ')
-            self.uid = dict.get('uid', str(uuid4()))
-            self.bio = dict.get('Bio', None)
-            self.altName = dict.get('AltName', None)
-            self.statsDict = dict.get('Stats', [stats])  # contains statsDicts
-            self.statsDictTimestamp = dict.get('StatsTime', [])  # contains strings of datetime objects
-            self.listOfPastNames = dict.get('Past Names', [])
-            # self.dateTimeVisitedLast = dict['LastVisited'] #This will be calculated by dict variable and retrieved only by function
+        if "__user__" in dictio:
+            self.handle = dictio.get('0_Handle', ' ')
+            self.uid = dictio.get('uid', str(uuid4()))
+            self.bio = dictio.get('Bio', None)
+            self.altName = dictio.get('AltName', None)
+            self.statsDict = dictio.get('Stats', [stats])  # contains statsDicts
+            self.statsDictTimestamp = dictio.get('StatsTime', [])  # contains strings of datetime objects
+            self.listOfPastNames = dictio.get('Past Names', [])
+            # self.dateTimeVisitedLast = dictio['LastVisited'] #This will be calculated by dict variable and retrieved only by function
 
-            self.listOf_followers = dict.get('listOf_followers', [])
-            self.listOf_following = dict.get('listOf_following', [])
-            self.listOf_HashTagsfollowing = dict.get('listOf_HashTagsfollowing', [])
-            self.listOf_HashTagsUsing = dict.get('listOf_HashTagsUsing', [])
+            self.listOf_followers = dictio.get('listOf_followers', [])
+            self.listOf_following = dictio.get('listOf_following', [])
+            self.listOf_HashTagsfollowing = dictio.get('listOf_HashTagsfollowing', [])
+            self.listOf_HashTagsUsing = dictio.get('listOf_HashTagsUsing', [])
 
-            self.dateFollowed_byMe = dict.get('dateFollowed_byMe', None)
-            self.dateUnFollowed_byMe = dict.get('dateUnFollowed_byMe', None)
-            self._userIgotYouFrom_youWereFollowing = dict.get('userIgotYouFrom_youWereFollowing', None)
+            self.dateFollowed_byMe = dictio.get('dateFollowed_byMe', None)
+            self.dateUnFollowed_byMe = dictio.get('dateUnFollowed_byMe', None)
+            self._userIgotYouFrom_youWereFollowing = dictio.get('userIgotYouFrom_youWereFollowing', None)
 
-            self._markL0 = dict.get('markL0', False)
-            self._markL1 = dict.get('markL1', False)
-            self._markL2 = dict.get('markL2', False)
-            self._rejected = dict.get('rejected', False)
+            self._markL0 = dictio.get('markL0', False)
+            self._markL1 = dictio.get('markL1', False)
+            self._markL2 = dictio.get('markL2', False)
+            self._rejected = dictio.get('rejected', False)
 
-            self._dateTimeLovedlast = dict.get('dateTimeLovedlast', None)
-            self.dateUnLoved_byMe = dict.get('dateUnLoved_byMe', None)
-            self._dailyLove = dict.get('dailyLove', False)
-            self._extraLove = dict.get('extraLove', False)
-
-    def serializeTo_JSON(self, format=False):
-        if not format:
-            return json.dumps(self, cls=UserEncoderDecoder)
-        return json.dumps(self, cls=UserEncoderDecoder, sort_keys=True, indent=4)
+            self._dateTimeLovedlast = dictio.get('dateTimeLovedlast', None)
+            self.dateUnLoved_byMe = dictio.get('dateUnLoved_byMe', None)
+            self._dailyLove = dictio.get('dailyLove', False)
+            self._extraLove = dictio.get('extraLove', False)
 
     def updateInfoFromLivePage_Landing(self, userPagePOM):
 
@@ -186,7 +181,11 @@ class User_M:
         except:
             return 0
 
-    def updateHashtagsFollwingList(self, newHashtags):
+    def updateHashtagsUsing(self, hashTags):
+        self.listOf_HashTagsUsing.extend(hashTags)
+        self.listOf_HashTagsUsing = list(dict.fromkeys(self.listOf_HashTagsUsing))  # remove duplicates
+
+    def updateHashtagsFollowingList(self, newHashtags):
         self.listOf_HashTagsfollowing.extend(newHashtags)
         self.listOf_HashTagsfollowing = list(dict.fromkeys(self.listOf_HashTagsfollowing))  # remove duplicates
 
@@ -198,37 +197,26 @@ class User_M:
 
     def markUserRejected(self):
         self._markL0 = False
-        self._markL1 = False
-        self._markL2 = False
-        self.dateFollowed_byMe = None
-        self.dateUnFollowed_byMe = None
-
         self._rejected = True
 
     def addToL0(self, sponsorUser):
         self._markL0 = True
-        self._markL1 = False
-        self._markL2 = False
         self._userIgotYouFrom_youWereFollowing = sponsorUser
 
     def addToL1(self):
         if self._markL0:
-            self._markL0 = False
             self._markL1 = True
-            self._markL2 = False
 
     def addToL2(self):
-        if self._markL1:
-            self._markL0 = False
-            self._markL1 = False
-            self._markL2 = True
+        self._markL2 = True
+
+    def thisUserHasBeenRejected(self):
+        return self._rejected
 
     def markTimeFollowed(self):
         from datetime import datetime
-        self.dateFollowed_byMe = datetime.now().strftime(timeStampFormat)
         self._markL0 = False
-        self._markL1 = False
-        self._markL2 = False
+        self.dateFollowed_byMe = datetime.now().strftime(timeStampFormat)
 
     def markDateUnfollowed(self):
         from datetime import datetime
@@ -249,7 +237,6 @@ class User_M:
         print(f"#### {self.handle} added to theLoveExtra")
 
     def removeFromLoveDaily(self):
-
         timestamp = datetime.now().strftime(timeStampFormat)
         self._dailyLove = False
         self.dateUnLoved_byMe = timestamp
@@ -309,19 +296,14 @@ class User_M:
             print(e)
             return 1
 
-    def thisUserHasBeenRejected(self):
-        return self._rejected
-
     def thisUserHasBeenThroughTheSystem(self):
         response = False
 
-        # if self._markL0: response = True
-        if self._markL1: response = True
-        if self._markL2: response = True
-        if self._rejected: response = True
+        if self.dateFollowed_byMe or self._rejected:
+            response = True
 
-        if self.dateFollowed_byMe: response = True
-        if self.dateUnFollowed_byMe: response = True
+        if self._markL1 and self._markL2:
+            response = True
 
         return response
 
@@ -345,16 +327,9 @@ class User_M:
     def iShouldFollowThisUser(self):
         answer = False
 
-        if self._markL2 and not self.dateFollowed_byMe:
-            answer = True
-
-        return answer
-
-    def iShouldUnFollowThisUser(self):
-        answer = False
-
-        if self.dateFollowed_byMe and not self.dateUnFollowed_byMe:
-            answer = True
+        if self._markL1 and self._markL2:
+            if not self._rejected and not self.dateFollowed_byMe:
+                answer = True
 
         return answer
 
