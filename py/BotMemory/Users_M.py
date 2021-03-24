@@ -296,16 +296,14 @@ class User_M:
             print(e)
             return 1
 
-    def thisUserHasBeenThroughTheSystem(self):  # TODO : Need to rethink this
+    def thisUserHasBeenThroughTheSystem(self):
         response = False
 
-        # if self._markL0: response = True
-        if self._markL1: response = True
-        if self._markL2: response = True
-        if self._rejected: response = True
+        if self.dateFollowed_byMe or self._rejected:
+            response = True
 
-        if self.dateFollowed_byMe: response = True
-        if self.dateUnFollowed_byMe: response = True
+        if self._markL1 and self._markL2:
+            response = True
 
         return response
 
@@ -326,7 +324,7 @@ class User_M:
         else:
             pass
 
-    def iShouldFollowThisUser(self):  # TODO : Need to rethink this
+    def iShouldFollowThisUser(self):
         answer = False
 
         if self._markL1 and self._markL2:

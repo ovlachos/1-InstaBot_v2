@@ -28,7 +28,7 @@ def userScraping(bot, userCount):
     #     print(e)
 
     # Bring users with relevant usernames to the top of the list, that they may be examined first
-    usersL01 = [x for x in usersL0 if checkHandle(bot.words, x.handle)]
+    usersL01 = [x for x in usersL0 if checkHandle(bot.words, x.handle) or x._markL2]
     usersL0 = moveListOfUsersToTop(usersL0, usersL01)
 
     # move manual additions to theGame to the top of the list

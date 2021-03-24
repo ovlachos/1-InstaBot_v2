@@ -105,6 +105,9 @@ class UserMemoryManager:
         firstDraft = [x for x in one if x.daysSinceYouGotFollowed_Unfollowed('follow') > daysBeforeIunLove]
         return [x for x in firstDraft if not x.dateUnLoved_byMe]
 
+    def getListOfReserveUsersToFollow(self):
+        return [x for x in self.listOfUserMemory if x.iShouldFollowThisUser()]
+
     def getListOfUsersToUnFollow(self, daysBeforeIunFollow):
         one = self.getListOfUsersAlreadyFollowedOnly()
         firstDraft = [x for x in one if x.daysSinceYouGotFollowed_Unfollowed('follow') > daysBeforeIunFollow]
@@ -148,12 +151,14 @@ class UserMemoryManager:
             if user:
                 if not user.thisUserHasBeenThroughTheSystem():
                     user.addToL0(auth.username)
+                    user.addToL2(auth.username)
                     self.updateUserRecord(user)
             else:
                 self.addUserToMemory(handle)
                 user = self.retrieveUserFromMemory(handle)
                 if user:
                     user.addToL0(auth.username)
+                    user.addToL2(auth.username)
                     self.updateUserRecord(user)
 
     def redistributeExtraLove(self):

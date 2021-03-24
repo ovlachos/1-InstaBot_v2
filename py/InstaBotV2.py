@@ -85,8 +85,11 @@ class InstaBot:
     def love_Service(self, fileName, numberOfLikes, percentageOfUsers):
         return Love_Service.love(self, fileName, numberOfLikes, percentageOfUsers)
 
-    def l0_Service(self, numberOfProfilesToProcess):
-        return L0_Service.list_getList_0(self, numberOfProfilesToProcess)
+    def l0_Service(self, typeOfList, numberOfProfilesToProcess, numberOfTags, numberOfPostsPerTag):
+        if not 'tag' in typeOfList:
+            return L0_Service.list_getList_0_FromSponsors(self, numberOfProfilesToProcess)
+        else:
+            return L0_Service.list_getList_0_FromTagedPosts(self, numberOfTags, numberOfPostsPerTag)
 
     def l1_2_Service(self, numberOfusersToCheck):
         return L1_2_Service.userScraping(self, numberOfusersToCheck)

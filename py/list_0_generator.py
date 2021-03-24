@@ -6,6 +6,9 @@ import InstaBotV2
 def main():
     hdLess = False
     numberOfProfilesToProcess = 5
+    typeOfList = 'hashtags'
+    numberOfTags = 1
+    numberOfPostsPerTag = 3
 
     if len(sys.argv) > 1:
         print(sys.argv)
@@ -27,7 +30,7 @@ def main():
         v2Bot.getBrowser()
         v2Bot.logIn()
 
-        v2Bot.l0_Service(numberOfProfilesToProcess)
+        v2Bot.l0_Service(typeOfList, numberOfProfilesToProcess, numberOfTags, numberOfPostsPerTag)
     except Exception as e:
         v2Bot.memoryManager.writeMemoryFileToDrive()
         print("we have a fail")

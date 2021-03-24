@@ -1,6 +1,11 @@
-def list_getList_0(bot, numberOfProfilesToProcess=5):
+import time
+
+
+#### SPONSORS ####
+
+def list_getList_0_FromSponsors(bot, numberOfProfilesToProcess=5):
     print("\n")
-    print("### theL0 ###")
+    print("### theL0 - Sponsors ###")
     print("\n")
     bot.mainPage.driver.refresh()
 
@@ -34,7 +39,7 @@ def list_getList_0(bot, numberOfProfilesToProcess=5):
         userPage = bot.mainPage.topRibbon_SearchField.navigateToUserPageThroughSearch(sponsorUser.handle)
 
         if not userPage:
-            bot.memoryManager.userPageCannotBeFound(user)
+            bot.memoryManager.userPageCannotBeFound(sponsorUser)
 
             userNotFound_counter += 1
             if userNotFound_counter > 5:
@@ -61,8 +66,6 @@ def list_getList_0(bot, numberOfProfilesToProcess=5):
 
 
 def addSponsorsFollowersToUserMemory(followers_, sponsorUser, usersAlreadyInList, bot):
-    import time
-
     for follower in followers_:
         if follower not in usersAlreadyInList:
             start = time.time()
@@ -86,3 +89,95 @@ def addSponsorsFollowersToUserMemory(followers_, sponsorUser, usersAlreadyInList
 def makeSureSponsorsAlreadyHaveAMemoryRecord(bot, inputSponsorHandles):
     for sponsor in inputSponsorHandles:
         bot.memoryManager.addUserToMemory(sponsor)
+
+
+#### HASHTAGS ####
+
+def list_getList_0_FromTagedPosts(bot, numberOfTags, numberOfPostsPerTag):
+    import random
+
+    print("\n")
+    print("### theL0 - Taged Posts ###")
+    print("\n")
+
+    bot.mainPage.driver.refresh()
+    bot.memoryManager.readMemoryFileFromDrive()
+
+    # myPage = bot.mainPage.topRibbon_myAccount.navigateToOwnProfile()
+    # bot.mainPage.sleepPage(1)
+    # mylatestPost = myPage.navigateTo_X_latestPost(0)
+    # bot.mainPage.sleepPage(1)
+    # mylatestPost.updateHashTagsUsed()
+    # bot.mainPage.sleepPage(1)
+    # hashList = mylatestPost.hashTagsUsed
+    # bot.mainPage.sleepPage(1)
+    # mylatestPost.close_post()
+
+    hashList = bot.targetHashtags_List
+    random.shuffle(hashList)
+
+    if hashList:
+        hashList = hashList[:numberOfTags]
+        print(f"Today's hashtags are: {hashList}")
+
+    userHandles = []
+
+    for hashtag in hashList:
+        hashPage = bot.mainPage.topRibbon_SearchField.navigateToHashTagPageThroughSearch(hashtag)
+        bot.mainPage.page.sleepPage(1)
+        bot.mainPage.driver.refresh()
+        bot.mainPage.page.sleepPage(1)
+
+        print(f"### HashTag: {hashPage.hashtag}")
+
+        userHandles.extend(getUserHandles(hashPage, numberOfPostsPerTag, bot.mainPage.page.sendESC, bot))
+
+        bot.botSleep(1.2)
+
+    addUsersTaggingToUserMemory(userHandles, bot)
+
+    print("\n### theEnd ###")
+    return 'OK'
+
+
+def getUserHandles(hashTagPage, numberOfPostsPerTag, escapeFunc, bot):
+    usersToReturn = []
+    for i in range(0, numberOfPostsPerTag):
+        try:
+            post = hashTagPage.navigateTo_X_mostRecentPosts(i)
+
+            bot.mainPage.page.sleepPage(2)
+
+            usersToReturn.append(post.getPostingUsersHandle())
+
+            bot.mainPage.page.sleepPage(2)
+            postExists = post.close_post()
+
+            if not postExists:
+                escapeFunc()
+
+        except Exception as e:
+            print(e)
+            continue
+
+    return usersToReturn
+
+
+def addUsersTaggingToUserMemory(users, bot):
+    users = list(dict.fromkeys(users))
+    for user in users:
+        start = time.time()
+
+        bot.memoryManager.addUserToMemory(user)
+
+        # Get the newly created memory object of the new user
+        newFollower = bot.memoryManager.retrieveUserFromMemory(user)
+        newFollower.addToL0('hashtag')
+        newFollower.addToL2()
+
+        bot.memoryManager.updateUserRecord(newFollower)
+
+        end = time.time()
+        print(f"##### {round((end - start), 1)} | User {user} added to memory")
+
+    return "OK"
