@@ -247,7 +247,7 @@ class UserMemoryManager:
             oldUserObj = self.retrieveUserFromMemory(userObj.handle)
             del self.listOfUserMemory[self.listOfUserMemory.index(oldUserObj)]
 
-    def updateUserRecord(self, userObj):
+    def updateUserRecord(self, userObj, writeNow=True):
         if self.userExistsInMemory(userObj.handle):
 
             # remove old
@@ -255,9 +255,10 @@ class UserMemoryManager:
 
             # add new
             self.listOfUserMemory.append(userObj)
-            self.writeMemoryFileToDrive()
         else:
             # add new
             if not self.userHasBeenRejected(userObj.handle):
                 self.listOfUserMemory.append(userObj)
-                self.writeMemoryFileToDrive()
+
+        if writeNow:
+            self.writeMemoryFileToDrive()

@@ -82,7 +82,9 @@ class Browser:
 
         option = webdriver.ChromeOptions()
         option.add_argument('--disable-blink-features=AutomationControlled')
-        option.add_argument("window-size=1280,800")
+        # option.add_argument("window-size=1280,800")
+        option.add_argument("--start-maximized")
+
         option.add_argument(
             "user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36")
 
@@ -218,9 +220,9 @@ class WebPage:
         try:
             actions = ActionChains(self.driver)
             actions.send_keys(Keys.ESCAPE).perform()
-            self.driver.refresh()
+            # self.driver.refresh()
         except Exception as e:
-            print(e)
+            print(f"ESC funciton: {e}")
 
     def slowTypeIntoField(self, fieldXPATH, query):
         try:

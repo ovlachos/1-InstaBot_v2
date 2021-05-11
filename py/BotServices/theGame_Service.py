@@ -10,8 +10,6 @@ def playTheGame(bot):
     ### Read User Memory
     bot.memoryManager.readMemoryFileFromDrive()
 
-    gameList = bot.memoryManager.getListOfUsersAlreadyFollowedOnly()
-
     ### Derive Lists
     reservesList = bot.memoryManager.getListOfReserveUsersToFollow()
     unfollowList = bot.memoryManager.getListOfUsersToUnFollow(bot.daysBeforeIunFollow)
@@ -22,13 +20,16 @@ def playTheGame(bot):
         print(f"### - {len(unLoveList)} users to be un-Loved")
         for user in unLoveList:
             user.removeFromLoveDaily()
-            bot.memoryManager.updateUserRecord(user)
+            bot.memoryManager.updateUserRecord(user, False)
+        bot.memoryManager.writeMemoryFileToDrive()
     else:
         print(f"### - {0} users to be un-Loved")
 
     ### Un Follow ###
     if unfollowList:
         print(f"### - {len(unfollowList)} users to be un-Followed")
+
+        unfollowList = unfollowList[:int(bot.followManaMax / 2)]
 
         userNotFound_counter = 0
         for user in unfollowList:
@@ -53,7 +54,7 @@ def playTheGame(bot):
 
             bot.memoryManager.updateUserRecord(user)
             if user.dateUnFollowed_byMe:
-                bot.botSleep()
+                bot.botSleep(2)
     else:
         print(f"### - {0} users to be un-Followed")
 

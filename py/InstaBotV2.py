@@ -30,7 +30,7 @@ class InstaBot:
 
         self.headless = headless
 
-        # Bot Params
+        # Bot Params Default values (that get replaced later on, maybe)
         self.paramsTimeStamp = None
         self.timeUpperBound = 48
         self.timeLowerBound = 34
@@ -38,9 +38,9 @@ class InstaBot:
         self.followMana = 50
         self.followManaMax = 100
 
-        ## Game vars
+        ## Game vars Default values (that get replaced later on, maybe)
         self.daysBeforeIunFollow = 20 - 1
-        self.daysBeforeIunLove = self.daysBeforeIunFollow + 5
+        self.daysBeforeIunLove = 5
 
         # List vars
         self.targetHashtags_frame = self.fileHandler.CSV_getFrameFromCSVfile('hashtagsToLookForCSV')
@@ -91,7 +91,7 @@ class InstaBot:
             self.followManaMax = params['manaMax']
 
             self.daysBeforeIunFollow = params['daysBeforeIunFollow']
-            self.daysBeforeIunLove = self.daysBeforeIunFollow + params['daysBeforeIunLove']
+            self.daysBeforeIunLove = params['daysBeforeIunLove']
 
     def botSleep(self, factor=1):
         time = randint(self.timeLowerBound, self.timeUpperBound)

@@ -26,10 +26,12 @@ def main():
         v2Bot.getBrowser()
         v2Bot.logIn()
 
-        theBoostResponse = v2Bot.postBoostService(numberOfTags, numberOfPostsPerTag)
-        if 'busted' in theBoostResponse:
-            print("Busted!")
-            return
+        for i in range(0, 3):
+            theBoostResponse = v2Bot.postBoostService(numberOfTags, numberOfPostsPerTag)
+            if 'busted' in theBoostResponse:
+                print("Busted!")
+                return
+            v2Bot.botSleep(20)
 
     except Exception as e:
         print("we have a fail")

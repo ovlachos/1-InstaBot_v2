@@ -30,8 +30,7 @@ def main():
         v2Bot.theGame_Service()
     except Exception as e:
         v2Bot.memoryManager.writeMemoryFileToDrive()
-        print("we have a fail")
-        print(e)
+        print(f"we have a fail: {e}")
 
 
 if __name__ == "__main__": main()

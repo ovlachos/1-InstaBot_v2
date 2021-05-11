@@ -100,41 +100,37 @@ def list_getList_0_FromTagedPosts(bot, numberOfTags, numberOfPostsPerTag):
     print("### theL0 - Taged Posts ###")
     print("\n")
 
+    # Load memory file
     bot.mainPage.driver.refresh()
     bot.memoryManager.readMemoryFileFromDrive()
 
-    # myPage = bot.mainPage.topRibbon_myAccount.navigateToOwnProfile()
-    # bot.mainPage.sleepPage(1)
-    # mylatestPost = myPage.navigateTo_X_latestPost(0)
-    # bot.mainPage.sleepPage(1)
-    # mylatestPost.updateHashTagsUsed()
-    # bot.mainPage.sleepPage(1)
-    # hashList = mylatestPost.hashTagsUsed
-    # bot.mainPage.sleepPage(1)
-    # mylatestPost.close_post()
-
+    # Load Target Hashtags list
     hashList = bot.targetHashtags_List
-    random.shuffle(hashList)
 
     if hashList:
-        hashList = hashList[:numberOfTags]
+        random.shuffle(hashList)
+        hashList = hashList[:numberOfTags]  # Reduce the amount of tags to be examined
         print(f"Today's hashtags are: {hashList}")
 
     userHandles = []
 
     for hashtag in hashList:
         hashPage = bot.mainPage.topRibbon_SearchField.navigateToHashTagPageThroughSearch(hashtag)
-        bot.mainPage.page.sleepPage(1)
-        bot.mainPage.driver.refresh()
-        bot.mainPage.page.sleepPage(1)
+        # bot.mainPage.page.sleepPage(1)
+        # bot.mainPage.driver.refresh()  # Is this necessary ?
+        bot.mainPage.page.sleepPage(3)
 
         print(f"### HashTag: {hashPage.hashtag}")
 
+        # Collect user handles
         userHandles.extend(getUserHandles(hashPage, numberOfPostsPerTag, bot.mainPage.page.sendESC, bot))
+
+        addUsersTaggingToUserMemory(userHandles, bot)
+        userHandles = []
 
         bot.botSleep(1.2)
 
-    addUsersTaggingToUserMemory(userHandles, bot)
+    # addUsersTaggingToUserMemory(userHandles, bot)
 
     print("\n### theEnd ###")
     return 'OK'
@@ -145,21 +141,24 @@ def getUserHandles(hashTagPage, numberOfPostsPerTag, escapeFunc, bot, toLike=Tru
     for i in range(0, numberOfPostsPerTag):
         try:
             post = hashTagPage.navigateTo_X_mostRecentPosts(i)
+            if not post:
+                continue
 
             bot.mainPage.page.sleepPage(2)
+
+            usersToReturn.append(post.getPostingUsersHandle())  # Collect names
 
             if toLike:
                 liked = post.like_post()
 
-            usersToReturn.append(post.getPostingUsersHandle())
-
             bot.mainPage.page.sleepPage(2)
+
             postExists = post.close_post()
 
             if liked:
+                print(f'{i + 1} Like pressed at HashTag {hashTagPage.hashtag}')
                 if not isinstance(liked, bool):
                     return 'busted'
-
                 bot.botSleep()
             if not postExists:
                 escapeFunc()
