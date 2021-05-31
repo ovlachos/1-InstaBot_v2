@@ -311,7 +311,7 @@ class userPage(userPage_base):
             if self.followAccess < 25:
                 # if following
                 self.page.getPageElement_tryHard("//span[@aria-label='Following']").click()
-                sleep(1)
+                sleep(2)
                 buttons = self.page.getPageElement_tryHard("//*[contains(@class,'-Cab')]")
                 if 'follow' in buttons.text:
                     buttons.click()
@@ -319,11 +319,11 @@ class userPage(userPage_base):
 
                     self.actionsLimitHit()
 
-                    self.driver.refresh()
+                    # self.driver.refresh()
             else:
                 # if requested
                 self.page.getPageElement_tryHard("//button[contains(text(),'Requested')]").click()
-                sleep(1)
+                sleep(2)
                 buttons = self.page.getPageElement_tryHard("//*[contains(@class,'-Cab')]")
                 if 'follow' in buttons.text:
                     buttons.click()

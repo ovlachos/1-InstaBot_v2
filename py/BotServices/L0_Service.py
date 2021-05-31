@@ -1,4 +1,5 @@
 import time
+from random import randint
 
 
 #### SPONSORS ####
@@ -44,7 +45,7 @@ def list_getList_0_FromSponsors(bot, numberOfProfilesToProcess=5):
             userNotFound_counter += 1
             if userNotFound_counter > 5:
                 if bot.internetConnectionLost():
-                    return "No Internet"
+                    return "No Internet - ...or search shadow ban"
 
             continue
 
@@ -52,6 +53,7 @@ def list_getList_0_FromSponsors(bot, numberOfProfilesToProcess=5):
 
         followers_ = userPage.getFollowersList()  # a list of handles as strings
         sponsorUser.updateInfoFromLivePage_Landing(userPage)
+        userNotFound_counter = 0  # restart this counter as we only want to see if we fail to get X users in a row, before shuting things down
 
         if len(followers_) > 0:
             sponsorUser.updateFollowersList(followers_)
@@ -93,48 +95,46 @@ def makeSureSponsorsAlreadyHaveAMemoryRecord(bot, inputSponsorHandles):
 
 #### HASHTAGS ####
 
-def list_getList_0_FromTagedPosts(bot, numberOfTags, numberOfPostsPerTag):
+def list_getList_0_FromTagedPosts(bot, numberOfTags, numberOfPostsPerTag0):
     import random
 
     print("\n")
     print("### theL0 - Taged Posts ###")
     print("\n")
 
+    # Load memory file
     bot.mainPage.driver.refresh()
     bot.memoryManager.readMemoryFileFromDrive()
 
-    # myPage = bot.mainPage.topRibbon_myAccount.navigateToOwnProfile()
-    # bot.mainPage.sleepPage(1)
-    # mylatestPost = myPage.navigateTo_X_latestPost(0)
-    # bot.mainPage.sleepPage(1)
-    # mylatestPost.updateHashTagsUsed()
-    # bot.mainPage.sleepPage(1)
-    # hashList = mylatestPost.hashTagsUsed
-    # bot.mainPage.sleepPage(1)
-    # mylatestPost.close_post()
-
+    # Load Target Hashtags list
     hashList = bot.targetHashtags_List
-    random.shuffle(hashList)
 
     if hashList:
-        hashList = hashList[:numberOfTags]
+        random.shuffle(hashList)
+        hashList = hashList[:numberOfTags]  # Reduce the amount of tags to be examined
         print(f"Today's hashtags are: {hashList}")
 
     userHandles = []
 
     for hashtag in hashList:
-        hashPage = bot.mainPage.topRibbon_SearchField.navigateToHashTagPageThroughSearch(hashtag)
-        bot.mainPage.page.sleepPage(1)
-        bot.mainPage.driver.refresh()
-        bot.mainPage.page.sleepPage(1)
+        hashPage = None
+        while not hashPage:
+            hashPage = bot.mainPage.topRibbon_SearchField.navigateToHashTagPageThroughSearch(hashtag)
+
+        bot.mainPage.page.sleepPage(3)
 
         print(f"### HashTag: {hashPage.hashtag}")
+        numberOfPostsPerTag = randint(numberOfPostsPerTag0, (numberOfPostsPerTag0 + 10))
 
+        # Collect user handles
         userHandles.extend(getUserHandles(hashPage, numberOfPostsPerTag, bot.mainPage.page.sendESC, bot))
+
+        addUsersTaggingToUserMemory(userHandles, bot)
+        userHandles = []
 
         bot.botSleep(1.2)
 
-    addUsersTaggingToUserMemory(userHandles, bot)
+    # addUsersTaggingToUserMemory(userHandles, bot)
 
     print("\n### theEnd ###")
     return 'OK'
@@ -142,30 +142,36 @@ def list_getList_0_FromTagedPosts(bot, numberOfTags, numberOfPostsPerTag):
 
 def getUserHandles(hashTagPage, numberOfPostsPerTag, escapeFunc, bot, toLike=True):
     usersToReturn = []
+
     for i in range(0, numberOfPostsPerTag):
         try:
             post = hashTagPage.navigateTo_X_mostRecentPosts(i)
+            if not post:
+                continue
 
             bot.mainPage.page.sleepPage(2)
+
+            usersToReturn.append(post.getPostingUsersHandle())  # Collect names
 
             if toLike:
                 liked = post.like_post()
 
-            usersToReturn.append(post.getPostingUsersHandle())
-
             bot.mainPage.page.sleepPage(2)
+
             postExists = post.close_post()
 
             if liked:
+                print(f'{i + 1} Like pressed at HashTag {hashTagPage.hashtag}')
                 if not isinstance(liked, bool):
                     return 'busted'
-
                 bot.botSleep()
             if not postExists:
                 escapeFunc()
 
         except Exception as e:
             print(e)
+            if "obscure" in e:
+                print("************** NO! **************")
             continue
 
     return usersToReturn
@@ -180,12 +186,16 @@ def addUsersTaggingToUserMemory(users, bot):
 
         # Get the newly created memory object of the new user
         newFollower = bot.memoryManager.retrieveUserFromMemory(user)
-        newFollower.addToL0('hashtag')
-        newFollower.addToL2()
+        if newFollower and not newFollower.thisUserHasBeenThroughTheSystem():
+            newFollower.addToL0('hashtag')
+            newFollower.addToL2()
 
-        bot.memoryManager.updateUserRecord(newFollower)
+            bot.memoryManager.updateUserRecord(newFollower)
 
-        end = time.time()
-        print(f"##### {round((end - start), 1)} | User {user} added to memory")
+            end = time.time()
+            print(f"##### {round((end - start), 1)} | User {user} added to memory")
+        else:
+            end = time.time()
+            print(f"##### {round((end - start), 1)} | User {user} NOT added to memory")
 
     return "OK"

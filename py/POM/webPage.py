@@ -8,6 +8,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 # All POMs require a webPage object to be instantiated/initialized.
 # The webPage object provides the webdriver and a "what page am I currently browsing" method
 
+
 class Browser:
 
     def __init__(self, headless=False):
@@ -21,72 +22,39 @@ class Browser:
             try:
                 self.driver = self.create_driver_session(sessionDataFromJSON_['session_id'], sessionDataFromJSON_['executor_url'])
 
-                # Old FireFox code
-                # self.driver = self.create_driver_session(sessionDataFromJSON_['session_id']
-                #                                          , sessionDataFromJSON_['executor_url'])
+                self.driver.session_id = sessionDataFromJSON_['session_id']
+                print(f"Got that old browser session with id {sessionDataFromJSON_['session_id']}\n")
 
-                print(f"Got that old browser session with id {sessionDataFromJSON_['session_id']}")
-                self.driver.implicitly_wait(6)
-
-                # Testing if we really got that old session. If not we are getting an exception here
-                # self.driver.get('https://intoli.com/blog/not-possible-to-block-chrome-headless/')
-                # self.driver.get('https://instagram.com')
-
+                self.driver.implicitly_wait(15)
                 self.newSession = False
+
                 print(f"It's final: ReUsing browser session with id {sessionDataFromJSON_['session_id']}")
             except Exception as e:
+                try:
+                    if self.driver:
+                        print('Let me quit the old session first')
+                        self.driver.quit()
+                        del self.driver
+                except Exception as e1:
+                    print(e1)
+
                 print(f'Creating new browser session because:\n{e}')
+
                 self.createNewBrowserSession(headless)
                 self.newSession = True
 
     def createNewBrowserSession(self, headless):
 
-        # Old Firefox Code
-        # options = Options()
-        # options.headless = False
-        # if headless:
-        #     print("I've got a  a headless browser!!")
-        #     options.headless = True
-        #
-        # profile = webdriver.FirefoxProfile()
-        # profile.set_preference("intl.accept_languages", 'en-us')
-        #
-        # # disabling caching (but not cookies)
-        # profile.set_preference('browser.cache.disk.enable', False)
-        # profile.set_preference('browser.cache.memory.enable', False)
-        # profile.set_preference('browser.cache.offline.enable', False)
-        #
-        # profile.set_preference("general.useragent.override",
-        #                        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:83.0) Gecko/20100101 Firefox/83.0')
-        #
-        # # 1 - Allow all images
-        # # 2 - Block all images
-        # # 3 - Block 3rd party images
-        # profile.set_preference("permissions.default.image", 1)
-        # profile.update_preferences()
-        #
-        # # Get the actual driver
-        # self.driver = webdriver.Firefox(options=options, firefox_profile=profile)
-        # self.driver.get('https://www.google.com/')
-        #
-        # # # Remove WebDriver Flag
-        # # success = self.driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => false})")
-        #
-        # print(self.driver.execute_script("return navigator.userAgent"))
-
-        # option = webdriver.ChromeOptions()
-        # chrome_prefs = {}
-        # chrome_prefs["profile.default_content_settings"] = {"images": 2}
-        # chrome_prefs["profile.managed_default_content_settings"] = {"images": 2}
-        # option.experimental_options["prefs"] = chrome_prefs
-
         option = webdriver.ChromeOptions()
         option.add_argument('--disable-blink-features=AutomationControlled')
         option.add_argument("window-size=1280,800")
+        option.add_argument("--start-maximized")
+
         option.add_argument(
             "user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36")
 
         self.driver = webdriver.Chrome(options=option)
+        self.driver.implicitly_wait(15)
 
         executor_url = self.driver.command_executor._url
         session_id = self.driver.session_id
@@ -116,10 +84,6 @@ class Browser:
 
         return True
 
-    def clearCache(self):
-        return
-        # self.driver.get('about:preferences#privacy')
-
     # Only needed for Firefox sessions ?
     def create_driver_session(self, session_id, executor_url):
         from selenium.webdriver.remote.webdriver import WebDriver as RemoteWebDriver
@@ -141,7 +105,8 @@ class Browser:
         new_driver.session_id = session_id
 
         # Replace the patched function with original function
-        RemoteWebDriver.execute = org_command_execute
+        RemoteWebDriver.execute = org_command_execute  # for some reason this no longer happens and all new browsers get the faked response.
+        new_driver.implicitly_wait(15)
 
         return new_driver
 
@@ -218,9 +183,9 @@ class WebPage:
         try:
             actions = ActionChains(self.driver)
             actions.send_keys(Keys.ESCAPE).perform()
-            self.driver.refresh()
+            # self.driver.refresh()
         except Exception as e:
-            print(e)
+            print(f"ESC funciton: {e}")
 
     def slowTypeIntoField(self, fieldXPATH, query):
         try:

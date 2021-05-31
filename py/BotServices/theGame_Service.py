@@ -10,8 +10,6 @@ def playTheGame(bot):
     ### Read User Memory
     bot.memoryManager.readMemoryFileFromDrive()
 
-    gameList = bot.memoryManager.getListOfUsersAlreadyFollowedOnly()
-
     ### Derive Lists
     reservesList = bot.memoryManager.getListOfReserveUsersToFollow()
     unfollowList = bot.memoryManager.getListOfUsersToUnFollow(bot.daysBeforeIunFollow)
@@ -22,13 +20,16 @@ def playTheGame(bot):
         print(f"### - {len(unLoveList)} users to be un-Loved")
         for user in unLoveList:
             user.removeFromLoveDaily()
-            bot.memoryManager.updateUserRecord(user)
+            bot.memoryManager.updateUserRecord(user, False)
+        bot.memoryManager.writeMemoryFileToDrive()
     else:
         print(f"### - {0} users to be un-Loved")
 
     ### Un Follow ###
     if unfollowList:
         print(f"### - {len(unfollowList)} users to be un-Followed")
+
+        unfollowList = unfollowList[:int(bot.followManaMax / 0.8)]
 
         userNotFound_counter = 0
         for user in unfollowList:
@@ -42,18 +43,19 @@ def playTheGame(bot):
                 userNotFound_counter += 1
                 if userNotFound_counter > 5:
                     if bot.internetConnectionLost():
-                        return "No Internet"
+                        return "No Internet - ...or search shadow ban"
 
                 continue
 
             print(f"Will unfollow user {user.handle}")
+            userNotFound_counter = 0  # restart this counter as we only want to see if we fail to get X users in a row, before shuting things down
 
             if 'OK' in userPage.unfollow():
                 user.markDateUnfollowed()
 
             bot.memoryManager.updateUserRecord(user)
             if user.dateUnFollowed_byMe:
-                bot.botSleep()
+                bot.botSleep(2)
     else:
         print(f"### - {0} users to be un-Followed")
 
@@ -71,11 +73,12 @@ def playTheGame(bot):
                 userNotFound_counter += 1
                 if userNotFound_counter > 5:
                     if bot.internetConnectionLost():
-                        return "No Internet"
+                        return "No Internet - ...or search shadow ban"
 
                 continue
 
             print(f"Will follow user {user.handle}")
+            userNotFound_counter = 0  # restart this counter as we only want to see if we fail to get X users in a row, before shuting things down
 
             if user.iShouldFollowThisUser() and bot.followMana > 0:
                 if 'OK' in userPage.follow():

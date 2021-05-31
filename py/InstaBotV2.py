@@ -1,18 +1,18 @@
+import sys
+import time
 from datetime import datetime
 from random import randint
 from time import sleep
 
-import time
 import auth
-
 from BotMemory import BotParams as btprms
 from BotMemory import FileHandlerBot as fh
 from BotMemory import UserMemoryManager
 from BotServices import L0_Service
 from BotServices import L1_2_Service
 from BotServices import Love_Service
-from BotServices import theGame_Service
 from BotServices import PostBooster_Service
+from BotServices import theGame_Service
 from POM import insta_LogInPage_POM as login
 from POM import webPage as wp
 
@@ -24,13 +24,14 @@ class InstaBot:
 
     def __init__(self, headless=False):
         # AUX Objects
+        print(sys.version)
         self.fileHandler = fh.FileHandlerBot()
         self.memoryManager = UserMemoryManager.UserMemoryManager()
         self.botParams = btprms.BotParams()
 
         self.headless = headless
 
-        # Bot Params
+        # Bot Params Default values (that get replaced later on, maybe)
         self.paramsTimeStamp = None
         self.timeUpperBound = 48
         self.timeLowerBound = 34
@@ -38,9 +39,9 @@ class InstaBot:
         self.followMana = 50
         self.followManaMax = 100
 
-        ## Game vars
+        ## Game vars Default values (that get replaced later on, maybe)
         self.daysBeforeIunFollow = 20 - 1
-        self.daysBeforeIunLove = self.daysBeforeIunFollow + 5
+        self.daysBeforeIunLove = 5
 
         # List vars
         self.targetHashtags_frame = self.fileHandler.CSV_getFrameFromCSVfile('hashtagsToLookForCSV')
@@ -91,12 +92,12 @@ class InstaBot:
             self.followManaMax = params['manaMax']
 
             self.daysBeforeIunFollow = params['daysBeforeIunFollow']
-            self.daysBeforeIunLove = self.daysBeforeIunFollow + params['daysBeforeIunLove']
+            self.daysBeforeIunLove = params['daysBeforeIunLove']
 
-    def botSleep(self, factor=1):
+    def botSleep(self, factor=1, verbose=False):
         time = randint(self.timeLowerBound, self.timeUpperBound)
         time = int(factor * time)
-        # print(f"Sleeping {time}")
+        if verbose: print(f"Sleeping {time}")
         sleep(time)
 
     def delayOps(self, minimum=2, maximum=20):
@@ -142,7 +143,7 @@ class InstaBot:
         return Love_Service.love(self, fileName, numberOfLikes, percentageOfUsers)
 
     def l0_Service(self, typeOfList, numberOfProfilesToProcess, numberOfTags, numberOfPostsPerTag):
-        if not 'tag' in typeOfList:
+        if 'tag' not in typeOfList:
             return L0_Service.list_getList_0_FromSponsors(self, numberOfProfilesToProcess)
         else:
             return L0_Service.list_getList_0_FromTagedPosts(self, numberOfTags, numberOfPostsPerTag)

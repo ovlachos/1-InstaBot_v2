@@ -1,7 +1,6 @@
 from time import sleep
 
 import auth
-
 from BotMemory import FileHandlerBot as fh
 from BotMemory import Users_M as UM
 
@@ -234,10 +233,10 @@ class UserMemoryManager:
             if write:
                 self.writeMemoryFileToDrive()
 
-    def slimDownRejectedUserRecord(self, userOdj):
-        user = userOdj
+    def slimDownRejectedUserRecord(self, userObj):
+        user = userObj
 
-        userHandle = userOdj.handle
+        userHandle = userObj.handle
         self.removeUserFromRecord(user)
 
         return userHandle
@@ -247,7 +246,7 @@ class UserMemoryManager:
             oldUserObj = self.retrieveUserFromMemory(userObj.handle)
             del self.listOfUserMemory[self.listOfUserMemory.index(oldUserObj)]
 
-    def updateUserRecord(self, userObj):
+    def updateUserRecord(self, userObj, writeNow=True):
         if self.userExistsInMemory(userObj.handle):
 
             # remove old
@@ -255,9 +254,10 @@ class UserMemoryManager:
 
             # add new
             self.listOfUserMemory.append(userObj)
-            self.writeMemoryFileToDrive()
         else:
             # add new
             if not self.userHasBeenRejected(userObj.handle):
                 self.listOfUserMemory.append(userObj)
-                self.writeMemoryFileToDrive()
+
+        if writeNow:
+            self.writeMemoryFileToDrive()

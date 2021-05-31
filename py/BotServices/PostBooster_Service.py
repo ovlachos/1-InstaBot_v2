@@ -9,13 +9,13 @@ def boostLatestPost(bot, numberOfTags, numberOfPostsPerTag):
     bot.mainPage.driver.refresh()
 
     myPage = bot.mainPage.topRibbon_myAccount.navigateToOwnProfile()
-    sleep(1)
+    sleep(2)
     mylatestPost = myPage.navigateTo_X_latestPost(0)
-    sleep(1)
+    sleep(2)
     mylatestPost.updateHashTagsUsed()
-    sleep(1)
+    sleep(2)
     hashList = mylatestPost.hashTagsUsed
-    sleep(1)
+    sleep(2)
     mylatestPost.close_post()
 
     if hashList:
@@ -25,9 +25,11 @@ def boostLatestPost(bot, numberOfTags, numberOfPostsPerTag):
     for hashtag in hashList:
 
         hashPage = bot.mainPage.topRibbon_SearchField.navigateToHashTagPageThroughSearch(hashtag)
-        sleep(1)
-        bot.mainPage.driver.refresh()
-        sleep(1)
+
+        if not hashPage:
+            continue
+
+        sleep(3)
 
         print(f"### HashTag: {hashPage.hashtag}")
 
@@ -44,6 +46,7 @@ def boostLatestPost(bot, numberOfTags, numberOfPostsPerTag):
 def likeThe_X_mostRecentPostsUnderHashtag(hashTagPage, numberOfPostsPerTag, escapeFunc, bot):
     for i in range(0, numberOfPostsPerTag):
         try:
+
             post = hashTagPage.navigateTo_X_mostRecentPosts(i)
 
             sleep(1)
@@ -65,7 +68,7 @@ def likeThe_X_mostRecentPostsUnderHashtag(hashTagPage, numberOfPostsPerTag, esca
 
 
         except Exception as e:
-            print(e)
+            print(f"Like the {i}th post failed: {e}")
             continue
 
     return "OK"
