@@ -29,7 +29,7 @@ def playTheGame(bot):
     if unfollowList:
         print(f"### - {len(unfollowList)} users to be un-Followed")
 
-        unfollowList = unfollowList[:int(bot.followManaMax / 2)]
+        unfollowList = unfollowList[:int(bot.followManaMax / 0.8)]
 
         userNotFound_counter = 0
         for user in unfollowList:
@@ -43,11 +43,12 @@ def playTheGame(bot):
                 userNotFound_counter += 1
                 if userNotFound_counter > 5:
                     if bot.internetConnectionLost():
-                        return "No Internet"
+                        return "No Internet - ...or search shadow ban"
 
                 continue
 
             print(f"Will unfollow user {user.handle}")
+            userNotFound_counter = 0  # restart this counter as we only want to see if we fail to get X users in a row, before shuting things down
 
             if 'OK' in userPage.unfollow():
                 user.markDateUnfollowed()
@@ -72,11 +73,12 @@ def playTheGame(bot):
                 userNotFound_counter += 1
                 if userNotFound_counter > 5:
                     if bot.internetConnectionLost():
-                        return "No Internet"
+                        return "No Internet - ...or search shadow ban"
 
                 continue
 
             print(f"Will follow user {user.handle}")
+            userNotFound_counter = 0  # restart this counter as we only want to see if we fail to get X users in a row, before shuting things down
 
             if user.iShouldFollowThisUser() and bot.followMana > 0:
                 if 'OK' in userPage.follow():

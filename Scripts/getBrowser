@@ -1,4 +1,4 @@
 #!/bin/sh
 scriptdir="$(dirname "$0")"
 cd "$scriptdir"
-python ../py/getBrowser.py
+python3.9 ../py/getBrowser.py

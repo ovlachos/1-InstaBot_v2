@@ -16,6 +16,14 @@ class HashTagPage:
         self.driver = self.page.driver
         self.hashtag = hashtag
 
+    def verifyHashtagHeading(self):
+        heading = self.page.getPageElement_tryHard(xpaths['hashTag']).text
+
+        if self.hashtag in heading:
+            return True
+
+        return False
+
     def getPostCount(self):
         try:
             return self.page.getPageElement_tryHard(xpaths['postCount']).text.replace(',', '')
@@ -26,8 +34,6 @@ class HashTagPage:
         from POM import insta_post_POM as pst
         numberX = numberX + (3 * 3)  # offset by 9 to skip the 9 top liked posts at the top of the page
         try:
-            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
             # posts = self.page.getPageElements_tryHard(xpaths['posts'])
             post = self.page.getPageElements_tryHard(xpaths['posts'])[numberX]
             if post:
@@ -37,8 +43,10 @@ class HashTagPage:
                 sleep(1)
 
         except Exception as e:
-            # self.page.driver.refresh()
             print(f'Navigating to post number {numberX} failed for #{self.hashtag}: {e}')
+            if "stale" in e:
+                self.driver.refresh()
+
             return None
 
         return pst.Post(self.page)

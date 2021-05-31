@@ -120,7 +120,7 @@ class SearchField:
         try:
             if 'obscures it' in e.msg:
                 clickOnObscuringElement(self.driver, e)
-        except:
+        except Exception:
             pass
 
     def navigateToUserPageThroughSearch(self, userName):
@@ -138,27 +138,22 @@ class SearchField:
 
                 fuzzyMatch = self.getFuzzyResults(userName)
                 result = self.driver.find_element_by_xpath("//a[contains(@href,'{}')]".format(fuzzyMatch))  # //a[contains(@href,'hd35mm')]
-                userName = fuzzyMatch
-
-                # used to be result = self.getExactResult(userName)
-
-                if not result:
-                    fuzzyMatch = self.getFuzzyResults(userName)
-                    result = self.driver.find_element_by_xpath("//a[contains(@href,'{}')]".format(fuzzyMatch))
+                if len(fuzzyMatch) > 0:
                     userName = fuzzyMatch
 
                 result.click()
+
+                sleep(2)
 
                 return up.userPage(self.page, userName)
 
             except Exception as e:
                 attempts -= 1
                 result = None
-                self.goHomeWhereYouAreSafe_s(e)
-                if attempts == 0:
-                    break
                 if attempts == 1:
                     self.driver.get("https://www.instagram.com/")
+                if attempts == 0:
+                    break
 
     def navigateToHashTagPageThroughSearch(self, hashtag):
         from POM import insta_HashTagPage_POM as hp
@@ -167,14 +162,26 @@ class SearchField:
         self.page.slowTypeIntoField(xpaths["searchBoxInput"], '#{}'.format(hashtag))
         sleep(1)
 
+        if self.noResults():
+            return None
+
         fuzzyMatch = self.getFuzzyResults(hashtag).replace("#", "")
         result = self.page.getPageElement_tryHard("//a[@href='/explore/tags/{}/']".format(fuzzyMatch))
 
         if result:
-            result.click()
-        sleep(2)
+            try:
+                self.driver.execute_script("arguments[0].click();", result)
+            except Exception as e:
+                if "stale" in e:
+                    return None
 
-        return hp.HashTagPage(self.page, hashtag)
+        sleep(4)
+
+        HTpage = hp.HashTagPage(self.page, hashtag)
+        if HTpage.verifyHashtagHeading():
+            return hp.HashTagPage(self.page, hashtag)
+
+        return None
 
     def getHashTagPostCountThroughSearch(self, hashtag):
         tagResult = -1
@@ -192,14 +199,14 @@ class SearchField:
         sleep(1)
         try:
             return self.driver.find_elements_by_xpath(xpaths["resultsList"])
-        except:
+        except Exception:
             return None
 
     def getExactResult(self, userName):
         try:
             result = self.driver.find_element_by_xpath("//a[@href='/{}/']".format(userName))
             return result
-        except:
+        except Exception:
             return None
 
     def getFuzzyResults(self, userName):
@@ -233,5 +240,5 @@ class SearchField:
         try:
             noResults = self.driver.find_element_by_xpath(xpaths['noResults'])
             return noResults
-        except:
+        except Exception:
             return None

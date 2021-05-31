@@ -44,7 +44,7 @@ def love(bot, loveType='extra', numberOfLikes=1, percentageOfUsers=0.501):
             # userNotFound_counter += 1
             # if userNotFound_counter > 5:
             #     if bot.internetConnectionLost():
-            #         return "No Internet"
+            #         return "No Internet - ...or search shadow ban"
             continue
 
         loveCount -= 1

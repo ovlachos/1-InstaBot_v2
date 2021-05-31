@@ -12,7 +12,7 @@ def userScraping(bot, userCount):
     usersL0 = bot.memoryManager.getListOfMarkedUsers(0)
 
     # Get people already following me and remove them
-    myFollowersCount = 1260  # indicative 2021/05/10
+    myFollowersCount = 1266  # indicative 2021/05/10
     # try:
     #     myPage = bot.mainPage.topRibbon_myAccount.navigateToOwnProfile()
     #
@@ -52,10 +52,11 @@ def userScraping(bot, userCount):
             userNotFound_counter += 1
             if userNotFound_counter > 5:
                 if bot.internetConnectionLost():
-                    return "No Internet"
+                    return "No Internet - ...or search shadow ban"
             continue
 
         user.updateInfoFromLivePage_Landing(userPage)
+        userNotFound_counter = 0  # restart this counter as we only want to see if we fail to get X users in a row, before shutting things down
 
         ### L1 ###
         user = userHasMoreThan_X_followers(myFollowersCount, user)
@@ -77,7 +78,9 @@ def userScraping(bot, userCount):
 
         bot.memoryManager.updateUserRecord(user)
         if user.dateFollowed_byMe:
-            bot.botSleep()
+            bot.botSleep(verbose=True)
+        else:
+            bot.botSleep(0.3, verbose=True)
 
     print(f"#### {user_counter} people followed this time around")
     print("\n### theEnd ###")

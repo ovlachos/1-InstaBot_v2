@@ -1,18 +1,18 @@
+import sys
+import time
 from datetime import datetime
 from random import randint
 from time import sleep
 
-import time
 import auth
-
 from BotMemory import BotParams as btprms
 from BotMemory import FileHandlerBot as fh
 from BotMemory import UserMemoryManager
 from BotServices import L0_Service
 from BotServices import L1_2_Service
 from BotServices import Love_Service
-from BotServices import theGame_Service
 from BotServices import PostBooster_Service
+from BotServices import theGame_Service
 from POM import insta_LogInPage_POM as login
 from POM import webPage as wp
 
@@ -24,6 +24,7 @@ class InstaBot:
 
     def __init__(self, headless=False):
         # AUX Objects
+        print(sys.version)
         self.fileHandler = fh.FileHandlerBot()
         self.memoryManager = UserMemoryManager.UserMemoryManager()
         self.botParams = btprms.BotParams()
@@ -93,10 +94,10 @@ class InstaBot:
             self.daysBeforeIunFollow = params['daysBeforeIunFollow']
             self.daysBeforeIunLove = params['daysBeforeIunLove']
 
-    def botSleep(self, factor=1):
+    def botSleep(self, factor=1, verbose=False):
         time = randint(self.timeLowerBound, self.timeUpperBound)
         time = int(factor * time)
-        # print(f"Sleeping {time}")
+        if verbose: print(f"Sleeping {time}")
         sleep(time)
 
     def delayOps(self, minimum=2, maximum=20):
@@ -142,7 +143,7 @@ class InstaBot:
         return Love_Service.love(self, fileName, numberOfLikes, percentageOfUsers)
 
     def l0_Service(self, typeOfList, numberOfProfilesToProcess, numberOfTags, numberOfPostsPerTag):
-        if not 'tag' in typeOfList:
+        if 'tag' not in typeOfList:
             return L0_Service.list_getList_0_FromSponsors(self, numberOfProfilesToProcess)
         else:
             return L0_Service.list_getList_0_FromTagedPosts(self, numberOfTags, numberOfPostsPerTag)

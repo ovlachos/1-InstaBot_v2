@@ -25,9 +25,11 @@ def boostLatestPost(bot, numberOfTags, numberOfPostsPerTag):
     for hashtag in hashList:
 
         hashPage = bot.mainPage.topRibbon_SearchField.navigateToHashTagPageThroughSearch(hashtag)
-        sleep(1)
-        bot.mainPage.driver.refresh()
-        sleep(1)
+
+        if not hashPage:
+            continue
+
+        sleep(3)
 
         print(f"### HashTag: {hashPage.hashtag}")
 

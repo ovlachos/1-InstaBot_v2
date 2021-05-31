@@ -1,4 +1,4 @@
 #!/bin/sh
 scriptdir="$(dirname "$0")"
 cd "$scriptdir"
-python ../py/getHashTag_Samples.py
+python3.9 ../py/getHashTag_Samples.py

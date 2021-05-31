@@ -1,4 +1,5 @@
 import time
+from random import randint
 
 
 #### SPONSORS ####
@@ -44,7 +45,7 @@ def list_getList_0_FromSponsors(bot, numberOfProfilesToProcess=5):
             userNotFound_counter += 1
             if userNotFound_counter > 5:
                 if bot.internetConnectionLost():
-                    return "No Internet"
+                    return "No Internet - ...or search shadow ban"
 
             continue
 
@@ -52,6 +53,7 @@ def list_getList_0_FromSponsors(bot, numberOfProfilesToProcess=5):
 
         followers_ = userPage.getFollowersList()  # a list of handles as strings
         sponsorUser.updateInfoFromLivePage_Landing(userPage)
+        userNotFound_counter = 0  # restart this counter as we only want to see if we fail to get X users in a row, before shuting things down
 
         if len(followers_) > 0:
             sponsorUser.updateFollowersList(followers_)
@@ -93,7 +95,7 @@ def makeSureSponsorsAlreadyHaveAMemoryRecord(bot, inputSponsorHandles):
 
 #### HASHTAGS ####
 
-def list_getList_0_FromTagedPosts(bot, numberOfTags, numberOfPostsPerTag):
+def list_getList_0_FromTagedPosts(bot, numberOfTags, numberOfPostsPerTag0):
     import random
 
     print("\n")
@@ -115,12 +117,14 @@ def list_getList_0_FromTagedPosts(bot, numberOfTags, numberOfPostsPerTag):
     userHandles = []
 
     for hashtag in hashList:
-        hashPage = bot.mainPage.topRibbon_SearchField.navigateToHashTagPageThroughSearch(hashtag)
-        # bot.mainPage.page.sleepPage(1)
-        # bot.mainPage.driver.refresh()  # Is this necessary ?
+        hashPage = None
+        while not hashPage:
+            hashPage = bot.mainPage.topRibbon_SearchField.navigateToHashTagPageThroughSearch(hashtag)
+
         bot.mainPage.page.sleepPage(3)
 
         print(f"### HashTag: {hashPage.hashtag}")
+        numberOfPostsPerTag = randint(numberOfPostsPerTag0, (numberOfPostsPerTag0 + 10))
 
         # Collect user handles
         userHandles.extend(getUserHandles(hashPage, numberOfPostsPerTag, bot.mainPage.page.sendESC, bot))
@@ -138,6 +142,7 @@ def list_getList_0_FromTagedPosts(bot, numberOfTags, numberOfPostsPerTag):
 
 def getUserHandles(hashTagPage, numberOfPostsPerTag, escapeFunc, bot, toLike=True):
     usersToReturn = []
+
     for i in range(0, numberOfPostsPerTag):
         try:
             post = hashTagPage.navigateTo_X_mostRecentPosts(i)
@@ -165,6 +170,8 @@ def getUserHandles(hashTagPage, numberOfPostsPerTag, escapeFunc, bot, toLike=Tru
 
         except Exception as e:
             print(e)
+            if "obscure" in e:
+                print("************** NO! **************")
             continue
 
     return usersToReturn
@@ -179,12 +186,16 @@ def addUsersTaggingToUserMemory(users, bot):
 
         # Get the newly created memory object of the new user
         newFollower = bot.memoryManager.retrieveUserFromMemory(user)
-        newFollower.addToL0('hashtag')
-        newFollower.addToL2()
+        if newFollower and not newFollower.thisUserHasBeenThroughTheSystem():
+            newFollower.addToL0('hashtag')
+            newFollower.addToL2()
 
-        bot.memoryManager.updateUserRecord(newFollower)
+            bot.memoryManager.updateUserRecord(newFollower)
 
-        end = time.time()
-        print(f"##### {round((end - start), 1)} | User {user} added to memory")
+            end = time.time()
+            print(f"##### {round((end - start), 1)} | User {user} added to memory")
+        else:
+            end = time.time()
+            print(f"##### {round((end - start), 1)} | User {user} NOT added to memory")
 
     return "OK"
