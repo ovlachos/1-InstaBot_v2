@@ -15,6 +15,7 @@ xpaths = {
     "logo": "//a[@href='/']",
     "cancelUnfollow": "//button[contains(text(),'Cancel')]",
     "myAvatar": "//img[contains(@alt,'{}')]//..//..//span[@class='_2dbep qNELH']".format(auth.username),
+    "myActivityFeed": "//*[contains(@aria-label, 'ctivity')]",
     'ownProfile': "//div[contains(text(),'Profile')]",
     'logOutButton': "//div[contains(text(),'Log Out')]",
 }
@@ -69,7 +70,7 @@ class AccountTab:
                     return up.userPage(self.page, auth.username)
             except Exception as e:
                 attempts -= 1
-                self.goHomeWhereYouAreSafe_u(e)
+                self.goHomeWhereYouAreSafe_u()
                 if attempts == 0:
                     break
 
@@ -87,11 +88,12 @@ class AccountTab:
                 result.click()
             except Exception as e:
                 attempts -= 1
-                self.goHomeWhereYouAreSafe_u(e)
+                self.goHomeWhereYouAreSafe_u()
                 if attempts == 0:
                     break
 
-    def goHomeWhereYouAreSafe_u(self, e):
+    def goHomeWhereYouAreSafe_u(self):
+        from POM import insta_homePage_POM as HP
 
         # if 'obscures it' in e.msg:
         #     clickOnObscuringElement(self.driver, e)
@@ -102,9 +104,21 @@ class AccountTab:
             logo = self.page.getPageElement_tryHard(xpaths['logo'])
             try:
                 logo.click()
+                return HP.HomePage(self.page)
             except Exception as e:
                 # print(e)
                 pass
+        except Exception as e:
+            # print('ET cannot go home cause: {0}'.format(e))
+            pass
+
+    def checkYourLikes(self):
+        try:
+            myFeed = self.page.getPageElement_tryHard(xpaths['myActivityFeed'])
+            myFeed.click()
+            sleep(6)
+            border = self.page.getPageElement_tryHard("//div[@class='wgVJm']")
+            border.click()
         except Exception as e:
             # print('ET cannot go home cause: {0}'.format(e))
             pass
@@ -115,13 +129,6 @@ class SearchField:
     def __init__(self, webPage):
         self.page = webPage
         self.driver = self.page.driver
-
-    def goHomeWhereYouAreSafe_s(self, e):
-        try:
-            if 'obscures it' in e.msg:
-                clickOnObscuringElement(self.driver, e)
-        except Exception:
-            pass
 
     def navigateToUserPageThroughSearch(self, userName):
         from POM import insta_userPage_POM as up

@@ -1,7 +1,7 @@
 import sys
 import time
 from datetime import datetime
-from random import randint
+from random import randint, random
 from time import sleep
 
 import auth
@@ -13,6 +13,7 @@ from BotServices import L1_2_Service
 from BotServices import Love_Service
 from BotServices import PostBooster_Service
 from BotServices import theGame_Service
+from BotServices import HomePageServices
 from POM import insta_LogInPage_POM as login
 from POM import webPage as wp
 
@@ -55,6 +56,7 @@ class InstaBot:
     def logIn(self):
         logInPage = login.InstaLogIn(self.webPage)
         self.mainPage = logInPage.logIn(auth.username, auth.password)
+        self.homePage = self.mainPage.topRibbon_myAccount.goHomeWhereYouAreSafe_u()
 
     def logOut(self):
         self.mainPage.topRibbon_myAccount.logOut()
@@ -142,17 +144,57 @@ class InstaBot:
     def love_Service(self, fileName, numberOfLikes, percentageOfUsers):
         return Love_Service.love(self, fileName, numberOfLikes, percentageOfUsers)
 
-    def l0_Service(self, typeOfList, numberOfProfilesToProcess, numberOfTags, numberOfPostsPerTag):
+    def l0_Service(self, numberOfProfilesToProcess=1, numberOfTags=1, numberOfPostsPerTag=1, typeOfList='tag', randomArgs=True):
+        if randomArgs:
+            numberOfProfilesToProcess = randint(1, 5)
+            numberOfTags = randint(1, 3)
+            numberOfPostsPerTag = randint(1, 5)
+
         if 'tag' not in typeOfList:
             return L0_Service.list_getList_0_FromSponsors(self, numberOfProfilesToProcess)
         else:
             return L0_Service.list_getList_0_FromTagedPosts(self, numberOfTags, numberOfPostsPerTag)
 
-    def l1_2_Service(self, numberOfusersToCheck):
+    def l1_2_Service(self, numberOfusersToCheck=1, randomArgs=True):
+        if randomArgs:
+            numberOfusersToCheck = randint(1, 5)
+
         return L1_2_Service.userScraping(self, numberOfusersToCheck)
 
-    def theGame_Service(self):
-        return theGame_Service.playTheGame(self)
+    def theGame_Service(self, numberOfusersToCheck=1, randomArgs=True):
+        if randomArgs:
+            numberOfusersToCheck = randint(1, 5)
 
-    def postBoostService(self, hashTagPage=10, numberOfPostsPerTag=5):
+        return theGame_Service.playTheGame(self, numberOfusersToCheck)
+
+    def postBoostService(self, hashTagPage=10, numberOfPostsPerTag=5, randomArgs=True):
+        if randomArgs:
+            hashTagPage = randint(1, 5)
+            numberOfPostsPerTag = randint(1, 5)
+
         return PostBooster_Service.boostLatestPost(self, hashTagPage, numberOfPostsPerTag)
+
+    def homePagePostsService(self, numberOfPosts=1, randomArgs=True):
+        if randomArgs:
+            numberOfPosts = randint(1, 6)
+
+        return HomePageServices.homePagePostScrolling()
+
+    def homePageStoriesService(self, numberOfStories=1, randomArgs=True):
+        if randomArgs:
+            numberOfStories = randint(4, 8)
+
+        return HomePageServices.homePageStoryWatching()
+
+    def run(self):
+        services = [
+            self.l0_Service,
+            self.l1_2_Service,
+            self.theGame_Service,
+            self.homePagePostsService,
+            self.homePageStoriesService,
+            self.mainPage.topRibbon_myAccount.checkYourLikes
+        ]
+
+        func = random.choice(services)
+        pass

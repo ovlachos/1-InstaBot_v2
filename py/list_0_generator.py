@@ -33,7 +33,7 @@ def main():
         v2Bot.getBrowser()
         v2Bot.logIn()
 
-        v2Bot.l0_Service(typeOfList, numberOfProfilesToProcess, numberOfTags, numberOfPostsPerTag)
+        v2Bot.l0_Service(typeOfList, numberOfProfilesToProcess, numberOfTags, numberOfPostsPerTag, randomArgs=False)
     except Exception as e:
         v2Bot.memoryManager.writeMemoryFileToDrive()
         print("we have a fail")

@@ -28,7 +28,7 @@ def main():
         v2Bot.logIn()
 
         for i in range(0, 3):
-            theBoostResponse = v2Bot.postBoostService(numberOfTags, numberOfPostsPerTag)
+            theBoostResponse = v2Bot.postBoostService(numberOfTags, numberOfPostsPerTag, randomArgs=False)
             if 'busted' in theBoostResponse:
                 print("Busted!")
                 return

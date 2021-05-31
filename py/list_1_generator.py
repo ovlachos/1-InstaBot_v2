@@ -27,7 +27,7 @@ def main():
         v2Bot.getBrowser()
         v2Bot.logIn()
 
-        response = v2Bot.l1_2_Service(numberOfProfilesToProcess)
+        response = v2Bot.l1_2_Service(numberOfusersToCheck=numberOfProfilesToProcess, randomArgs=False)
         print(response)
     except Exception as e:
         v2Bot.memoryManager.writeMemoryFileToDrive()

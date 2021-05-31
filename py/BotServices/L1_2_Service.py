@@ -6,7 +6,6 @@ def userScraping(bot, userCount):
     # Read User Memory
     bot.memoryManager.readMemoryFileFromDrive()
     bot.memoryManager.manuallyAddNewUsersTo_theGame()
-    bot.mainPage.driver.refresh()
 
     # Filter users down to L0
     usersL0 = bot.memoryManager.getListOfMarkedUsers(0)

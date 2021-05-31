@@ -31,7 +31,6 @@ class Post:
             sleep(randint(2, 4))
             like_button = None
             try:
-                # If it's a picture or
                 like_button = self.page.getPageElement_tryHard(xpaths['likeButton'])
             except Exception as e:
                 print(e)
