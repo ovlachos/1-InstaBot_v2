@@ -124,7 +124,8 @@ def list_getList_0_FromTagedPosts(bot, numberOfTags, numberOfPostsPerTag0):
         bot.mainPage.page.sleepPage(3)
 
         print(f"### HashTag: {hashPage.hashtag}")
-        numberOfPostsPerTag = randint(numberOfPostsPerTag0, (numberOfPostsPerTag0 + 10))
+        # numberOfPostsPerTag = randint(numberOfPostsPerTag0, (numberOfPostsPerTag0 + 10))
+        numberOfPostsPerTag = numberOfPostsPerTag0
 
         # Collect user handles
         userHandles.extend(getUserHandles(hashPage, numberOfPostsPerTag, bot.mainPage.page.sendESC, bot))

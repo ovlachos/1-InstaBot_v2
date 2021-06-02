@@ -132,6 +132,11 @@ class HomePage:
                 sleep(2)
                 nextButton = self.page.getPageElement_tryHard(xpaths['nextStoryButton'])
                 nextButton.click()
+                sleep(1)
 
-        except:
+            if self.busyWatchingStories():
+                print("Still watching stories...")
+
+        except Exception as e:
+            print(e)
             storyUnavailable = None

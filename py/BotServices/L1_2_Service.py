@@ -11,7 +11,7 @@ def userScraping(bot, userCount):
     usersL0 = bot.memoryManager.getListOfMarkedUsers(0)
 
     # Get people already following me and remove them
-    myFollowersCount = 1266  # indicative 2021/05/10
+    myFollowersCount = 1271  # indicative 2021/05/10
     # try:
     #     myPage = bot.mainPage.topRibbon_myAccount.navigateToOwnProfile()
     #

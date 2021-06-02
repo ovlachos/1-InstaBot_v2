@@ -27,7 +27,7 @@ def main():
         v2Bot.getBrowser()
         v2Bot.logIn()
 
-        v2Bot.theGame_Service(randomArgs=False)
+        v2Bot.theGame_Service(numberOfusersToCheck=50, randomArgs=False)
     except Exception as e:
         v2Bot.memoryManager.writeMemoryFileToDrive()
         print(f'we have a fail: {e}')

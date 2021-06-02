@@ -1,4 +1,4 @@
-def playTheGame(bot):
+def playTheGame(bot, num):
     print("\n")
     print("### theGame ###")
     print("\n")
@@ -11,8 +11,8 @@ def playTheGame(bot):
     bot.memoryManager.readMemoryFileFromDrive()
 
     ### Derive Lists
-    reservesList = bot.memoryManager.getListOfReserveUsersToFollow()
-    unfollowList = bot.memoryManager.getListOfUsersToUnFollow(bot.daysBeforeIunFollow)
+    reservesList = bot.memoryManager.getListOfReserveUsersToFollow()[:num]
+    unfollowList = bot.memoryManager.getListOfUsersToUnFollow(bot.daysBeforeIunFollow)[:num]
     unLoveList = bot.memoryManager.getListOfUsersToUnLove(bot.daysBeforeIunLove)
 
     ### Un Love ###
@@ -28,8 +28,6 @@ def playTheGame(bot):
     ### Un Follow ###
     if unfollowList:
         print(f"### - {len(unfollowList)} users to be un-Followed")
-
-        unfollowList = unfollowList[:int(bot.followManaMax / 0.8)]
 
         userNotFound_counter = 0
         for user in unfollowList:

@@ -13,8 +13,9 @@ class UserMemoryManager:
 
     ### Memory level
     def writeMemoryFileToDrive(self):  # TODO: Re-think when this method is called and if it should always be done explicitly outside this object
-        self.slimDownRejectedMemoryRecords()
-        self.memoryFileHandler.writeToUserMemory(self.listOfUserMemory, UM.UserEncoderDecoder)
+        if len(self.listOfUserMemory) > 3:
+            self.slimDownRejectedMemoryRecords()
+            self.memoryFileHandler.writeToUserMemory(self.listOfUserMemory, UM.UserEncoderDecoder)
 
     def writeToIndividualUserMemory(self, userM):
         JSONencoder = UM.UserEncoderDecoder

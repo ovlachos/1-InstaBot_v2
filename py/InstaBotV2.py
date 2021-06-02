@@ -1,7 +1,8 @@
+import sched
 import sys
 import time
 from datetime import datetime
-from random import randint, random
+from random import randint, random, choice
 from time import sleep
 
 import auth
@@ -163,7 +164,8 @@ class InstaBot:
 
     def theGame_Service(self, numberOfusersToCheck=1, randomArgs=True):
         if randomArgs:
-            numberOfusersToCheck = randint(1, 5)
+            factor = 1.2
+            numberOfusersToCheck = int(randint(1, 5) * factor)
 
         return theGame_Service.playTheGame(self, numberOfusersToCheck)
 
@@ -174,27 +176,83 @@ class InstaBot:
 
         return PostBooster_Service.boostLatestPost(self, hashTagPage, numberOfPostsPerTag)
 
-    def homePagePostsService(self, numberOfPosts=1, randomArgs=True):
+    def homePage_PostsService(self, numberOfPosts=1, randomArgs=True):
         if randomArgs:
-            numberOfPosts = randint(1, 6)
+            numberOfPosts = randint(1, 8)
 
-        return HomePageServices.homePagePostScrolling()
+        return HomePageServices.homePagePostScrolling(self, numberOfPosts)
 
-    def homePageStoriesService(self, numberOfStories=1, randomArgs=True):
+    def homePage_StoriesService(self, numberOfStories=1, randomArgs=True):
         if randomArgs:
-            numberOfStories = randint(4, 8)
+            numberOfStories = randint(1, 4)
 
-        return HomePageServices.homePageStoryWatching()
+        return HomePageServices.homePageStoryWatching(self, numberOfStories)
 
+    def checkYourLikes(self):
+        self.mainPage.topRibbon_myAccount.checkYourLikes()
+        sleep(5)
+        self.mainPage.topRibbon_myAccount.checkYourLikes()
+        sleep(5)
+        self.mainPage.topRibbon_myAccount.checkYourLikes()
+
+        # self.homePage_PostsService()
+
+    ### RANDOM RUN ###
     def run(self):
+
         services = [
             self.l0_Service,
             self.l1_2_Service,
-            self.theGame_Service,
-            self.homePagePostsService,
-            self.homePageStoriesService,
-            self.mainPage.topRibbon_myAccount.checkYourLikes
+            self.theGame_Service
         ]
 
-        func = random.choice(services)
-        pass
+        fillers = [
+            self.homePage_PostsService,
+            self.homePage_StoriesService,
+            self.checkYourLikes
+        ]
+
+        # Produce a fairly non repeatable list of actions
+        actionList, actionList_names = self.produceActionList(fillers, services, actionsNumber=4)
+        while self.seq_len_moreThan_1(actionList_names):
+            actionList, actionList_names = self.produceActionList(fillers, services, actionsNumber=4)
+
+        # Schedule actions
+        s = sched.scheduler(time.time, time.sleep)
+        for action in actionList:
+            s.enter(10, 1, action)
+
+        # Announce Schedule
+        print(f"This time's schedule is:")
+        for item in s.queue:
+            out = str(item[2]).split("InstaBot.")[1].split(' of <')[0]
+            print(out)
+
+        # Execute Schedule
+        s.run()
+
+        print(f"This run is complete!")
+
+    def seq_len_moreThan_1(self, seq):
+        guess = False
+        for i in range(0, len(seq)):
+            if i > 0:
+                seq = seq[1:]
+
+            if len(seq) >= 4:
+                if seq[0:2] == seq[2:4]:
+                    guess = True
+
+        return guess
+
+    def produceActionList(self, fillers, services, actionsNumber=4):
+        actionList = []
+        actionList_names = []
+        for i in range(0, actionsNumber):
+            actionList.append(choice(services))
+            actionList.append(choice(fillers))
+
+        for action in actionList:
+            actionList_names.append(str(action).split("InstaBot.")[1].split(' of <')[0])
+
+        return actionList, actionList_names
